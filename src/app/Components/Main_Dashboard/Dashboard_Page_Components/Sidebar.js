@@ -182,7 +182,7 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
             <li className="menu-item">
               <Link href="/Dashboard/Users" className={`menu-link ${pathname === '/Dashboard/Users' ? 'active' : ''}`}>
                 <i className="menu-icon tf-icons ri-group-line me-2"></i>
-                <div>Users</div>
+                <div>Clients</div>
               </Link>
             </li>
             <li className="menu-item">

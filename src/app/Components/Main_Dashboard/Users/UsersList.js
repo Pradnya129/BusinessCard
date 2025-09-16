@@ -149,7 +149,7 @@ const UsersList = () => {
       {/* Desktop Table */}
       <div className="table-responsive mb-5 d-none d-md-block">
         <div className="d-none d-md-block mb-3 ms-5">
-          <h5 className="mb-0">Users</h5>
+          <h5 className="mb-0">Total Clients</h5>
         </div>
         <table className="table table-bordered align-middle table-hover text-nowrap responsive-table">
           <thead className="table-light">
@@ -199,7 +199,7 @@ const UsersList = () => {
       {/* Mobile Card View */}
       <div className="d-block d-md-none mb-4">
         <div className="d-block d-md-none mx-auto mb-3">
-          <h5 className="mb-0 text-center">Users</h5>
+          <h5 className="mb-0 text-center">Client</h5>
         </div>
         {patients.map((patient, index) => (
           <div
