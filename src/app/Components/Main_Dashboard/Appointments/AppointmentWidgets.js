@@ -53,7 +53,7 @@ const AppointmentWidgets = () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    fetch(`http://localhost:5000/api/customer-appointments/admin/${adminId}`, {
+    fetch(`http://localhost:5000/api/customer-appointments/`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

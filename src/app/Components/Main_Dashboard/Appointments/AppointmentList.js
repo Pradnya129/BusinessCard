@@ -84,28 +84,38 @@ const AppointmentList = () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    const fetchAppointments = async () => {
-      try {
-        const idToUse = selectedUserId || adminId;
-        const url = `http://localhost:5000/api/customer-appointments/admin/${idToUse}`;
-        const response = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        if (Array.isArray(response.data.data)) {
-          const sortedAppointments = [...response.data.data].sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
-          setAppointments(sortedAppointments);
-        } else {
-          setAppointments([]);
-          console.error("Unexpected appointments response format:", response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-        setAppointments([]);
-      }
-    };
+   const fetchAppointments = async () => {
+  try {
+    const idToUse = selectedUserId || adminId;
+
+    // Send as query param
+    const url = `http://localhost:5000/api/customer-appointments/`;
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+      params: {
+        userId: selectedUserId || undefined, // only include if you want user-specific
+        adminId: selectedUserId ? undefined : adminId, // fallback to admin if no user selected
+      },
+    });
+
+    if (Array.isArray(response.data.data)) {
+      const sortedAppointments = [...response.data.data].sort(
+        (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
+      );
+      setAppointments(sortedAppointments);
+    } else {
+      setAppointments([]);
+      console.error("Unexpected appointments response format:", response.data);
+    }
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    setAppointments([]);
+  }
+};
+
 
     fetchAppointments();
   }, [selectedUserId]);
@@ -141,17 +151,29 @@ const AppointmentList = () => {
     }));
   };
 
-  const handleDelete = (id) => {
-    const updatedAppointments = appointments.filter((appt) => appt.id !== id);
-    setAppointments(updatedAppointments);
+const handleDelete = async (id) => {
+  // 🟡 Show confirmation before proceeding
+  const confirmDelete = window.confirm("Are you sure you want to delete this appointment?");
+  if (!confirmDelete) return;
 
-    axios.delete(`http://localhost:5000/api/customer-appointments/delete/${id}`)
-      .then(() => console.log(`Appointment ${id} deleted successfully.`))
-      .catch(error => {
-        console.error("Error deleting appointment:", error.response || error.message);
-        setAppointments(appointments);  // Rollback on failure
-      });
-  };
+  const updatedAppointments = appointments.filter((appt) => appt.id !== id);
+  setAppointments(updatedAppointments);
+
+  try {
+    await axios.delete(`http://localhost:5000/api/customer-appointments/delete/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    console.log(`Appointment ${id} deleted successfully.`);
+  } catch (error) {
+    console.error("Error deleting appointment:", error.response?.data || error.message);
+    setAppointments(appointments); // Rollback on failure
+  }
+};
+
+
 
   const handleSaveChanges = () => {
     const token = localStorage.getItem('token');

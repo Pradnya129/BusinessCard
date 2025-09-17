@@ -12,6 +12,7 @@ import './Calendar.css';
 import AppointmentForm from './AppointmentForm';
 import ShiftManager from './ShiftManager';
 import { api } from '../../../../api';
+import axios from 'axios';
 
 export default function CalendarComponent() {
   const offcanvasRef = useRef(null);
@@ -53,37 +54,49 @@ export default function CalendarComponent() {
   };
 
   // fetch appointments
-  const fetchAppointments = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    let decoded;
-    try {
-      decoded = jwtDecode(token);
-    } catch (e) {
-      console.error('Failed to decode token', e);
-      return;
-    }
-    const adminId = decoded.id;
-    const idToUse = selectedUserId || adminId;
-    try {
-      const res = await fetch(`http://localhost:5000/api/customer-appointments/admin/${idToUse}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      const result = await res.json();
-      let data = result.data ?? [];
-      // normalize to array
-      if (!Array.isArray(data)) data = [];
-      // sort by createdAt
-      const sorted = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-      setAppointments(sorted);
-    } catch (err) {
-      console.error('Error fetching appointments', err);
-      setAppointments([]);
-    }
-  };
+const fetchAppointments = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+
+  let decoded;
+  try {
+    decoded = jwtDecode(token);
+  } catch (e) {
+    console.error('Failed to decode token', e);
+    return;
+  }
+
+  const adminId = decoded.id; // or userId from token
+  try {
+    const url = `http://localhost:5000/api/customer-appointments/`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json', // GET request doesn't need multipart
+      },
+      params: {
+        userId: selectedUserId || undefined,      // send userId if selected
+        adminId: selectedUserId ? undefined : adminId, // fallback to adminId if no user selected
+      },
+    });
+
+    const data = Array.isArray(response.data.data) ? response.data.data : [];
+    
+    // sort by appointmentDate + appointmentTime
+    const sortedAppointments = data.sort(
+      (a, b) =>
+        new Date(a.appointmentDate + ' ' + a.appointmentTime) -
+        new Date(b.appointmentDate + ' ' + b.appointmentTime)
+    );
+
+    setAppointments(sortedAppointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    setAppointments([]);
+  }
+};
+
 
   useEffect(() => {
     // offcanvas hidden handler refresh

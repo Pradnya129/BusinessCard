@@ -32,7 +32,7 @@ const Dashboard_Content = () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    axios.get(`http://localhost:5000/api/customer-appointments/admin/${adminId}`, {
+    axios.get(`http://localhost:5000/api/customer-appointments/`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((res) => {
