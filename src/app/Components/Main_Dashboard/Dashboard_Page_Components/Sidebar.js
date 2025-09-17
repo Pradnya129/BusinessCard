@@ -1,11 +1,9 @@
-'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
-import React, { useState, useEffect } from 'react';
-import './Dashboard.css';
-
-
+import React, { useState, useEffect } from "react";
+import "./Dashboard.css";
 
 const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
   const [openMenu, setOpenMenu] = useState(null);
@@ -29,15 +27,15 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
     const handleOutsideClick = (e) => {
       if (
         mobileSidebarVisible &&
-        !e.target.closest('#layout-menu') &&
-        !e.target.closest('.layout-menu-toggle')
+        !e.target.closest("#layout-menu") &&
+        !e.target.closest(".layout-menu-toggle")
       ) {
         setMobileSidebarVisible(false);
       }
     };
 
-    document.addEventListener('click', handleOutsideClick);
-    return () => document.removeEventListener('click', handleOutsideClick);
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
   }, [mobileSidebarVisible, setMobileSidebarVisible]);
 
   const toggleMenu = (menu) => {
@@ -49,13 +47,15 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
       <aside
         id="layout-menu"
         className={`layout-menu menu-vertical menu bg-menu-theme bg-fixed
-          ${sidebarCollapsed ? 'menu-collapsed' : ''} 
-          ${mobileSidebarVisible ? 'mobile-sidebar-show' : 'mobile-sidebar-hide'}`}
+          ${sidebarCollapsed ? "menu-collapsed" : ""} 
+          ${
+            mobileSidebarVisible ? "mobile-sidebar-show" : "mobile-sidebar-hide"
+          }`}
       >
         <div className="app-brand demo">
           <Link href="/Dashboard" className="app-brand-link">
             <span className="app-brand-logo demo me-5 ">
-              <span style={{ color: "var(--bs-primary)" }} className='me-4'>
+              <span style={{ color: "var(--bs-primary)" }} className="me-4">
                 <svg
                   width="268"
                   height="150"
@@ -142,17 +142,21 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
               />
             </svg>
           </a>
-
         </div>
 
         <div className="menu-inner-shadow"></div>
 
         {/* ✅ Show menus based on role */}
-        {userRole === 'admin' && (
+        {userRole === "admin" && (
           <ul className="menu-inner py-1">
             {/* --- Admin Menus --- */}
             <li className="menu-item">
-              <Link href="/Dashboard" className={`menu-link ${pathname === '/Dashboard' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard"
+                className={`menu-link ${
+                  pathname === "/Dashboard" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-dashboard-line me-2"></i>
                 <div>Dashboard</div>
               </Link>
@@ -180,46 +184,81 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
             </li> */}
 
             <li className="menu-item">
-              <Link href="/Dashboard/Change_Landing_Page" className={`menu-link ${pathname === '/Dashboard/Change_Landing_Page' ? 'active' : ''}`}>
-                <i className="menu-icon tf-icons ri-pages-line me-2"></i>
+              <Link
+                href="/Dashboard/Change_Landing_Page"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Change_Landing_Page" ? "active" : ""
+                }`}
+              >
+                <i className="menu-icon tf-icons ri-layout-line me-2"></i>
                 <div>Manage Landing Page</div>
               </Link>
             </li>
             <li className="menu-item">
-                  <Link href="/Dashboard/Users" className={`menu-link ${pathname === '/Dashboard/Users' ? 'active' : ''}`}>
-                  <i className="menu-icon tf-icons ri-pages-line me-2"></i>
-                    <div>Manage Clients</div>
-                  </Link>
-                </li>
-           <li className="menu-item">
-                  <Link href="/Dashboard/Users/CreateUser" className={`menu-link ${pathname === '/Dashboard/Users/CreateUser' ? 'active' : ''}`}>
-                  <i className="menu-icon tf-icons ri-pages-line me-2"></i>
-                    <div>Create Sub-Admin</div>
-                  </Link>
-                </li>
+              <Link
+                href="/Dashboard/Users"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Users" ? "active" : ""
+                }`}
+              >
+                <i className="menu-icon tf-icons ri-team-line me-2"></i>
+                <div>Manage Clients</div>
+              </Link>
+            </li>
+            <li className="menu-item">
+              <Link
+                href="/Dashboard/Users/CreateUser"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Users/CreateUser" ? "active" : ""
+                }`}
+              >
+                <i className="menu-icon tf-icons ri-user-add-line me-2"></i>
+                <div>Create Sub-Admin</div>
+              </Link>
+            </li>
 
             <li className="menu-item">
-              <Link href="/Dashboard/Calendar" className={`menu-link ${pathname === '/Dashboard/Calendar' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/Calendar"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Calendar" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-calendar-line me-2"></i>
                 <div>Calendar</div>
               </Link>
             </li>
 
             <li className="menu-item">
-              <Link href="/Dashboard/Appointments" className={`menu-link ${pathname === '/Dashboard/Appointments' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/Appointments"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Appointments" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
                 <div>Appointments</div>
               </Link>
             </li>
             <li className="menu-item">
-              <Link href="/Dashboard/Renewal" className={`menu-link ${pathname === '/Dashboard/Renewal' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/Renewal"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Renewal" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
                 <div>Renewals</div>
               </Link>
             </li>
 
             <li className="menu-item">
-              <Link href="/Dashboard/SubscriptionAssigned" className={`menu-link ${pathname === '/Dashboard/SubscriptionAssigned' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/SubscriptionAssigned"
+                className={`menu-link ${
+                  pathname === "/Dashboard/SubscriptionAssigned" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-file-text-line me-2"></i>
                 <div>My Subscription</div>
               </Link>
@@ -228,20 +267,39 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
             {/* Plans submenu */}
             <li className="menu-item">
               <a
-                className={`menu-link menu-toggle cursor-pointer ${pathname === '/Dashboard/Add_Plan' || pathname === '/Dashboard/Plan_List' ? 'active' : ''}`}
-                onClick={() => toggleMenu('plans')}
+                className={`menu-link menu-toggle cursor-pointer ${
+                  pathname === "/Dashboard/Add_Plan" ||
+                  pathname === "/Dashboard/Plan_List"
+                    ? "active"
+                    : ""
+                }`}
+                onClick={() => toggleMenu("plans")}
               >
                 <i className="menu-icon tf-icons ri-price-tag-3-line me-2"></i>
                 <div>Plans</div>
               </a>
-              <ul className={`menu-sub ${openMenu === 'plans' ? 'd-block' : 'd-none'}`}>
+              <ul
+                className={`menu-sub ${
+                  openMenu === "plans" ? "d-block" : "d-none"
+                }`}
+              >
                 <li className="menu-item">
-                  <Link href="/Dashboard/Add_Plan" className={`menu-link ${pathname === '/Dashboard/Add_Plan' ? 'active' : ''}`}>
+                  <Link
+                    href="/Dashboard/Add_Plan"
+                    className={`menu-link ${
+                      pathname === "/Dashboard/Add_Plan" ? "active" : ""
+                    }`}
+                  >
                     <div>Add Plan</div>
                   </Link>
                 </li>
                 <li className="menu-item">
-                  <Link href="/Dashboard/Plan_List" className={`menu-link ${pathname === '/Dashboard/Plan_List' ? 'active' : ''}`}>
+                  <Link
+                    href="/Dashboard/Plan_List"
+                    className={`menu-link ${
+                      pathname === "/Dashboard/Plan_List" ? "active" : ""
+                    }`}
+                  >
                     <div>Plan List</div>
                   </Link>
                 </li>
@@ -251,25 +309,50 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
             {/* Account Settings */}
             <li className="menu-item">
               <a
-                className={`menu-link menu-toggle cursor-pointer ${pathname === '/Dashboard/Profile' || pathname === '/Dashboard/Security' || pathname === '/Dashboard/Billing' ? 'active' : ''}`}
-                onClick={() => toggleMenu('account')}
+                className={`menu-link menu-toggle cursor-pointer ${
+                  pathname === "/Dashboard/Profile" ||
+                  pathname === "/Dashboard/Security" ||
+                  pathname === "/Dashboard/Billing"
+                    ? "active"
+                    : ""
+                }`}
+                onClick={() => toggleMenu("account")}
               >
                 <i className="menu-icon tf-icons ri-settings-3-line me-2"></i>
                 <div>Account Settings</div>
               </a>
-              <ul className={`menu-sub ${openMenu === 'account' ? 'd-block' : 'd-none'}`}>
+              <ul
+                className={`menu-sub ${
+                  openMenu === "account" ? "d-block" : "d-none"
+                }`}
+              >
                 <li className="menu-item">
-                  <Link href="/Dashboard/Profile" className={`menu-link ${pathname === '/Dashboard/Profile' ? 'active' : ''}`}>
+                  <Link
+                    href="/Dashboard/Profile"
+                    className={`menu-link ${
+                      pathname === "/Dashboard/Profile" ? "active" : ""
+                    }`}
+                  >
                     <div>My Profile</div>
                   </Link>
                 </li>
                 <li className="menu-item">
-                  <Link href="/Dashboard/Security" className={`menu-link ${pathname === '/Dashboard/Security' ? 'active' : ''}`}>
+                  <Link
+                    href="/Dashboard/Security"
+                    className={`menu-link ${
+                      pathname === "/Dashboard/Security" ? "active" : ""
+                    }`}
+                  >
                     <div>Security</div>
                   </Link>
                 </li>
                 <li className="menu-item">
-                  <Link href="/Dashboard/Billing" className={`menu-link ${pathname === '/Dashboard/Billing' ? 'active' : ''}`}>
+                  <Link
+                    href="/Dashboard/Billing"
+                    className={`menu-link ${
+                      pathname === "/Dashboard/Billing" ? "active" : ""
+                    }`}
+                  >
                     <div>Billing & Plans</div>
                   </Link>
                 </li>
@@ -278,10 +361,10 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
           </ul>
         )}
 
-        {userRole === 'superadmin' && (
+        {userRole === "superadmin" && (
           <ul className="menu-inner py-1">
             {/* --- Superadmin Menus --- */}
-            <li className="menu-item">
+            {/* <li className="menu-item">
               <a
                 className={`menu-link menu-toggle cursor-pointer ${pathname === '/Dashboard/AdminUsers' || pathname === '/Dashboard/AdminUsers/CreateUser' ? 'active' : ''}`}
                 onClick={() => toggleMenu('users')}
@@ -295,32 +378,53 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
                     <div>Manage Users</div>
                   </Link>
                 </li>
-                <li className="menu-item">
-                  <Link href="/Dashboard/AdminUsers/CreateUser" className={`menu-link ${pathname === '/Dashboard/AdminUsers/CreateUser' ? 'active' : ''}`}>
-                    <div>Create User</div>
-                  </Link>
-                </li>
+               
               </ul>
-            </li>
+              </li> */}
+              <li className="menu-item">
+                <Link
+                  href="/Dashboard/AdminUsers"
+                  className={`menu-link ${
+                    pathname === "/Dashboard/AdminUsers" ? "active" : ""
+                  }`}
+                >
+                   <i className="menu-icon tf-icons ri-admin-line me-2"></i>
+                  <div>Manage Admins</div>
+                </Link>
+              </li>
             <li className="menu-item">
-              <Link href="/Dashboard/Coupans" className={`menu-link ${pathname === '/Dashboard/Coupans' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/Coupans"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Coupans" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-coupon-line me-2"></i>
                 <div>Coupons</div>
               </Link>
             </li>
             <li className="menu-item">
-              <Link href="/Dashboard/Plans" className={`menu-link ${pathname === '/Dashboard/Plans' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/Plans"
+                className={`menu-link ${
+                  pathname === "/Dashboard/Plans" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-price-tag-3-line me-2"></i>
                 <div>Subscription Plans</div>
               </Link>
             </li>
             <li className="menu-item">
-              <Link href="/Dashboard/SubscriptionRenewals" className={`menu-link ${pathname === '/Dashboard/SubscriptionRenewals' ? 'active' : ''}`}>
+              <Link
+                href="/Dashboard/SubscriptionRenewals"
+                className={`menu-link ${
+                  pathname === "/Dashboard/SubscriptionRenewals" ? "active" : ""
+                }`}
+              >
                 <i className="menu-icon tf-icons ri-wallet-line me-2"></i>
                 <div>Subscription Renewals</div>
               </Link>
             </li>
-           
           </ul>
         )}
       </aside>

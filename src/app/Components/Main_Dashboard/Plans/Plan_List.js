@@ -209,6 +209,30 @@ const Plan_List = () => {
     }
   };
 
+  // 🔹 Unassign user from plan
+  const handleUnassign = async (userId) => {
+    if (!confirm("Are you sure you want to unassign this user from the plan?")) return;
+    const token = localStorage.getItem("token");
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/admin/plans/unassign/${userId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (response.ok) {
+        alert("User unassigned successfully!");
+        await fetchPlans();
+      } else {
+        alert("Failed to unassign user.");
+      }
+    } catch (error) {
+      console.error("Error unassigning user:", error);
+      alert("Error unassigning user.");
+    }
+  };
+
   const formatText = (command, value = null) => {
     document.execCommand(command, false, value);
   };
@@ -307,7 +331,7 @@ const Plan_List = () => {
         );
       } else {
         // POST new buffer rule
-        await fetch(`http://localhost:5000/api/plan-shift-buffer-rule/add`, {
+        await fetch(`http://localhost:5000/C:\Users\ASUS\Desktop\github clone\appointify\NewAppointify_MultiUser_Frontend\src\app\Components\Main_Dashboard\Plans\Plan_List.jsplan-shift-buffer-rule/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -404,7 +428,15 @@ const Plan_List = () => {
                   <ul>
                     {plan.UserPlans && plan.UserPlans.length > 0 ? (
                       plan.UserPlans.map((up) => (
-                        <li key={up.id}>{up.User.name} ({up.User.email})</li>
+                        <li key={up.id} className="d-flex justify-content-between align-items-center">
+                          {up.User.name} ({up.User.email})
+                          <button
+                            className="btn btn-sm btn-danger ms-2"
+                            onClick={() => handleUnassign(up.User.id)}
+                          >
+                            Unassign
+                          </button>
+                        </li>
                       ))
                     ) : (
                       <li>No users assigned</li>

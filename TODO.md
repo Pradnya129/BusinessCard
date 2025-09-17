@@ -1,5 +1,7 @@
-# TODO for Modifying Appointment Fetching API
+# TODO: Add Unassign Plan from User Functionality to Plan_List.js
 
-- [x] Update AppointmentList.js to use the same API for fetching appointments: http://localhost:5000/api/customer-appointments/admin/{id}
-- [x] Change the logic to send selectedUserId or adminId to the API
-- [ ] Test the functionality with different user selections
+- [x] Add "Unassign" button next to each assigned user in the plan card
+- [x] Implement handleUnassign function to call DELETE /api/admin/plans/unassign/{userId}
+- [x] Add confirmation dialog for unassign
+- [x] Refresh plans list after unassign
+- [ ] Test unassign functionality (run the app and verify the unassign works)
