@@ -14,6 +14,7 @@ const Plan_List = () => {
   const [assigningPlan, setAssigningPlan] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
+  const [adminUser, setAdminUser] = useState(null);
 
   const [editedPlan, setEditedPlan] = useState({
     name: "",
@@ -99,39 +100,79 @@ const Plan_List = () => {
     fetchUsers();
   }, []);
 
-  const handleAssign = (plan) => {
-    setAssigningPlan(plan);
-    setSelectedUsers(plan.UserPlans ? plan.UserPlans.map(up => up.User.id) : []);
-    const modal = new window.bootstrap.Modal(document.getElementById("assignModal"));
-    modal.show();
-  };
-
-  const handleAssignSubmit = async () => {
-    if (!assigningPlan) return;
-    const token = localStorage.getItem("token");
-    try {
-      await fetch("http://localhost:5000/api/admin/plans/assign-plan-to-user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          planId: assigningPlan.planId,
-          planShiftBufferRuleId: assigningPlan.bufferRuleId,
-          userIds: selectedUsers,
-        }),
-      });
-      alert("Plan assigned successfully!");
-      await fetchPlans();
-      const modal = window.bootstrap.Modal.getInstance(
-        document.getElementById("assignModal")
-      );
-      modal.hide();
-    } catch (err) {
-      console.error("Error assigning plan:", err);
+  useEffect(() => {
+    if (adminUser && allUsers.length > 0) {
+      const adminExists = allUsers.some(user => user.id === adminUser.id);
+      if (!adminExists) {
+        setAllUsers(prev => [...prev, { id: adminUser.id, name: adminUser.name, email: 'admin@example.com' }]); // Assuming email or adjust as needed
+      }
     }
-  };
+  }, [adminUser, allUsers]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setAdminUser({ id: payload.id, name: payload.name });
+      } catch (e) {
+        console.error("Error decoding token:", e);
+      }
+    }
+  }, []);
+
+  const handleAssign = (plan) => {
+  setAssigningPlan(plan);
+
+  // Collect existing assigned user IDs
+  let initialSelected = plan.UserPlans ? plan.UserPlans.map(up => up.User.id) : [];
+
+  // ✅ Ensure admin ID is included
+  if (adminUser && !initialSelected.includes(adminUser.id)) {
+    initialSelected.push(adminUser.id);
+  }
+
+  setSelectedUsers(initialSelected);
+
+  const modal = new window.bootstrap.Modal(document.getElementById("assignModal"));
+  modal.show();
+};
+
+
+ const handleAssignSubmit = async () => {
+  if (!assigningPlan) return;
+  const token = localStorage.getItem("token");
+
+  try {
+    // ✅ Always include admin id
+    let userIdsToAssign = [...selectedUsers];
+    if (adminUser && !userIdsToAssign.includes(adminUser.id)) {
+      userIdsToAssign.push(adminUser.id);
+    }
+
+    await fetch("http://localhost:5000/api/admin/plans/assign-plan-to-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        planId: assigningPlan.planId,
+        planShiftBufferRuleId: assigningPlan.bufferRuleId,
+        userIds: userIdsToAssign, // ✅ admin included here
+      }),
+    });
+
+    alert("Plan assigned successfully!");
+    await fetchPlans();
+    const modal = window.bootstrap.Modal.getInstance(
+      document.getElementById("assignModal")
+    );
+    modal.hide();
+  } catch (err) {
+    console.error("Error assigning plan:", err);
+  }
+};
 
   const fetchBufferForPlan = async (planId, shiftId) => {
     if (!shiftId) {
