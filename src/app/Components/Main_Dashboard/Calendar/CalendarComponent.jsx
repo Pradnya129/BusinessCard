@@ -33,6 +33,10 @@ export default function CalendarComponent() {
   const [slotStartTime, setSlotStartTime] = useState(null);
   const [slotEndTime, setSlotEndTime] = useState(null);
 
+  // users for dropdown
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState('');
+
   const getColorClass = (index) => {
     const colors = [
       'form-check-primary',
@@ -60,10 +64,16 @@ export default function CalendarComponent() {
       return;
     }
     const adminId = decoded.id;
+    const idToUse = selectedUserId || adminId;
     try {
-      const res = await api.getAdminAppointments(adminId);
-      // your API responded { success: true, data: [...] }
-      let data = res.data ?? [];
+      const res = await fetch(`http://localhost:5000/api/customer-appointments/admin/${idToUse}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      const result = await res.json();
+      let data = result.data ?? [];
       // normalize to array
       if (!Array.isArray(data)) data = [];
       // sort by createdAt
@@ -92,6 +102,56 @@ export default function CalendarComponent() {
 
   useEffect(() => {
     fetchAppointments();
+  }, [selectedUserId]);
+
+  // fetch users for dropdown
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    // Fetch plans with assigned users and admin user for dropdown
+    const fetchUsersAndPlans = async () => {
+      try {
+        // Fetch admin user
+        const decoded = jwtDecode(token);
+        const currentAdminUser = { id: decoded.id, name: decoded.name || decoded.email || 'Admin' };
+
+        // Fetch plans with users
+        const plansResponse = await api.getPlansWithUsers();
+
+        let assignedUsers = [];
+        if (plansResponse && Array.isArray(plansResponse.data)) {
+          plansResponse.data.forEach(plan => {
+            if (plan.UserPlans && Array.isArray(plan.UserPlans)) {
+              plan.UserPlans.forEach(up => {
+                if (up.User) {
+                  assignedUsers.push({ id: up.User.id, name: up.User.name || up.User.email });
+                }
+              });
+            }
+          });
+        }
+
+        // Remove duplicates from assignedUsers by id
+        const uniqueAssignedUsersMap = new Map();
+        assignedUsers.forEach(user => {
+          if (!uniqueAssignedUsersMap.has(user.id)) {
+            uniqueAssignedUsersMap.set(user.id, user);
+          }
+        });
+        const uniqueAssignedUsers = Array.from(uniqueAssignedUsersMap.values());
+
+        // Combine assigned users, exclude admin from list
+        const combinedUsers = uniqueAssignedUsers.filter(u => u.id !== currentAdminUser.id);
+
+        setUsers(combinedUsers);
+      } catch (error) {
+        console.error("Error fetching plans or users:", error);
+        setUsers([]);
+      }
+    };
+
+    fetchUsersAndPlans();
   }, []);
 
   // fetch plans + default selected plans
@@ -259,6 +319,20 @@ export default function CalendarComponent() {
           </div>
 
           <div className="col app-calendar-content overflow-auto ">
+            <div className="d-flex justify-content-end p-2">
+              <select
+                className="form-select w-auto"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+              >
+                <option value="">All Appointments (Admin)</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className=" border-0">
               <div className=" ps-0 pb-0 ">
                 <FullCalendar

@@ -19,6 +19,8 @@ const Add_Plan = () => {
   const [selectedShift, setSelectedShift] = useState(null);
   const [bufferMin, setBufferMin] = useState('');
 
+
+
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -33,6 +35,8 @@ const Add_Plan = () => {
         console.error('Failed to load shifts', err);
       }
     };
+
+
 
     loadShifts();
   }, []);
@@ -161,7 +165,6 @@ if (selectedShift && bufferMin && parseInt(bufferMin) > 0) {
   }
 };
 
-
   return (
     <div className="container-xxl py-4">
       <ToastContainer />
@@ -243,6 +246,7 @@ if (selectedShift && bufferMin && parseInt(bufferMin) > 0) {
                 <label htmlFor="bufferMinutes">Buffer Minutes</label>
               </div>
 
+
             </div>
           </div>
         </div>
@@ -252,3 +256,5 @@ if (selectedShift && bufferMin && parseInt(bufferMin) > 0) {
 };
 
 export default Add_Plan;
+
+

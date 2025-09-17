@@ -157,6 +157,27 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
                 <div>Dashboard</div>
               </Link>
             </li>
+            {/* <li className="menu-item">
+              <a
+                className={`menu-link menu-toggle cursor-pointer ${pathname === '/Dashboard/Users' || pathname === '/Dashboard/Users/CreateUser' ? 'active' : ''}`}
+                onClick={() => toggleMenu('users')}
+              >
+                <i className="menu-icon tf-icons ri-group-line me-2"></i>
+                <div>Users</div>
+              </a>
+              <ul className={`menu-sub ${openMenu === 'users' ? 'd-block' : 'd-none'}`}>
+                <li className="menu-item">
+                  <Link href="/Dashboard/Users" className={`menu-link ${pathname === '/Dashboard/Users' ? 'active' : ''}`}>
+                    <div>Manage Users</div>
+                  </Link>
+                </li>
+                <li className="menu-item">
+                  <Link href="/Dashboard/Users/CreateUser" className={`menu-link ${pathname === '/Dashboard/Users/CreateUser' ? 'active' : ''}`}>
+                    <div>Create User</div>
+                  </Link>
+                </li>
+              </ul>
+            </li> */}
 
             <li className="menu-item">
               <Link href="/Dashboard/Change_Landing_Page" className={`menu-link ${pathname === '/Dashboard/Change_Landing_Page' ? 'active' : ''}`}>
@@ -164,6 +185,18 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
                 <div>Manage Landing Page</div>
               </Link>
             </li>
+            <li className="menu-item">
+                  <Link href="/Dashboard/Users" className={`menu-link ${pathname === '/Dashboard/Users' ? 'active' : ''}`}>
+                  <i className="menu-icon tf-icons ri-pages-line me-2"></i>
+                    <div>Manage Clients</div>
+                  </Link>
+                </li>
+           <li className="menu-item">
+                  <Link href="/Dashboard/Users/CreateUser" className={`menu-link ${pathname === '/Dashboard/Users/CreateUser' ? 'active' : ''}`}>
+                  <i className="menu-icon tf-icons ri-pages-line me-2"></i>
+                    <div>Create Sub-Admin</div>
+                  </Link>
+                </li>
 
             <li className="menu-item">
               <Link href="/Dashboard/Calendar" className={`menu-link ${pathname === '/Dashboard/Calendar' ? 'active' : ''}`}>
@@ -176,13 +209,6 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
               <Link href="/Dashboard/Appointments" className={`menu-link ${pathname === '/Dashboard/Appointments' ? 'active' : ''}`}>
                 <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
                 <div>Appointments</div>
-              </Link>
-            </li>
-
-            <li className="menu-item">
-              <Link href="/Dashboard/Users" className={`menu-link ${pathname === '/Dashboard/Users' ? 'active' : ''}`}>
-                <i className="menu-icon tf-icons ri-group-line me-2"></i>
-                <div>Clients</div>
               </Link>
             </li>
             <li className="menu-item">
@@ -256,10 +282,25 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
           <ul className="menu-inner py-1">
             {/* --- Superadmin Menus --- */}
             <li className="menu-item">
-              <Link href="/Dashboard/AdminUsers" className={`menu-link ${pathname === '/Dashboard/AdminUsers' ? 'active' : ''}`}>
+              <a
+                className={`menu-link menu-toggle cursor-pointer ${pathname === '/Dashboard/AdminUsers' || pathname === '/Dashboard/AdminUsers/CreateUser' ? 'active' : ''}`}
+                onClick={() => toggleMenu('users')}
+              >
                 <i className="menu-icon tf-icons ri-group-line me-2"></i>
                 <div>Users</div>
-              </Link>
+              </a>
+              <ul className={`menu-sub ${openMenu === 'users' ? 'd-block' : 'd-none'}`}>
+                <li className="menu-item">
+                  <Link href="/Dashboard/AdminUsers" className={`menu-link ${pathname === '/Dashboard/AdminUsers' ? 'active' : ''}`}>
+                    <div>Manage Users</div>
+                  </Link>
+                </li>
+                <li className="menu-item">
+                  <Link href="/Dashboard/AdminUsers/CreateUser" className={`menu-link ${pathname === '/Dashboard/AdminUsers/CreateUser' ? 'active' : ''}`}>
+                    <div>Create User</div>
+                  </Link>
+                </li>
+              </ul>
             </li>
             <li className="menu-item">
               <Link href="/Dashboard/Coupans" className={`menu-link ${pathname === '/Dashboard/Coupans' ? 'active' : ''}`}>

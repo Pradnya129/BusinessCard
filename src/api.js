@@ -26,6 +26,9 @@ export const api = {
   // GET /admin/plans/all -> returns array of plans
   getPlans: () => client.get('/admin/plans/all').then(r => r.data),
 
+  // GET /admin/plans/all_plans_with_users -> returns { success: true, data: [...] }
+  getPlansWithUsers: () => client.get('/admin/plans/all_plans_with_users').then(r => r.data),
+
   // GET /plan-shift-buffer-rule/all?planId=xxx -> returns { rules: [...] }
   getPlanShiftRules: (planId) => client.get('/plan-shift-buffer-rule/all', { params: { planId } }).then(r => r.data),
 

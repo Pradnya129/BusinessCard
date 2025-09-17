@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import { jwtDecode } from "jwt-decode";
+import { api } from '../../../../api';
 
 import './Appointments.css'
 
@@ -24,6 +25,57 @@ const AppointmentList = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [appointments, setAppointments] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    // Fetch plans with assigned users and admin user for dropdown
+    const fetchUsersAndPlans = async () => {
+      try {
+        // Fetch admin user
+        const decoded = jwtDecode(token);
+        const currentAdminUser = { id: decoded.id, name: decoded.name || decoded.email || 'Admin' };
+
+        // Fetch plans with users
+        const plansResponse = await api.getPlansWithUsers();
+
+        let assignedUsers = [];
+        if (plansResponse && Array.isArray(plansResponse.data)) {
+          plansResponse.data.forEach(plan => {
+            if (plan.UserPlans && Array.isArray(plan.UserPlans)) {
+              plan.UserPlans.forEach(up => {
+                if (up.User) {
+                  assignedUsers.push({ id: up.User.id, name: up.User.name || up.User.email });
+                }
+              });
+            }
+          });
+        }
+
+        // Remove duplicates from assignedUsers by id
+        const uniqueAssignedUsersMap = new Map();
+        assignedUsers.forEach(user => {
+          if (!uniqueAssignedUsersMap.has(user.id)) {
+            uniqueAssignedUsersMap.set(user.id, user);
+          }
+        });
+        const uniqueAssignedUsers = Array.from(uniqueAssignedUsersMap.values());
+
+        // Combine assigned users, exclude admin from list
+        const combinedUsers = uniqueAssignedUsers.filter(u => u.id !== currentAdminUser.id);
+
+        setUsers(combinedUsers);
+      } catch (error) {
+        console.error("Error fetching plans or users:", error);
+        setUsers([]);
+      }
+    };
+
+    fetchUsersAndPlans();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,20 +84,31 @@ const AppointmentList = () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    axios.get(`http://localhost:5000/api/customer-appointments/admin/${adminId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
-      },
-    })
-    .then(response => {
-      const sortedAppointments = [...response.data.data].sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
-      setAppointments(sortedAppointments);
-    })
-    .catch(error => {
-      console.error('Error fetching appointments:', error);
-    });
-  }, [appointments]);
+    const fetchAppointments = async () => {
+      try {
+        const idToUse = selectedUserId || adminId;
+        const url = `http://localhost:5000/api/customer-appointments/admin/${idToUse}`;
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        if (Array.isArray(response.data.data)) {
+          const sortedAppointments = [...response.data.data].sort((a, b) => new Date(a.createdDate) - new Date(b.createdDate));
+          setAppointments(sortedAppointments);
+        } else {
+          setAppointments([]);
+          console.error("Unexpected appointments response format:", response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+        setAppointments([]);
+      }
+    };
+
+    fetchAppointments();
+  }, [selectedUserId]);
 
   function downloadPdf(base64Pdf) {
     const byteCharacters = atob(base64Pdf);
@@ -145,6 +208,10 @@ const AppointmentList = () => {
            status === "Pending" ? 'danger' : 'dark';
   };
 
+  const handleUserChange = (event) => {
+    setSelectedUserId(event.target.value);
+  };
+
   return (
     <>
       <div className="card p-3 rounded-4 mt-5">
@@ -152,8 +219,21 @@ const AppointmentList = () => {
           <div className="d-block d-md-none mx-auto mb-3">
             <h5 className="mb-0">Appointments</h5>
           </div>
-          <div className="d-none d-md-block mb-3">
-            <h5 className="mb-0">Appointments</h5>
+          <div className="d-none d-md-block mb-3 d-flex justify-content-between align-items-center w-100">
+            <h5 className="mb-0">Appointment</h5>
+            <select
+              className="form-select w-auto"
+              style={{ minWidth: '200px' }}
+              value={selectedUserId}
+              onChange={handleUserChange}
+            >
+              <option value="">Admin</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -336,7 +416,7 @@ const AppointmentList = () => {
   </div>
 )}
 
-      {/* Modal code stays the same */}
+      {/* Modal code stays the same */} 
     </>
   );
 };
