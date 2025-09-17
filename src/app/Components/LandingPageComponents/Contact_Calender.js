@@ -197,7 +197,9 @@ const handleSubmit = async (e) => {
     // ✅ Construct request body as backend expects
     const payload = {
       ...formData,
-      adminId: selectedPlan.adminId,  // 👈 pick adminId from plan
+      adminId: selectedPlan.adminId,
+       planId: selectedPlan.planId
+        // 👈 pick adminId from plan
     };
 
     console.log("📤 Sending appointment payload:", payload);
