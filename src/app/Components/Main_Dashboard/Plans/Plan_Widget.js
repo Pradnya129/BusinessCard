@@ -13,7 +13,7 @@ const Plan_Widget = () => {
     // Fetch data from the backend API
           const token = localStorage.getItem('token');
 
-           fetch(`http://localhost:5000/api/admin/plans/all`, {
+           fetch(`http://103.224.247.28:5000/api/admin/plans/all`, {
             headers: { 'Authorization': `Bearer ${token}` },
           })
       .then((response) => response.json())

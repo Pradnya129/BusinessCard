@@ -21,7 +21,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
           const token = localStorage.getItem('token');
 
       try {
-        const res = await fetch('http://localhost:5000/api/admin/plans/all', {
+        const res = await fetch('http://103.224.247.28:5000/api/admin/plans/all', {
           headers: { Authorization: `Bearer ${token}` },
         })
         const data = await res.json();
@@ -204,7 +204,7 @@ const handleSubmit = async (e) => {
 
     console.log("📤 Sending appointment payload:", payload);
 
-    const response = await fetch(`http://localhost:5000/api/customer-appointments/paid`, {
+    const response = await fetch(`http://103.224.247.28:5000/api/customer-appointments/paid`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -283,7 +283,7 @@ const handleSubmit = async (e) => {
 
   const verifyPayment = async (paymentResponse) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/customer-appointments/verify-payment`, {
+      const response = await fetch(`http://103.224.247.28:5000/api/customer-appointments/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -361,9 +361,9 @@ const headers = {
 
   // fetch appointments + rules + shifts
   Promise.all([
-    axios.get(`http://localhost:5000/api/customer-appointments/admin/${adminId}`, { headers }),
-    axios.get("http://localhost:5000/api/plan-shift-buffer-rule/all", { headers }),
-    axios.get("http://localhost:5000/api/admin/shift", { headers }),
+    axios.get(`http://103.224.247.28:5000/api/customer-appointments/admin/${adminId}`, { headers }),
+    axios.get("http://103.224.247.28:5000/api/plan-shift-buffer-rule/all", { headers }),
+    axios.get("http://103.224.247.28:5000/api/admin/shift", { headers }),
   ])
     .then(([appointmentsRes, rulesRes, shiftsRes]) => {
       const appointments = appointmentsRes.data?.data || [];

@@ -15,7 +15,7 @@ const FAQSection = () => {
     const fetchFAQs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/admin/faq');
+        const response = await axios.get('http://103.224.247.28:5000/api/admin/faq');
         setFaqs(response.data.data || []);
       } catch (err) {
         console.error('Error fetching FAQs:', err);

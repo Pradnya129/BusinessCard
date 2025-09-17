@@ -27,7 +27,7 @@ const Renewal = () => {
         setLoading(true);
 
         const res = await axios.get(
-          `http://localhost:5000/api/superadmin/renewals/by-admin/${adminId}`,
+          `http://103.224.247.28:5000/api/superadmin/renewals/by-admin/${adminId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

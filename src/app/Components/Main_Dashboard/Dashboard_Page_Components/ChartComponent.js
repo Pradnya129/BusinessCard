@@ -55,10 +55,10 @@ const ChartComponent = () => {
         const adminId = decoded.id;
 
         const [appointmentsRes, plansRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/customer-appointments/`, {
+          axios.get(`http://103.224.247.28:5000/api/customer-appointments/`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:5000/api/admin/plans/all`, {
+          axios.get(`http://103.224.247.28:5000/api/admin/plans/all`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash, FaSpinner, FaPlus, FaCrown } from "react-icons/fa";
 
-const API_BASE = "http://localhost:5000/api/superAdmin/sub_plans";
+const API_BASE = "http://103.224.247.28:5000/api/superAdmin/sub_plans";
 
 const Plans = () => {
   const [plans, setPlans] = useState([]);
@@ -57,7 +57,7 @@ const Plans = () => {
   // ✅ Fetch admins
   const fetchAdmins = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/superadmin/manageAdmins/`, { headers: getAuthHeaders() });
+      const res = await axios.get(`http://103.224.247.28:5000/api/superadmin/manageAdmins/`, { headers: getAuthHeaders() });
       setAdmins(res.data || []);
     } catch (err) {
       console.error('Error fetching admins:', err);

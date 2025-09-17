@@ -157,7 +157,7 @@ const Profile = () => {
   useEffect(() => {
     if (!token || !adminId) return;
     axios
-      .get(`http://localhost:5000/api/landing/${adminId}`, {
+      .get(`http://103.224.247.28:5000/api/landing/${adminId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
@@ -177,7 +177,7 @@ const Profile = () => {
 
     try {
       await axios.patch(
-        `http://localhost:5000/api/landing/${landingId}`,
+        `http://103.224.247.28:5000/api/landing/${landingId}`,
         { [key]: newValue },
         { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' } }
       );
@@ -194,11 +194,11 @@ const Profile = () => {
 
     try {
       if (landingId) {
-        await axios.patch(`http://localhost:5000/api/landing/${landingId}`, formData, {
+        await axios.patch(`http://103.224.247.28:5000/api/landing/${landingId}`, formData, {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        const res = await axios.post(`http://localhost:5000/api/landing`, formData, {
+        const res = await axios.post(`http://103.224.247.28:5000/api/landing`, formData, {
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
         });
         setLandingId(res.data.id || res.data._id);
@@ -237,8 +237,8 @@ const Profile = () => {
     user.profileImage
       ? user.profileImage.startsWith('blob:')
         ? user.profileImage
-        : `http://localhost:5000${user.profileImage}` // remove extra slash
-      : 'http://localhost:5000/assets/img/160x160/img8.jpg'
+        : `http://103.224.247.28:5000${user.profileImage}` // remove extra slash
+      : 'http://103.224.247.28:5000/assets/img/160x160/img8.jpg'
   }                  alt="Profile"
                   className="rounded-circle border shadow"
                   style={{ width: '150px', height: '150px', objectFit: 'cover' }}

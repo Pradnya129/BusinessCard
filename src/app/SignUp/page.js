@@ -31,7 +31,7 @@ const Page = () => {
     console.log("Sending form data:", formData); // ✅ Debug
 
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/register`, {
+      const response = await fetch(`http://103.224.247.28:5000/api/admin/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

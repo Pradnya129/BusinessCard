@@ -23,7 +23,7 @@ const Page = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`http://localhost:5000/api/admin/login`, formData);
+      const response = await axios.post(`http://103.224.247.28:5000/api/admin/login`, formData);
        console.log(response);
       // Save token or user data
            localStorage.setItem('token', response.data.token);

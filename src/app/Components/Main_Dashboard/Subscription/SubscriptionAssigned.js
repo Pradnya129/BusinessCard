@@ -29,7 +29,7 @@ const SubscriptionAssigned = () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    const url = `http://localhost:5000/api/superAdmin/sub_plans/subscriptions/${adminId}`;
+    const url = `http://103.224.247.28:5000/api/superAdmin/sub_plans/subscriptions/${adminId}`;
 
     const response = await axios.get(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -136,7 +136,7 @@ const handleSubscribe = async () => {
     }
 
     const response = await axios.post(
-      'http://localhost:5000/api/admin/sub_plans/create-order',
+      'http://103.224.247.28:5000/api/admin/sub_plans/create-order',
       payload,
       {
         headers: {
@@ -179,7 +179,7 @@ const handleSubscribe = async () => {
           }
 
           const verifyResponse = await axios.post(
-            'http://localhost:5000/api/admin/sub_plans/verify-payment',
+            'http://103.224.247.28:5000/api/admin/sub_plans/verify-payment',
             verifyPayload,
             {
               headers: {

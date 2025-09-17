@@ -27,7 +27,7 @@ const Add_Plan = () => {
     const loadShifts = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`http://localhost:5000/api/admin/shift`, {
+        const res = await axios.get(`http://103.224.247.28:5000/api/admin/shift`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setShiftList(res.data);
@@ -94,7 +94,7 @@ const listItems = Array.from(editorRef.current.querySelectorAll("li"))
   console.log("📤 Sending Plan Data:", planData);
 
   try {
-    const response = await fetch(`http://localhost:5000/api/admin/plans`, {
+    const response = await fetch(`http://103.224.247.28:5000/api/admin/plans`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ if (selectedShift && bufferMin && parseInt(bufferMin) > 0) {
   };
   console.log("Sending Buffer Data:", bufferPayload);
 
-  await axios.post(`http://localhost:5000/api/plan-shift-buffer-rule/add`, bufferPayload, {
+  await axios.post(`http://103.224.247.28:5000/api/plan-shift-buffer-rule/add`, bufferPayload, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

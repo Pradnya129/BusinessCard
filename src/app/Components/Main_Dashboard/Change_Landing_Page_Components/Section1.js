@@ -47,7 +47,7 @@ useEffect(() => {
       const decoded = jwtDecode(token);
       const adminId = decoded.id;
 
-      const response = await fetch(`http://localhost:5000/api/landing/${adminId}`);
+      const response = await fetch(`http://103.224.247.28:5000/api/landing/${adminId}`);
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();
@@ -138,7 +138,7 @@ useEffect(() => {
    
 
     const response = await axios.patch(
-      `http://localhost:5000/api/landing/${landingId}`,
+      `http://103.224.247.28:5000/api/landing/${landingId}`,
       formData,
       { headers: { "Content-Type": "multipart/form-data" } }
     );
@@ -178,8 +178,8 @@ useEffect(() => {
     editableData.profileImage
       ? editableData.profileImage.startsWith('blob:')
         ? editableData.profileImage
-        : `http://localhost:5000${editableData.profileImage}` // remove extra slash
-      : 'http://localhost:5000/assets/img/160x160/img8.jpg'
+        : `http://103.224.247.28:5000${editableData.profileImage}` // remove extra slash
+      : 'http://103.224.247.28:5000/assets/img/160x160/img8.jpg'
   }
   alt="Profile"
   className="border border-secondary rounded-circle"

@@ -19,7 +19,7 @@ useEffect(() => {
   
     const decoded = jwtDecode(token);
     const adminId = decoded.id; 
-  axios.get(`http://localhost:5000/api/customer-appointments/admin/${adminId}`, {
+  axios.get(`http://103.224.247.28:5000/api/customer-appointments/admin/${adminId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'multipart/form-data',

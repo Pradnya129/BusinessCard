@@ -89,7 +89,7 @@ const AppointmentList = () => {
     const idToUse = selectedUserId || adminId;
 
     // Send as query param
-    const url = `http://localhost:5000/api/customer-appointments/`;
+    const url = `http://103.224.247.28:5000/api/customer-appointments/`;
     const response = await axios.get(url, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -160,7 +160,7 @@ const handleDelete = async (id) => {
   setAppointments(updatedAppointments);
 
   try {
-    await axios.delete(`http://localhost:5000/api/customer-appointments/delete/${id}`, {
+    await axios.delete(`http://103.224.247.28:5000/api/customer-appointments/delete/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
       }
@@ -178,7 +178,7 @@ const handleDelete = async (id) => {
   const handleSaveChanges = () => {
     const token = localStorage.getItem('token');
     axios.patch(
-      `http://localhost:5000/api/customer-appointments/update/${selectedAppt.id}`,
+      `http://103.224.247.28:5000/api/customer-appointments/update/${selectedAppt.id}`,
       { ...selectedAppt },
       { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
     )
