@@ -14,7 +14,7 @@ const UsersList = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://103.224.247.28:5000/api/customer-appointments/clients`,
+        `https://appo.coinagesoft.com/api/customer-appointments/clients`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -83,7 +83,7 @@ const UsersList = () => {
     console.log("newPatient:", newPatient);
     try {
       const response = await fetch(
-        `http://103.224.247.28:5000/api/customer-appointments/update-user/${newPatient.clientId}`,
+        `https://appo.coinagesoft.com/api/customer-appointments/update-user/${newPatient.clientId}`,
         {
           method: "PATCH",
           headers: {
@@ -112,7 +112,7 @@ const UsersList = () => {
     if (window.confirm("Are you sure you want to delete this patient?")) {
       try {
         const res = await fetch(
-          `http://103.224.247.28:5000/api/customer-appointments/by-user/${clientId}`,
+          `https://appo.coinagesoft.com/api/customer-appointments/by-user/${clientId}`,
           {
             method: "DELETE",
             headers: {

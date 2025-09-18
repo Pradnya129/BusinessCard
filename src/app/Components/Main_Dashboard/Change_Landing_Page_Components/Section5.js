@@ -28,7 +28,7 @@ const Section5 = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://103.224.247.28:5000/api/landing/${adminId}`);
+        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
         const data = res.data.data;
 
         const mappedData = {
@@ -101,7 +101,7 @@ const handleSave = async () => {
     formDataPayload.append("section5_MainDescription", editedData.section5_MainDescription);
     formDataPayload.append("section5_MainHeading", editedData.section5_MainHeading);
 
-    await axios.patch(`http://103.224.247.28:5000/api/landing/${landingPageId}`, formDataPayload, {
+    await axios.patch(`https://appo.coinagesoft.com/api/landing/${landingPageId}`, formDataPayload, {
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "multipart/form-data",

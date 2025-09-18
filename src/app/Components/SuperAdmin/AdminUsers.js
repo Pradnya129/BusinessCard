@@ -26,7 +26,7 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://103.224.247.28:5000/api/superadmin/manageAdmins/', {
+      const response = await axios.get('https://appo.coinagesoft.com/api/superadmin/manageAdmins/', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data || []);
@@ -62,7 +62,7 @@ const AdminUsers = () => {
     setUpdating(true);
     try {
       const res = await axios.put(
-        `http://103.224.247.28:5000/api/superadmin/manageAdmins/${selectedUser.id}`,
+        `https://appo.coinagesoft.com/api/superadmin/manageAdmins/${selectedUser.id}`,
         selectedUser,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -83,7 +83,7 @@ const AdminUsers = () => {
 
     setDeleting(id);
     try {
-      await axios.delete(`http://103.224.247.28:5000/api/superadmin/manageAdmins/${id}`, {
+      await axios.delete(`https://appo.coinagesoft.com/api/superadmin/manageAdmins/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(users.filter(u => u.id !== id));
@@ -124,7 +124,7 @@ const AdminUsers = () => {
     setErrors({});
     setUpdating(true);
     try {
-      const res = await axios.post('http://103.224.247.28:5000/api/superadmin/manageAdmins/', newUser, {
+      const res = await axios.post('https://appo.coinagesoft.com/api/superadmin/manageAdmins/', newUser, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setUsers([...users, res.data.admin]);

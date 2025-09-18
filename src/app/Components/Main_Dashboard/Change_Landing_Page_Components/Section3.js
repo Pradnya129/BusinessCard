@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://103.224.247.28:5000";
+const API_URL = process.env.REACT_APP_API_URL || "https://appo.coinagesoft.com";
 
 const Section3 = () => {
   const [tagline, setTagline] = useState('');

@@ -34,7 +34,7 @@ const Section2 = () => {
     const adminId = decoded.id;
 
     try {
-      const response = await fetch(`http://103.224.247.28:5000/api/landing/${adminId}`);
+      const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();
@@ -130,7 +130,7 @@ const Section2 = () => {
       }
 
       const response = await axios.patch(
-        `http://103.224.247.28:5000/api/landing/${landingId}`,
+        `https://appo.coinagesoft.com/api/landing/${landingId}`,
         updatedFormData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -171,8 +171,8 @@ const Section2 = () => {
               formData.section2_Image
                 ? formData.section2_Image.startsWith('blob:')
                   ? formData.section2_Image
-                  : `http://103.224.247.28:5000${formData.section2_Image}`
-                : 'http://103.224.247.28:5000/assets/img/160x160/img8.jpg'
+                  : `https://appo.coinagesoft.com${formData.section2_Image}`
+                : 'https://appo.coinagesoft.com/assets/img/160x160/img8.jpg'
             }
             alt="Section 2 Preview"
             id="section2_Image"

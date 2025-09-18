@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
 
-const API_URL = "http://103.224.247.28:5000";
+const API_URL = "https://appo.coinagesoft.com";
 
 const ConsultantSection4 = () => {
   const [stats, setStats] = useState([]);

@@ -46,7 +46,7 @@ const Plan_List = () => {
         plansData.map(async (plan) => {
           try {
             const bufferRes = await axios.get(
-              `http://103.224.247.28:5000/api/plan-shift-buffer-rule/${plan.planId}`,
+              `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/${plan.planId}`,
               { headers: { Authorization: `Bearer ${token}` } }
             );
 
@@ -82,7 +82,7 @@ const Plan_List = () => {
     const fetchUsers = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch("http://103.224.247.28:5000/api/admin/all_user", {
+        const res = await fetch("https://appo.coinagesoft.com/api/admin/all_user", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -150,7 +150,7 @@ const Plan_List = () => {
       userIdsToAssign.push(adminUser.id);
     }
 
-    await fetch("http://103.224.247.28:5000/api/admin/plans/assign-plan-to-user", {
+    await fetch("https://appo.coinagesoft.com/api/admin/plans/assign-plan-to-user", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -182,7 +182,7 @@ const Plan_List = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.get(
-        "http://103.224.247.28:5000/api/plan-shift-buffer-rule/all",
+        "https://appo.coinagesoft.com/api/plan-shift-buffer-rule/all",
         {
           headers: { Authorization: `Bearer ${token}` },
           params: { planId, shiftId },
@@ -238,7 +238,7 @@ const Plan_List = () => {
     const planToDelete = plans[index];
     try {
       const response = await fetch(
-        `http://103.224.247.28:5000/api/admin/plans/${planToDelete.planId}`,
+        `https://appo.coinagesoft.com/api/admin/plans/${planToDelete.planId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -256,7 +256,7 @@ const Plan_List = () => {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(
-        `http://103.224.247.28:5000/api/admin/plans/unassign/${userId}`,
+        `https://appo.coinagesoft.com/api/admin/plans/unassign/${userId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -339,7 +339,7 @@ const Plan_List = () => {
 
     try {
       // 🔹 Update Plan
-      await fetch(`http://103.224.247.28:5000/api/admin/plans/${plan.planId}`, {
+      await fetch(`https://appo.coinagesoft.com/api/admin/plans/${plan.planId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -350,14 +350,14 @@ const Plan_List = () => {
 
       // 🔹 Update buffer
       const ruleRes = await axios.get(
-        `http://103.224.247.28:5000/api/plan-shift-buffer-rule/${plan.planId}`,
+        `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/${plan.planId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (ruleRes.status === 200 && ruleRes.data) {
         // PATCH existing buffer rule
         await fetch(
-          `http://103.224.247.28:5000/api/plan-shift-buffer-rule/${ruleRes.data.id}`,
+          `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/${ruleRes.data.id}`,
           {
             method: "PATCH",
             headers: {
@@ -372,7 +372,7 @@ const Plan_List = () => {
         );
       } else {
         // POST new buffer rule
-        await fetch(`http://103.224.247.28:5000/C:\Users\ASUS\Desktop\github clone\appointify\NewAppointify_MultiUser_Frontend\src\app\Components\Main_Dashboard\Plans\Plan_List.jsplan-shift-buffer-rule/add`, {
+        await fetch(`https://appo.coinagesoft.com/C:\Users\ASUS\Desktop\github clone\appointify\NewAppointify_MultiUser_Frontend\src\app\Components\Main_Dashboard\Plans\Plan_List.jsplan-shift-buffer-rule/add`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

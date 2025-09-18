@@ -72,7 +72,7 @@ const MiniCalendar = ({
         const baseDate = new Date(selected);
 
         // 1. Get plan-shift-buffer
-        const bufferRes = await axios.get(`http://103.224.247.28:5000/api/plan-shift-buffer-rule/all`, {
+        const bufferRes = await axios.get(`https://appo.coinagesoft.com/api/plan-shift-buffer-rule/all`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -83,7 +83,7 @@ const MiniCalendar = ({
         }
 
         // 2. Get shift by ID
-        const shiftRes = await axios.get(`http://103.224.247.28:5000/api/admin/shift`, {
+        const shiftRes = await axios.get(`https://appo.coinagesoft.com/api/admin/shift`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const shift = shiftRes.data.find((s) => s.id === rule.shiftId);
@@ -106,7 +106,7 @@ const MiniCalendar = ({
 
         // 4. Fetch booked slots for that date
         const bookedRes = await axios.get(
-          `http://103.224.247.28:5000/api/customer-appointments/booked-slots/${selected}`,
+          `https://appo.coinagesoft.com/api/customer-appointments/booked-slots/${selected}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

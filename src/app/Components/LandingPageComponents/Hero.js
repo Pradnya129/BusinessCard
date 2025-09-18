@@ -21,7 +21,7 @@ const Hero = ({ scrollToSectionHeader }) => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const response = await fetch(`http://103.224.247.28:5000/api/landing/${adminId}`);
+        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
         if (!response.ok) throw new Error("Failed to fetch consultant data");
         const result = await response.json();
         const data = result.data;
@@ -103,7 +103,7 @@ const Hero = ({ scrollToSectionHeader }) => {
                             className="avatar-img rounded-pill"
                             src={
                               consultantData.profileImage
-                                  ?  `http://103.224.247.28:5000${consultantData.profileImage}`
+                                  ?  `https://appo.coinagesoft.com${consultantData.profileImage}`
                                 : '/assets/img/160x160/img6.jpg'
                             }
                             alt="Doctor"

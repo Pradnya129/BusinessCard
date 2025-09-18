@@ -26,7 +26,7 @@ const CreateUser = () => {
     setFetchError('');
     console.log('Token:', token);
     try {
-      const response = await axios.get('http://103.224.247.28:5000/api/admin/all_user', {
+      const response = await axios.get('https://appo.coinagesoft.com/api/admin/all_user', {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('Response:', response.data);
@@ -67,7 +67,7 @@ const CreateUser = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://103.224.247.28:5000/api/admin/create_user', user, {
+      const response = await axios.post('https://appo.coinagesoft.com/api/admin/create_user', user, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('User created successfully!');
@@ -94,7 +94,7 @@ const CreateUser = () => {
 
     setLoading(true);
     try {
-      await axios.put(`http://103.224.247.28:5000/api/admin/user/${editingUser.id}`, editingUser, {
+      await axios.put(`https://appo.coinagesoft.com/api/admin/user/${editingUser.id}`, editingUser, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('User updated successfully!');
@@ -115,7 +115,7 @@ const CreateUser = () => {
 
     setLoading(true);
     try {
-      await axios.delete(`http://103.224.247.28:5000/api/admin/user/${userId}`, {
+      await axios.delete(`https://appo.coinagesoft.com/api/admin/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('User deleted successfully!');
