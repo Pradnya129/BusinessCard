@@ -8,7 +8,7 @@ const LeafletMap = () => {
     const fetchIframeUrl = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
+        const adminId = urlParams.get('adminId') || '9f40b61b-0c80-4067-962f-0f469161e4c2';
         const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
         console.log("res iframeurl", res.data.data.locationIframeURL);
 

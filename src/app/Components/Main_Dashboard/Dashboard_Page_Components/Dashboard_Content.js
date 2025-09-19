@@ -16,6 +16,10 @@ const Dashboard_Content = () => {
   });
 
   const [appointmentData, setAppointmentData] = useState([]);
+  const [slug, setSlug] = useState("");          // ✅ added
+  const [isSaving, setIsSaving] = useState(false); // ✅ added
+  const [adminId, setAdminId] = useState(null);  // ✅ store adminId
+  const [token, setToken] = useState(null);      // ✅ store token
 
   // Helper: Convert minutes → hh:mm
   const formatMinutesToHHMM = (minutes) => {
@@ -26,14 +30,25 @@ const Dashboard_Content = () => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) return;
 
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+    setToken(storedToken);
+    const decoded = jwtDecode(storedToken);
+    setAdminId(decoded.id);
 
+    // fetch slug for this admin
+    axios.get(`https://appo.coinagesoft.com/api/admin/${decoded.id}`, {
+      headers: { Authorization: `Bearer ${storedToken}` }
+    })
+    .then(res => {
+      if (res.data?.slug) setSlug(res.data.slug);
+    })
+    .catch(err => console.error("Failed to fetch slug:", err));
+
+    // fetch appointments
     axios.get(`https://appo.coinagesoft.com/api/customer-appointments/`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${storedToken}` },
     })
     .then((res) => {
       const appointments = res.data?.data || [];
@@ -154,10 +169,46 @@ const Dashboard_Content = () => {
     });
   }, []);
 
+  const handleSaveSlug = () => {
+    if (!adminId || !token) return;
+    setIsSaving(true);
+
+    axios.put(`https://appo.coinagesoft.com/api/admin/${adminId}/slug`, { slug }, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => {
+      alert("Slug updated successfully!");
+      window.history.pushState({}, "", `/${slug}`);
+    })
+    .catch(err => alert(err.response?.data?.message || "Failed to update slug"))
+    .finally(() => setIsSaving(false));
+  };
+
   return (
     <div className="content-wrapper">
       <div className="container-md-xxl container-p-y responsive-container">
-        {/* Widgets */}
+
+        {/* Slug Input */}
+        <div className="d-flex justify-content-end align-items-center mb-3">
+          <div className="input-group" style={{ maxWidth: "300px" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+            />
+            <button
+              className="btn btn-primary"
+              disabled={isSaving}
+              onClick={handleSaveSlug}
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Widgets */}
         <div className="row g-4 mb-4">
           {[
             { title: 'Total Appointments', icon: 'ri-calendar-check-line', color: 'primary', value: stats.totalAppointments },
@@ -167,7 +218,7 @@ const Dashboard_Content = () => {
               title: 'Payment Received', 
               icon: 'ri-refresh-line', 
               color: 'info', 
-              value: `₹${Number(stats.paymentReceived).toLocaleString('en-IN')}`
+              value: `₹${Number(stats.paymentReceived).toLocaleString('en-IN')}` 
             }
           ].map((item, idx) => (
             <div key={idx} className="col-sm-6 col-lg-3">

@@ -8,7 +8,7 @@ import 'swiper/css/effect-fade';
 import { Pagination, Thumbs, EffectFade, Autoplay } from 'swiper/modules';
 const API_URL = process.env.REACT_APP_API_URL;
 const dummyData = {
-  images: ['img32', 'img33', 'img34'],
+  images: ['img32', 'img33'],
 };
 
 const Hero = ({ scrollToSectionHeader }) => {
@@ -20,13 +20,13 @@ const Hero = ({ scrollToSectionHeader }) => {
     const fetchData = async () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
+        const adminId = urlParams.get('adminId') || '9f40b61b-0c80-4067-962f-0f469161e4c2';
         const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
         if (!response.ok) throw new Error("Failed to fetch consultant data");
         const result = await response.json();
         const data = result.data;
         setConsultantData(data);
-        setTaglines([data.tagline1, data.tagline2, data.tagline3]);
+        setTaglines([data.tagline1, data.tagline2]);
       } catch (error) {
         console.error("Error fetching consultant data:", error);
       }
@@ -55,7 +55,7 @@ const Hero = ({ scrollToSectionHeader }) => {
         direction: 'vertical',
         watchSlidesVisibility: true,
         watchSlidesProgress: true,
-        slidesPerView: 3,
+        slidesPerView: 2,
         history: false,
         on: {
           afterInit: function (swiper) {
@@ -91,7 +91,7 @@ const Hero = ({ scrollToSectionHeader }) => {
               <div
                 key={index}
                 className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-                style={{ backgroundImage: `url(/dist/assets/img/1920x1080/${image}.jpg)`, height:"100vh", backgroundPosition:"center center" }}
+                style={{ backgroundImage: `url(/assets/img/1920x1080/${image}.jpg)`, height:"100vh", backgroundPosition:"center center" }}
                 // , minHeight: '40rem'
               >
                 <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
