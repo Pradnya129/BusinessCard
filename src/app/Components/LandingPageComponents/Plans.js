@@ -20,7 +20,7 @@ const Plans = React.forwardRef((props, ref) => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const res = await axios.get(`http://localhost:5000/api/landing/${adminId}`);
+        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
         const data = res.data.data;
         setFormData({
           tagline: data.section5_Tagline || '',
@@ -36,10 +36,10 @@ const Plans = React.forwardRef((props, ref) => {
       const token = localStorage.getItem('token');
       try {
         const [plansRes, shiftsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/admin/plans/all', {
+          fetch('https://appo.coinagesoft.com/api/admin/plans/all', {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch('http://localhost:5000/api/admin/shift', {
+          fetch('https://appo.coinagesoft.com/api/admin/shift', {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

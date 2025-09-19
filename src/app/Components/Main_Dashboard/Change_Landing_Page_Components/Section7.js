@@ -21,7 +21,7 @@ const fetchIframeUrl = async () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    const res = await axios.get(`http://localhost:5000/api/landing/${adminId}`);
+    const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
     const data = res.data.data;
 
     setLandingId(data.id); // ✅ store landing page ID
@@ -47,7 +47,7 @@ const handleSave = async () => {
 
   try {
     await axios.patch(
-      `http://localhost:5000/api/landing/${landingId}`,
+      `https://appo.coinagesoft.com/api/landing/${landingId}`,
       JSON.stringify({ locationIframeURL: trimmedUrl }),
       {
         headers: {
@@ -72,7 +72,7 @@ const handleSave = async () => {
   // Delete iframe URL
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/landing/${adminId}`);
+      await axios.delete(`https://appo.coinagesoft.com/api/landing/${adminId}`);
       setIframeUrl('');
       setSavedUrl('');
       setStatusMessage({ type: 'success', text: 'Map URL deleted.' });

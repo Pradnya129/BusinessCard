@@ -10,7 +10,7 @@ const Consultant_Info = () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const response = await fetch(`http://localhost:5000/api/landing/${adminId}`);
+        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
         if (!response.ok) throw new Error("Failed to fetch consultant data");
         const result = await response.json();
         console.log("result", result.data);
@@ -35,7 +35,7 @@ const Consultant_Info = () => {
         onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         src={
           consultantData.section2_Image
-            ? `http://localhost:5000${consultantData.section2_Image}`
+            ? `https://appo.coinagesoft.com${consultantData.section2_Image}`
             : "/assets/img/160x160/img8.jpg"
         }
         alt={consultantData.fullName}

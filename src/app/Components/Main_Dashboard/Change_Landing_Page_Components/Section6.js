@@ -31,7 +31,7 @@ const ConsultantSection6 = () => {
           return;
         }
 
-        const res = await axios.get(`http://localhost:5000/api/admin/faq`, { headers });
+        const res = await axios.get(`https://appo.coinagesoft.com/api/admin/faq`, { headers });
         setFaqs(res.data.data);
         setStatusMessage({ type: '', text: '' });
       } catch (err) {
@@ -50,7 +50,7 @@ const ConsultantSection6 = () => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return;
 
-      const res = await axios.post(`http://localhost:5000/api/admin/faq`, {
+      const res = await axios.post(`https://appo.coinagesoft.com/api/admin/faq`, {
         question,
         answer
       }, { headers });
@@ -83,7 +83,7 @@ const ConsultantSection6 = () => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return;
 
-      const res = await axios.put(`http://localhost:5000/api/admin/faq/${updatedFaq.id}`, updatedFaq, { headers });
+      const res = await axios.put(`https://appo.coinagesoft.com/api/admin/faq/${updatedFaq.id}`, updatedFaq, { headers });
       const updatedFaqs = [...faqs];
       updatedFaqs[editIndex] = res.data;
       setFaqs(updatedFaqs);
@@ -101,7 +101,7 @@ const ConsultantSection6 = () => {
       const headers = getAuthHeaders();
       if (!headers.Authorization) return;
 
-      await axios.delete(`http://localhost:5000/api/admin/faq/${id}`, { headers });
+      await axios.delete(`https://appo.coinagesoft.com/api/admin/faq/${id}`, { headers });
       setFaqs(faqs.filter((_, i) => i !== index));
       setStatusMessage({ type: 'success', text: `FAQ index - ${index} deleted successfully!` });
     } catch (err) {

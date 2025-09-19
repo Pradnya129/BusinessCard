@@ -15,7 +15,7 @@ const FAQSection = () => {
     const fetchFAQs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/admin/faq');
+        const response = await axios.get('https://appo.coinagesoft.com/api/admin/faq');
         setFaqs(response.data.data || []);
       } catch (err) {
         console.error('Error fetching FAQs:', err);

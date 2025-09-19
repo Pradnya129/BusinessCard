@@ -68,7 +68,7 @@ const fetchAppointments = async () => {
 
   const adminId = decoded.id; // or userId from token
   try {
-    const url = `http://localhost:5000/api/customer-appointments/`;
+    const url = `https://appo.coinagesoft.com/api/customer-appointments/`;
 
     const response = await axios.get(url, {
       headers: {
