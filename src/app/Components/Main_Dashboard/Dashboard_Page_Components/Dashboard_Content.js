@@ -16,6 +16,10 @@ const Dashboard_Content = () => {
   });
 
   const [appointmentData, setAppointmentData] = useState([]);
+  const [slug, setSlug] = useState("");          // ✅ added
+  const [isSaving, setIsSaving] = useState(false); // ✅ added
+  const [adminId, setAdminId] = useState(null);  // ✅ store adminId
+  const [token, setToken] = useState(null);      // ✅ store token
 
   // Helper: Convert minutes → hh:mm
   const formatMinutesToHHMM = (minutes) => {
@@ -25,23 +29,40 @@ const Dashboard_Content = () => {
     return `${hrs}h ${mins}m`;
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+ useEffect(() => {
+  const storedToken = localStorage.getItem("token");
+  if (!storedToken) return;
 
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+  setToken(storedToken);
+  const decoded = jwtDecode(storedToken); // decode JWT
+  const adminId = decoded.id; // current admin ID
+  setAdminId(adminId);
 
-    axios.get(`https://appo.coinagesoft.com/api/customer-appointments/`, {
-      headers: { Authorization: `Bearer ${token}` },
+  // --- FETCH ADMIN SLUG ---
+ // Example: fetch admin data using slug from query param
+axios.get(`http://localhost:5000/api/admin/slugbyAdminId/${adminId}`, {
+})
+.then((res) => {
+  // res.data contains the admin info for this slug
+  if (res.data?.data) {
+    setUser(res.data.data);
+    setSlug(res.data.data.slug); // set slug from response
+  }
+})
+.catch((err) => console.error("Failed to fetch slug:", err));
+
+  // --- FETCH CUSTOMER APPOINTMENTS ---
+  axios
+    .get(`https://appo.coinagesoft.com/api/customer-appointments/`, {
+      headers: { Authorization: `Bearer ${storedToken}` },
     })
     .then((res) => {
       const appointments = res.data?.data || [];
       if (appointments.length === 0) return;
 
       const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December",
       ];
 
       const sorted = [...appointments].sort(
@@ -65,13 +86,13 @@ const Dashboard_Content = () => {
           completed: [],
           canceled: 0,
           rescheduled: 0,
-          paid: []
+          paid: [],
         });
         cursor.setMonth(cursor.getMonth() + 1);
       }
 
       // Populate monthYearMap
-      appointments.forEach(item => {
+      appointments.forEach((item) => {
         const date = new Date(item.createdAt);
         const key = `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
         const group = monthYearMap.get(key);
@@ -80,84 +101,147 @@ const Dashboard_Content = () => {
         group.totalAppointments += 1;
 
         switch (item.appointmentStatus) {
-          case "Pending": group.pending += 1; break;
-          case "Completed": group.completed.push(item); break;
-          case "Canceled": group.canceled += 1; break;
-          case "Rescheduled": group.rescheduled += 1; break;
-          default: break;
+          case "Pending":
+            group.pending += 1;
+            break;
+          case "Completed":
+            group.completed.push(item);
+            break;
+          case "Canceled":
+            group.canceled += 1;
+            break;
+          case "Rescheduled":
+            group.rescheduled += 1;
+            break;
+          default:
+            break;
         }
 
-        if (item.paymentStatus === "Paid") {
-          group.paid.push(item);
-        }
+        if (item.paymentStatus === "Paid") group.paid.push(item);
       });
 
-      // Prepare table data
+      // Prepare monthly table data
       const monthlyData = [];
       monthYearMap.forEach((group, key) => {
         const paidCount = group.paid.length;
         const revenue = group.paid.reduce(
-          (sum, item) => sum + parseFloat(item.amount || 0), 0
+          (sum, item) => sum + parseFloat(item.amount || 0),
+          0
         );
 
         const totalDuration = group.paid.reduce((sum, item) => {
           const duration = parseFloat(item.duration);
-          return (Number.isFinite(duration) && duration > 0 && duration < 10000)
+          return Number.isFinite(duration) && duration > 0 && duration < 10000
             ? sum + duration
             : sum;
         }, 0);
 
         const avgDuration = paidCount > 0
           ? formatMinutesToHHMM(Math.round(totalDuration / paidCount))
-          : '0h 0m';
+          : "0h 0m";
 
         monthlyData.push({
           month: key,
-          revenue: `₹${revenue.toLocaleString('en-IN')}`,
+          revenue: `₹${revenue.toLocaleString("en-IN")}`,
           totalAppointments: group.totalAppointments,
           pending: group.pending,
           completed: group.completed.length,
           canceled: group.canceled,
-          avgTime: avgDuration
+          avgTime: avgDuration,
         });
       });
 
-      // Stats for widgets
-      const paidAppointments = appointments.filter(item => item.paymentStatus === "Paid");
+      // Stats for dashboard widgets
+      const paidAppointments = appointments.filter(
+        (item) => item.paymentStatus === "Paid"
+      );
       const totalRevenue = paidAppointments.reduce(
-        (sum, item) => sum + parseFloat(item.amount || 0), 0
+        (sum, item) => sum + parseFloat(item.amount || 0),
+        0
       );
 
       const totalDuration = paidAppointments.reduce(
-        (sum, item) => sum + parseFloat(item.duration || 0), 0
+        (sum, item) => sum + parseFloat(item.duration || 0),
+        0
       );
 
       const avgDuration = paidAppointments.length > 0
         ? formatMinutesToHHMM(Math.round(totalDuration / paidAppointments.length))
-        : '0h 0m';
+        : "0h 0m";
 
       setStats({
         totalAppointments: appointments.length,
-        scheduled_rescheduledAppointment: appointments.filter(item =>
+        scheduled_rescheduledAppointment: appointments.filter((item) =>
           ["Pending", "Rescheduled"].includes(item.appointmentStatus)
         ).length,
-        completedSessions: appointments.filter(item => item.appointmentStatus === "Completed").length,
+        completedSessions: appointments.filter(
+          (item) => item.appointmentStatus === "Completed"
+        ).length,
         paymentReceived: totalRevenue,
         totalRevenue,
-        avgDuration
+        avgDuration,
       });
 
       setAppointmentData(monthlyData);
     })
-    .catch(error => {
-      console.error('Failed to fetch dashboard data:', error);
+    .catch((error) => {
+      console.error("Failed to fetch dashboard data:", error);
     });
-  }, []);
+}, []);
+
+
+const handleSaveSlug = async () => {
+  if (!adminId || !token) return;
+  setIsSaving(true);
+
+  try {
+    // Use edit-slug endpoint for updating
+    const response = await axios.put(
+      "http://localhost:5000/api/admin/edit-slug",
+      {
+        adminId,
+        slug, // new slug value
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    alert("Slug updated successfully!");
+    setSlug(slug); // update local state
+    window.history.pushState({}, "", `/${slug}`); // update URL
+  } catch (err) {
+    alert(err.response?.data?.message || "Failed to update slug");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   return (
     <div className="content-wrapper">
       <div className="container-md-xxl container-p-y responsive-container">
-        {/* Widgets */}
+
+        {/* Slug Input */}
+        <div className="d-flex justify-content-end align-items-center mb-3">
+          <div className="input-group" style={{ maxWidth: "300px" }}>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter slug"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+            />
+            <button
+              className="btn btn-primary"
+              disabled={isSaving}
+              onClick={handleSaveSlug}
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Widgets */}
         <div className="row g-4 mb-4">
           {[
             { title: 'Total Appointments', icon: 'ri-calendar-check-line', color: 'primary', value: stats.totalAppointments },
@@ -167,7 +251,7 @@ const Dashboard_Content = () => {
               title: 'Payment Received', 
               icon: 'ri-refresh-line', 
               color: 'info', 
-              value: `₹${Number(stats.paymentReceived).toLocaleString('en-IN')}`
+              value: `₹${Number(stats.paymentReceived).toLocaleString('en-IN')}` 
             }
           ].map((item, idx) => (
             <div key={idx} className="col-sm-6 col-lg-3">

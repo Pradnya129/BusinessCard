@@ -1,7 +1,7 @@
-# TODO: Add Unassign Plan from User Functionality to Plan_List.js
+# TODO: Update Navbar.js for Dynamic Profile and Editable Slug Display
 
-- [x] Add "Unassign" button next to each assigned user in the plan card
-- [x] Implement handleUnassign function to call DELETE /api/admin/plans/unassign/{userId}
-- [x] Add confirmation dialog for unassign
-- [x] Refresh plans list after unassign
-- [ ] Test unassign functionality (run the app and verify the unassign works)
+## Tasks:
+- [x] Fetch profile data dynamically in Navbar.js using axios and jwtDecode.
+- [x] Update the profile dropdown to display dynamic profile image and fullName.
+- [x] Add editable slug field display in the center of the navbar with save and edit buttons.
+- [ ] Test the changes to ensure dynamic data loads correctly and slug editing works.

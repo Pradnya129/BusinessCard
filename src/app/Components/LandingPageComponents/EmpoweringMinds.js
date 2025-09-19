@@ -14,7 +14,7 @@ const EmpoweringMinds = () => {
       // ✅ Extract slug from URL path (/landing/pradnya → "pradnya")
       const pathParts = window.location.pathname.split("/");
       const slug = pathParts[pathParts.length - 1];
-
+ 
       // ✅ Use slug API
       const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
       if (!response.ok) throw new Error("Failed to fetch consultant data");

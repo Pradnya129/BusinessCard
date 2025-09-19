@@ -11,7 +11,7 @@ const Consultant_Info = () => {
         // Get slug from URL path
         const path = window.location.pathname; // e.g., "/pradnya"
         const slug = path.split('/').filter(Boolean)[0]; // get first segment
-
+      
         if (!slug) throw new Error("Slug not found in URL");
 
         const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);

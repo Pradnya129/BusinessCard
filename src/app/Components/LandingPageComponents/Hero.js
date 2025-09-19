@@ -8,7 +8,7 @@ import 'swiper/css/effect-fade';
 import { Pagination, Thumbs, EffectFade, Autoplay } from 'swiper/modules';
 const API_URL = process.env.REACT_APP_API_URL;
 const dummyData = {
-  images: ['img32', 'img33', 'img34'],
+  images: ['img32', 'img33'],
 };
 
 const Hero = ({ scrollToSectionHeader }) => {
@@ -61,7 +61,7 @@ useEffect(() => {
         direction: 'vertical',
         watchSlidesVisibility: true,
         watchSlidesProgress: true,
-        slidesPerView: 3,
+        slidesPerView: 2,
         history: false,
         on: {
           afterInit: function (swiper) {
@@ -97,7 +97,7 @@ useEffect(() => {
               <div
                 key={index}
                 className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-                style={{ backgroundImage: `url(/dist/assets/img/1920x1080/${image}.jpg)`, height:"100vh", backgroundPosition:"center center" }}
+                style={{ backgroundImage: `url(/assets/img/1920x1080/${image}.jpg)`, height:"100vh", backgroundPosition:"center center" }}
                 // , minHeight: '40rem'
               >
                 <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
