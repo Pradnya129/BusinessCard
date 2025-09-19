@@ -123,7 +123,7 @@ const Navbar = ({ onToggleSidebar }) => {
           ) : (
             <div className="d-flex align-items-center flex-nowrap">
               <span className="me-2 fw-bold" style={{ whiteSpace: "nowrap" }}>
-                Your live URL https://appointify.me/{slug}
+                Your live URL is here 👉 https://appointify.me/{slug}
               </span>
               <button
                 className="btn btn-sm btn-outline-primary"
