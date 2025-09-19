@@ -117,7 +117,7 @@ Leaflet Changelog
 
 * Split `plugins.md` into many files for easier maintenance ([#7805](https://github.com/Leaflet/Leaflet/pull/7805) by [@Falke-Design](https://github.com/Falke-Design))
 * Add Bundlemon to watch bundle size ([#7934](https://github.com/Leaflet/Leaflet/pull/7934), [#7983](https://github.com/Leaflet/Leaflet/pull/7983), [#7905](https://github.com/Leaflet/Leaflet/pull/7905) by [@jonkoops](https://github.com/jonkoops))
-* Add `npm run serve` to serve docs on localhost ([#7973](https://github.com/Leaflet/Leaflet/pull/7973) by [@Falke-Design](https://github.com/Falke-Design))
+* Add `npm run serve` to serve docs on 103.224.247.28 ([#7973](https://github.com/Leaflet/Leaflet/pull/7973) by [@Falke-Design](https://github.com/Falke-Design))
 * Rename `master` branch to `main` ([#7921](https://github.com/Leaflet/Leaflet/pull/7921) by [@jonkoops](https://github.com/jonkoops))
 * Upload files to AWS even if the file-size is the same ([#7853](https://github.com/Leaflet/Leaflet/pull/7853) by [@jonkoops](https://github.com/jonkoops))
 * Remove `leaflet-include.js` from `debug` samples ([#7776](https://github.com/Leaflet/Leaflet/pull/7776) by [@Falke-Design](https://github.com/Falke-Design))

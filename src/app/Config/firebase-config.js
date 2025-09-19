@@ -20,8 +20,8 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
 // Connect to Firebase Authentication Emulator (only in local environment)
-if (window.location.hostname === "localhost") {
-  connectAuthEmulator(auth, "http://localhost:9090");
+if (window.location.hostname === "103.224.247.28") {
+  connectAuthEmulator(auth, "http://103.224.247.28:9090");
 }
 
 export { auth };

@@ -25,7 +25,7 @@ AOS is built using webpack.
   This will run local webpack-dev-server and build AOS automatically.
 
 - Open browser and head to: 
-  [http://localhost:8080/webpack-dev-server/](http://localhost:8080/webpack-dev-server/)
+  [http://103.224.247.28:8080/webpack-dev-server/](http://103.224.247.28:8080/webpack-dev-server/)
   Server loads content from `demo` folder.
   
 Now you are ready to play with AOS. Browser should reload automatically as you change code in `src` folder.

@@ -62,7 +62,7 @@ npm i
 npm start
 ```
 
-Then open `http://localhost:4000` in your browser.
+Then open `http://103.224.247.28:4000` in your browser.
 
 ### npm scripts
 

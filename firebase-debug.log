@@ -164,7 +164,7 @@
 [debug] [2025-05-09T10:41:02.295Z] [unzip] Processing entry: server\server.mjs
 [debug] [2025-05-09T10:41:02.295Z] [unzip] else mkdir: C:\Users\admin\.cache\firebase\emulators\ui-v1.15.0\server
 [debug] [2025-05-09T10:41:02.295Z] [unzip] deflating: C:\Users\admin\.cache\firebase\emulators\ui-v1.15.0\server\server.mjs
-[debug] [2025-05-09T10:41:02.308Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2025-05-09T10:41:02.308Z] Could not find VSCode notification endpoint: FetchError: request to http://103.224.247.28:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │

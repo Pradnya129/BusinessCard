@@ -41,7 +41,7 @@ To build `*.less` files
 $ yarn build
 ```
 
-To serve it on `localhost:8000`
+To serve it on `103.224.247.28:8000`
 
 ```bash
 $ yarn start
