@@ -99,7 +99,7 @@ const Navbar = ({ onToggleSidebar }) => {
         <div className="navbar-center flex-grow-1 d-flex justify-content-center align-items-center">
           {editingSlug ? (
             <div className="d-flex align-items-center flex-nowrap">
-              <span className="me-2 fw-bold">Your live URL https://appointify.me/</span>
+              <span className="me-2 fw-bold">Your live URL  https://appointify.me/</span>
               <input
                 type="text"
                 className="form-control form-control-sm me-2"
