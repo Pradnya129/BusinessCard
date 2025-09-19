@@ -1,5 +1,5 @@
 'use client';
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { Children, forwardRef, useEffect, useState } from 'react';
 import 'react-time-picker/dist/TimePicker.css';
 import MiniCalendar from './MiniCalendar';
 import dynamic from 'next/dynamic';
@@ -16,37 +16,41 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
 
-  useEffect(() => {
-    const fetchPlans = async () => {
-          const token = localStorage.getItem('token');
+useEffect(() => {
+  const fetchPlans = async () => {
+  
 
-      try {
-        const res = await fetch('https://appo.coinagesoft.com/api/admin/plans/all', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        const data = await res.json();
-        // setAvailablePlans(Array.isArray(data) ? data : []);
-        if (Array.isArray(data) && data.length > 0) {
-          setAvailablePlans(data);
+    // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
+    const pathParts = window.location.pathname.split("/");
+    const slug = pathParts[pathParts.length - 1];
 
-          // Auto-select the first plan
-          const firstPlan = data[0];
-          setFormData(prev => ({
-            ...prev,
-            plan: firstPlan.planName,
-            amount: firstPlan.planPrice,
-            duration: firstPlan.planDuration,
-            appointmentTime: ''
-          }));
-        }
+    try {
+      const res = await fetch(`http://localhost:5000/api/public-landing/all/${slug}`, {
+      });
+      const obj = await res.json();
+      const data = obj.data
+      console.log(data.data)
 
-      } catch (err) {
-        console.error("Error fetching plans", err);
+      if (Array.isArray(data) && data.length > 0) {
+        setAvailablePlans(data);
+
+        // Auto-select the first plan
+        const firstPlan = data[0];
+        setFormData(prev => ({
+          ...prev,
+          plan: firstPlan.planName,
+          amount: firstPlan.planPrice,
+          duration: firstPlan.planDuration,
+          appointmentTime: ''
+        }));
       }
-    };
+    } catch (err) {
+      console.error("Error fetching plans", err);
+    }
+  };
 
-    fetchPlans();
-  }, []);
+  fetchPlans();
+}, []);
 
 
   const API_URL = process.env.REACT_APP_API_URL;
@@ -187,6 +191,10 @@ const handleSubmit = async (e) => {
   setFormErrors({});
 
   try {
+    // ✅ Get slug from URL path
+ const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
+
     // ✅ Find selected plan
     const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
     if (!selectedPlan) {
@@ -194,17 +202,16 @@ const handleSubmit = async (e) => {
       return;
     }
 
-    // ✅ Construct request body as backend expects
+    // ✅ Construct request body
     const payload = {
       ...formData,
-      adminId: selectedPlan.adminId,
-       planId: selectedPlan.planId
-        // 👈 pick adminId from plan
+      slug,              // send slug instead of adminId
+      planId: selectedPlan.planId
     };
 
     console.log("📤 Sending appointment payload:", payload);
 
-    const response = await fetch(`https://appo.coinagesoft.com/api/customer-appointments/paid`, {
+    const response = await fetch(`http://localhost:5000/api/public-landing/paid`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -253,6 +260,7 @@ const handleSubmit = async (e) => {
     showModal("failureModal");
   }
 };
+
 
   function openReceiptPdf(base64Pdf) {
     const byteCharacters = atob(base64Pdf);
@@ -336,41 +344,29 @@ const handleSubmit = async (e) => {
     }, 3000);
   };
 
-useEffect(() => {
+useEffect(() => { 
   if (!formData.appointmentDate || !formData.plan) return;
 
-const token = localStorage.getItem("token"); // or sessionStorage
-if (!token) {
-  console.error("No token found. Please login again.");
-  return;
-}
-
-const headers = {
-  Authorization: `Bearer ${token}`,
-};
-  if (!token) return;
-
-  let decoded;
-  try {
-    decoded = jwtDecode(token);
-  } catch (e) {
-    console.error("Failed to decode token", e);
+  // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
+ const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
+  if (!slug) {
+    console.error("Slug not found in URL");
     return;
   }
-  const adminId = decoded.id;
 
-  // fetch appointments + rules + shifts
+  // fetch appointments + rules + shifts using slug
   Promise.all([
-    axios.get(`https://appo.coinagesoft.com/api/customer-appointments/admin/${adminId}`, { headers }),
-    axios.get("https://appo.coinagesoft.com/api/plan-shift-buffer-rule/all", { headers }),
-    axios.get("https://appo.coinagesoft.com/api/admin/shift", { headers }),
+    axios.get(`http://localhost:5000/api/public-landing/customer-appointments?slug=${slug}`),
+    axios.get(`http://localhost:5000/api/public-landing/all-rules/${slug}`),
+    axios.get(`http://localhost:5000/api/public-landing/all-shifts/${slug}`),
   ])
     .then(([appointmentsRes, rulesRes, shiftsRes]) => {
       const appointments = appointmentsRes.data?.data || [];
       const rules = rulesRes.data?.rules || [];
-      const shifts = shiftsRes.data || [];
-
+      const shifts = shiftsRes.data.data || [];
       // find selected plan
+      console.log(rules)
       const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
       if (!selectedPlan) return;
 
@@ -390,8 +386,8 @@ const headers = {
 
       // generate available slots
       const slots = generateSlots(
-        shift.startTime, // "10:00:00"
-        shift.endTime,   // "22:00:00"
+        shift.startTime,           // "10:00:00"
+        shift.endTime,             // "22:00:00"
         Number(selectedPlan.planDuration), // minutes
         Number(rule.bufferInMinutes),      // minutes
         booked

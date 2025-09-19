@@ -63,78 +63,83 @@ const MiniCalendar = ({
   };
 
   // 🔹 Fetch shift + booked slots
-  useEffect(() => {
-    const fetchShiftAndGenerateSlots = async () => {
-      if (!selected || !duration || !planId) return;
-      const token = localStorage.getItem("token");
+useEffect(() => {
+  const fetchShiftAndGenerateSlots = async () => {
+    if (!selected || !duration || !planId) return;
 
-      try {
-        const baseDate = new Date(selected);
+    const token = localStorage.getItem("token");
 
-        // 1. Get plan-shift-buffer
-        const bufferRes = await axios.get(`https://appo.coinagesoft.com/api/plan-shift-buffer-rule/all`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    try {
+      const baseDate = new Date(selected);
 
-        const rule = bufferRes.data.rules.find((r) => r.planId === planId);
-        if (!rule) {
-          setTimeSlots([]);
-          return;
-        }
+      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
 
-        // 2. Get shift by ID
-        const shiftRes = await axios.get(`https://appo.coinagesoft.com/api/admin/shift`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const shift = shiftRes.data.find((s) => s.id === rule.shiftId);
-        if (!shift) {
-          setTimeSlots([]);
-          return;
-        }
+      // 1. Get plan-shift-buffer for this admin via slug
+      const bufferRes = await axios.get(
+        `http://localhost:5000/api/public-landing/all-rules/${slug}`,
+      );
 
-        const shiftStart = new Date(`${selected}T${shift.startTime}`);
-        const shiftEnd = new Date(`${selected}T${shift.endTime}`);
-
-        // 3. Generate all slots
-        const slots = generateTimeSlots(
-          shiftStart,
-          shiftEnd,
-          Number(duration),
-          rule.bufferInMinutes,
-          baseDate
-        );
-
-        // 4. Fetch booked slots for that date
-        const bookedRes = await axios.get(
-          `https://appo.coinagesoft.com/api/customer-appointments/booked-slots/${selected}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        const bookedData = bookedRes.data?.data || [];
-
-        // Convert booked slots → Date
-        const bookedRanges = bookedData.map((b) => ({
-          start: parse12ToDate(b.startTime, baseDate),
-          end: parse12ToDate(b.endTime, baseDate),
-        }));
-
-        // 5. Filter booked
-        const finalSlots = slots.map((slot) => {
-          const isBooked = bookedRanges.some((b) =>
-            isOverlapping(slot.start, slot.end, b.start, b.end)
-          );
-          return { ...slot, isBooked };
-        });
-
-        setTimeSlots(finalSlots);
-      } catch (err) {
-        console.error("❌ Error fetching shift/slots:", err);
+      const rule = bufferRes.data.rules.find((r) => r.planId === planId);
+      if (!rule) {
         setTimeSlots([]);
+        return;
       }
-    };
 
-    fetchShiftAndGenerateSlots();
-  }, [selected, duration, planId]);
+      // 2. Get shifts for this admin via slug
+      const shiftRes = await axios.get(
+        `http://localhost:5000/api/public-landing/all-shifts/${slug}`,
+      );
+      const shift = shiftRes.data.data.find((s) => s.id === rule.shiftId);
+      if (!shift) {
+        setTimeSlots([]);
+        return;
+      }
+
+      const shiftStart = new Date(`${selected}T${shift.startTime}`);
+      const shiftEnd = new Date(`${selected}T${shift.endTime}`);
+
+      // 3. Generate all slots
+      const slots = generateTimeSlots(
+        shiftStart,
+        shiftEnd,
+        Number(duration),
+        rule.bufferInMinutes,
+        baseDate
+      );
+
+      // 4. Fetch booked slots for that date via slug
+     const bookedRes = await axios.get(
+  `http://localhost:5000/api/public-landing/booked-slots/${selected}?slug=${slug}`,
+);
+
+
+      const bookedData = bookedRes.data?.data || [];
+
+      // Convert booked slots → Date
+      const bookedRanges = bookedData.map((b) => ({
+        start: parse12ToDate(b.startTime, baseDate),
+        end: parse12ToDate(b.endTime, baseDate),
+      }));
+
+      // 5. Filter booked
+      const finalSlots = slots.map((slot) => {
+        const isBooked = bookedRanges.some((b) =>
+          isOverlapping(slot.start, slot.end, b.start, b.end)
+        );
+        return { ...slot, isBooked };
+      });
+
+      setTimeSlots(finalSlots);
+    } catch (err) {
+      console.error("❌ Error fetching shift/slots:", err);
+      setTimeSlots([]);
+    }
+  };
+
+  fetchShiftAndGenerateSlots();
+}, [selected, duration, planId]);
 
   return (
     <div className="mx-auto mt-5 mt-sm-0" style={{ maxWidth: "35rem" }}>

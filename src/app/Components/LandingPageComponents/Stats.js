@@ -14,13 +14,23 @@ const Stats = () => {
     'bi-emoji-smile-fill'
   ];
 
-  useEffect(() => {
-    axios.get('https://appointify.coinagesoft.com/api/Stat')
-      .then(response => {
-        setStats(response.data);
-      })
-      .catch(error => console.error('Error fetching stats:', error));
-  }, []);
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
+      const res = await axios.get(`http://localhost:5000/api/public-landing/all-stats/${slug}`);
+      console.log(res.data)
+      setStats(res.data.data || []); // ensure it's always an array
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setStats([]); // fallback
+    }
+  };
+
+  fetchStats();
+}, []);
+
 
   return (
     <div className="rounded-2 mx-3 mx-lg-10">

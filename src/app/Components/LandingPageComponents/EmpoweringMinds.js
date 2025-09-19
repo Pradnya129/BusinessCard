@@ -9,36 +9,40 @@ const EmpoweringMinds = () => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
-        if (!response.ok) throw new Error("Failed to fetch consultant data");
+  const fetchData = async () => {
+    try {
+      // ✅ Extract slug from URL path (/landing/pradnya → "pradnya")
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
 
-        const result = await response.json();
-        const data = result.data;
+      // ✅ Use slug API
+      const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+      if (!response.ok) throw new Error("Failed to fetch consultant data");
 
-        // Split the long description string into array of paragraphs
-        const rawDescription = data.section3_Description || '';
-        const formattedDescription = rawDescription
-          .split("',") // You can change this if needed to '\n' or a custom delimiter
-          .map(s => s.replace(/^'/, '').trim())
-          .filter(line => line.length > 0);
+      const result = await response.json();
+      const data = result.data;
 
-        // Update state with formatted data
-        setConsultantInfo({
-          section3_Tagline: data.section3_Tagline || '',
-          section3_Description: formattedDescription,
-          section3_Image: data.section3_Image || ''
-        });
-      } catch (error) {
-        console.error("Error fetching consultant data:", error);
-      }
-    };
+      // ✅ Split description into array of paragraphs
+      const rawDescription = data?.section3_Description || "";
+      const formattedDescription = rawDescription
+        .split("',") // change to "\n" if your backend sends newlines instead
+        .map(s => s.replace(/^'/, "").trim())
+        .filter(line => line.length > 0);
 
-    fetchData();
-  }, []);
+      // ✅ Update state
+      setConsultantInfo({
+        section3_Tagline: data?.section3_Tagline || "",
+        section3_Description: formattedDescription,
+        section3_Image: data?.section3_Image || ""
+      });
+    } catch (error) {
+      console.error("Error fetching consultant data:", error);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   return (
     <div className="container bg-grey py-5  px-3 px-md-4 px-lg-5">

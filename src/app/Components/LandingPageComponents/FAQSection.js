@@ -11,22 +11,28 @@ const FAQSection = () => {
   const [error, setError] = useState(null);
   const API_BASE = `https://appointify.coinagesoft.com/api/Faq`;
 
-  useEffect(() => {
-    const fetchFAQs = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('https://appo.coinagesoft.com/api/admin/faq');
-        setFaqs(response.data.data || []);
-      } catch (err) {
-        console.error('Error fetching FAQs:', err);
-        setError('Failed to load FAQs. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  const fetchFAQs = async () => {
+    try {
+      setLoading(true);
 
-    fetchFAQs();
-  }, []);
+      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
+
+      const response = await axios.get(`http://localhost:5000/api/public-landing/all-faqs/${slug}`);
+      setFaqs(response.data.data || []);
+    } catch (err) {
+      console.error('Error fetching FAQs:', err);
+      setError('Failed to load FAQs. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchFAQs();
+}, []);
+
 
   // Split FAQs into two columns
   const midIndex = Math.ceil(faqs.length / 2);

@@ -16,23 +16,29 @@ const Hero = ({ scrollToSectionHeader }) => {
   const [taglines, setTaglines] = useState([]);
   Swiper.use([Pagination, Thumbs, EffectFade, Autoplay]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
-        if (!response.ok) throw new Error("Failed to fetch consultant data");
-        const result = await response.json();
-        const data = result.data;
-        setConsultantData(data);
-        setTaglines([data.tagline1, data.tagline2, data.tagline3]);
-      } catch (error) {
-        console.error("Error fetching consultant data:", error);
-      }
-    };
-    fetchData();
-  }, []);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1]; 
+
+      // ✅ Call slug-based API
+      const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+      if (!response.ok) throw new Error("Failed to fetch consultant data");
+
+      const result = await response.json();
+      const data = result.data;
+
+      setConsultantData(data);
+      setTaglines([data?.tagline1, data?.tagline2, data?.tagline3]);
+    } catch (error) {
+      console.error("Error fetching consultant data:", error);
+    }
+  };
+
+  fetchData();
+}, []);
 
   useEffect(() => {
     const loadImage = (path) => {

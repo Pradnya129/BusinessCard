@@ -10,22 +10,29 @@ const API_URL = process.env.REACT_APP_API_URL;
 const Header = () => {
   const [ConsultantData, setConsultantData] = useState({});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
-        if (!response.ok) throw new Error("Failed to fetch consultant data");
-        const result = await response.json();
-        const data = result.data;
-        setConsultantData(data);
-      } catch (error) {
-        console.error("Error fetching consultant data:", error);
-      }
-    };
-    fetchData();
-  }, []);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // ✅ Get slug directly from the pathname (e.g. /landing/pradnya)
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1]; // "pradnya"
+
+      // ✅ Call your new slug-based API
+      const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+      if (!response.ok) throw new Error("Failed to fetch landing page data");
+
+      const result = await response.json();
+      console.log("Landing Page Data:", result.data);
+
+      setConsultantData(result.data || {});
+    } catch (error) {
+      console.error("Error fetching landing page data:", error);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   return (
     <header id="header" className="navbar navbar-expand-lg navbar-end bg-transparent position-absolute top-0 w-100 z-3 mt-3">

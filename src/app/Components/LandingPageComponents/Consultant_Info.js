@@ -5,20 +5,23 @@ import './Consultant_Info.css';
 const Consultant_Info = () => {
   const [consultantData, setConsultantData] = useState({});
 
-  useEffect(() => {
+ useEffect(() => {
     const fetchData = async () => {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
+        // Get slug from URL path
+        const path = window.location.pathname; // e.g., "/pradnya"
+        const slug = path.split('/').filter(Boolean)[0]; // get first segment
 
-        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
-        if (!response.ok) throw new Error("Failed to fetch consultant data");
+        if (!slug) throw new Error("Slug not found in URL");
+
+        const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+        if (!response.ok) throw new Error("Failed to fetch landing page data");
 
         const result = await response.json();
-        console.log("Consultant Info:", result.data);
+        console.log("Landing Page Data:", result.data);
         setConsultantData(result.data || {});
       } catch (error) {
-        console.error("Error fetching consultant data:", error);
+        console.error("Error fetching landing page data:", error);
       }
     };
 

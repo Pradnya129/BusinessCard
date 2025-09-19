@@ -15,53 +15,53 @@ const Plans = React.forwardRef((props, ref) => {
   const [plans, setPlans] = useState([]);
   const [shifts, setShifts] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
-        const data = res.data.data;
-        setFormData({
-          tagline: data.section5_Tagline || '',
-          mainDescription: data.section5_MainDescription || '',
-          mainHeading: data.section5_MainHeading || '',
-        });
-      } catch (error) {
-        console.error("Error fetching landing data:", error);
-      }
-    };
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // ✅ Get slug from URL path (e.g., /landing/pradnya → "pradnya")
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
 
-    const fetchPlans = async () => {
-      const token = localStorage.getItem('token');
-      try {
-        const [plansRes, shiftsRes] = await Promise.all([
-          fetch('https://appo.coinagesoft.com/api/admin/plans/all', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch('https://appo.coinagesoft.com/api/admin/shift', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+      const res = await axios.get(`http://localhost:5000/api/public-landing/${slug}`);
+      const data = res.data.data;
 
-        if (!plansRes.ok) throw new Error('Failed to fetch plans');
-        if (!shiftsRes.ok) throw new Error('Failed to fetch shifts');
+      setFormData({
+        tagline: data.section5_Tagline || '',
+        mainDescription: data.section5_MainDescription || '',
+        mainHeading: data.section5_MainHeading || '',
+      });
+    } catch (error) {
+      console.error("Error fetching landing data:", error);
+    }
+  };
 
-        const plansData = await plansRes.json();
-        const shiftsData = await shiftsRes.json();
+  const fetchPlans = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      // ✅ Use slug to fetch plans/shifts for public landing if needed
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1];
 
-        setPlans(plansData);
-        setShifts(shiftsData);
-      } catch (error) {
-        console.error('Error fetching plans or shifts:', error);
-        setPlans([]);
-        setShifts([]);
-      }
-    };
+      const [plansRes, shiftsRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/public-landing/all/${slug}`, {
+        }),
+        axios.get(`http://localhost:5000/api/public-landing/all-shifts/${slug}`, {
+        }),
+      ]);
 
-    fetchData();
-    fetchPlans();
-  }, []);
+      setPlans(plansRes.data.data || []);
+      setShifts(shiftsRes.data.data || []);
+    } catch (error) {
+      console.error('Error fetching plans or shifts:', error);
+      setPlans([]);
+      setShifts([]);
+    }
+  };
+
+  fetchData();
+  fetchPlans();
+}, []);
+
 
   return (
     <div className="overflow-hidden">

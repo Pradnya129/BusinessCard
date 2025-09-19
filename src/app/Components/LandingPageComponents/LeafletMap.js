@@ -4,26 +4,28 @@ import axios from 'axios';
 const LeafletMap = () => {
   const [iframeUrl, setIframeUrl] = useState('');
 
-  useEffect(() => {
-    const fetchIframeUrl = async () => {
-      try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const adminId = urlParams.get('adminId') || '67adc6aa-6fac-4c37-9f00-632bf483b916';
-        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
-        console.log("res iframeurl", res.data.data.locationIframeURL);
+useEffect(() => {
+  const fetchIframeUrl = async () => {
+    try {
+      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
+      const pathParts = window.location.pathname.split("/");
+      const slug = pathParts[pathParts.length - 1]; 
 
-        if (res.data.data?.locationIframeURL) {
-          setIframeUrl(res.data.data.locationIframeURL);
-        } else {
-          console.warn("No iframe URL found in response");
-        }
-      } catch (err) {
-        console.error('Error loading map:', err);
+      const res = await axios.get(`http://localhost:5000/api/public-landing/${slug}`);
+      console.log("res iframeurl", res.data.data.locationIframeURL);
+
+      if (res.data.data?.locationIframeURL) {
+        setIframeUrl(res.data.data.locationIframeURL);
+      } else {
+        console.warn("No iframe URL found in response");
       }
-    };
+    } catch (err) {
+      console.error('Error loading map:', err);
+    }
+  };
 
-    fetchIframeUrl();
-  }, []);
+  fetchIframeUrl();
+}, []);
 
   if (!iframeUrl) return null;
 
