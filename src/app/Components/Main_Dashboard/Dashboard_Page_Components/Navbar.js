@@ -31,7 +31,7 @@ const handleSaveSlug = async () => {
     console.log("Sending payload:", payload);
 
     const response = await axios.put(
-      "http://localhost:5000/api/admin/edit-slug",
+      "https://appo.coinagesoft.com/api/admin/edit-slug",
       payload,
       {
         headers: {
@@ -95,7 +95,7 @@ const handleSaveSlug = async () => {
 
   // Fetch slug by adminId
   axios
-    .get(`http://localhost:5000/api/admin/slugbyAdminId/${adminId}`, {
+    .get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((res) => {

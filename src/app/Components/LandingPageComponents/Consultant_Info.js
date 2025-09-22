@@ -14,7 +14,7 @@ const Consultant_Info = () => {
       
         if (!slug) throw new Error("Slug not found in URL");
 
-        const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
         if (!response.ok) throw new Error("Failed to fetch landing page data");
 
         const result = await response.json();

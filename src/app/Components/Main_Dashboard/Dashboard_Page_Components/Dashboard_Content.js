@@ -40,7 +40,7 @@ const Dashboard_Content = () => {
 
   // --- FETCH ADMIN SLUG ---
  // Example: fetch admin data using slug from query param
-axios.get(`http://localhost:5000/api/admin/slugbyAdminId/${adminId}`, {
+axios.get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
 })
 .then((res) => {
   // res.data contains the admin info for this slug
@@ -197,7 +197,7 @@ const handleSaveSlug = async () => {
   try {
     // Use edit-slug endpoint for updating
     const response = await axios.put(
-      "http://localhost:5000/api/admin/edit-slug",
+      "https://appo.coinagesoft.com/api/admin/edit-slug",
       {
         adminId,
         slug, // new slug value

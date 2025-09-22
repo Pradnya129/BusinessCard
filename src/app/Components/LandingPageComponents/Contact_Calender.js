@@ -25,7 +25,7 @@ useEffect(() => {
     const slug = pathParts[pathParts.length - 1];
 
     try {
-      const res = await fetch(`http://localhost:5000/api/public-landing/all/${slug}`, {
+      const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/all/${slug}`, {
       });
       const obj = await res.json();
       const data = obj.data
@@ -211,7 +211,7 @@ const handleSubmit = async (e) => {
 
     console.log("📤 Sending appointment payload:", payload);
 
-    const response = await fetch(`http://localhost:5000/api/public-landing/paid`, {
+    const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -357,9 +357,9 @@ useEffect(() => {
 
   // fetch appointments + rules + shifts using slug
   Promise.all([
-    axios.get(`http://localhost:5000/api/public-landing/customer-appointments?slug=${slug}`),
-    axios.get(`http://localhost:5000/api/public-landing/all-rules/${slug}`),
-    axios.get(`http://localhost:5000/api/public-landing/all-shifts/${slug}`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments?slug=${slug}`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules/${slug}`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts/${slug}`),
   ])
     .then(([appointmentsRes, rulesRes, shiftsRes]) => {
       const appointments = appointmentsRes.data?.data || [];

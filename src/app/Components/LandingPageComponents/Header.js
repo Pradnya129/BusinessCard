@@ -18,7 +18,7 @@ useEffect(() => {
       const slug = pathParts[pathParts.length - 1]; // "pradnya"
 
       // ✅ Call your new slug-based API
-      const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
       if (!response.ok) throw new Error("Failed to fetch landing page data");
 
       const result = await response.json();

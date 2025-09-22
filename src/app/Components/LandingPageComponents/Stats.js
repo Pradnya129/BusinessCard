@@ -19,7 +19,7 @@ useEffect(() => {
     try {
       const pathParts = window.location.pathname.split("/");
       const slug = pathParts[pathParts.length - 1];
-      const res = await axios.get(`http://localhost:5000/api/public-landing/all-stats/${slug}`);
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-stats/${slug}`);
       console.log(res.data)
       setStats(res.data.data || []); // ensure it's always an array
     } catch (err) {

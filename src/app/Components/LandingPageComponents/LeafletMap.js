@@ -11,7 +11,7 @@ useEffect(() => {
       const pathParts = window.location.pathname.split("/");
       const slug = pathParts[pathParts.length - 1]; 
 
-      const res = await axios.get(`http://localhost:5000/api/public-landing/${slug}`);
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
       console.log("res iframeurl", res.data.data.locationIframeURL);
 
       if (res.data.data?.locationIframeURL) {

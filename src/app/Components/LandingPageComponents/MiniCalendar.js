@@ -78,7 +78,7 @@ useEffect(() => {
 
       // 1. Get plan-shift-buffer for this admin via slug
       const bufferRes = await axios.get(
-        `http://localhost:5000/api/public-landing/all-rules/${slug}`,
+        `https://appo.coinagesoft.com/api/public-landing/all-rules/${slug}`,
       );
 
       const rule = bufferRes.data.rules.find((r) => r.planId === planId);
@@ -89,7 +89,7 @@ useEffect(() => {
 
       // 2. Get shifts for this admin via slug
       const shiftRes = await axios.get(
-        `http://localhost:5000/api/public-landing/all-shifts/${slug}`,
+        `https://appo.coinagesoft.com/api/public-landing/all-shifts/${slug}`,
       );
       const shift = shiftRes.data.data.find((s) => s.id === rule.shiftId);
       if (!shift) {

@@ -4,7 +4,7 @@ export default async function Home({ params }) {
   const { slug } = params; // get slug from URL
 
   // Fetch admin from backend
-  const res = await fetch(`http://localhost:5000/api/admin/slug?slug=${slug}`, {
+  const res = await fetch(`https://appo.coinagesoft.com/api/admin/slug?slug=${slug}`, {
     cache: 'no-store',
   });
 

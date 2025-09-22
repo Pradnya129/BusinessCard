@@ -16,7 +16,7 @@ const EmpoweringMinds = () => {
       const slug = pathParts[pathParts.length - 1];
  
       // ✅ Use slug API
-      const response = await fetch(`http://localhost:5000/api/public-landing/${slug}`);
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();

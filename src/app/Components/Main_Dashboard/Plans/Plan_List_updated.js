@@ -26,24 +26,42 @@ const Plan_List = () => {
   const [errors, setErrors] = useState({});
   const editorRef = useRef(null);
 
-  // 🔹 Fetch plans + shifts
+  // 🔹 Fetch plans + shifts with admin filtering
   const fetchPlans = async () => {
     const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
-      const decoded = jwtDecode(token);
-      const adminId = decoded?.id || decoded?.adminId;
+      // Decode token to get admin ID
+      const decodedToken = jwtDecode(token);
+      const adminId = decodedToken.adminId || decodedToken.id;
 
-      const [plansRes, shiftsRes] = await Promise.all([
-        api.getPlansWithUsers(),
-        api.getShifts(),
-      ]);
+      // Fetch plans from the new API endpoint
+      const plansRes = await fetch("https://appo.coinagesoft.com/api/admin/plans/all", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
 
-      const filteredPlans = plansRes.data.filter(
-        (plan) => plan.adminId === adminId
-      );
+      if (!plansRes.ok) {
+        throw new Error(`HTTP error! status: ${plansRes.status}`);
+      }
+
+      const plansResult = await plansRes.json();
+      const allPlansData = plansResult.data || [];
+
+      // Filter plans by admin ID
+      const filteredPlans = allPlansData.filter(plan => plan.adminId === adminId);
+
+      // Fetch shifts using existing API
+      const shiftsRes = await api.getShifts();
       const shiftData = shiftsRes;
+
       setShiftList(shiftData);
 
+      // Fetch buffer rules & assign shiftId to plans
       const bufferMap = {};
       const updatedPlans = await Promise.all(
         filteredPlans.map(async (plan) => {
@@ -55,12 +73,9 @@ const Plan_List = () => {
 
             bufferMap[plan.planId] = bufferRes.data.bufferInMinutes ?? 0;
 
+            // Assign shiftId and bufferRuleId from buffer rule if exists
             if (bufferRes.data.shiftId) {
-              return {
-                ...plan,
-                shiftId: bufferRes.data.shiftId,
-                bufferRuleId: bufferRes.data.id,
-              };
+              return { ...plan, shiftId: bufferRes.data.shiftId, bufferRuleId: bufferRes.data.id };
             }
             return { ...plan, bufferRuleId: null };
           } catch {
@@ -88,12 +103,9 @@ const Plan_List = () => {
     const fetchUsers = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch(
-          "https://appo.coinagesoft.com/api/admin/all_user",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await fetch("https://appo.coinagesoft.com/api/admin/all_user", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         if (res.ok) {
           const result = await res.json();
           // 👇 store only the array
@@ -111,12 +123,8 @@ const Plan_List = () => {
 
   const handleAssign = (plan) => {
     setAssigningPlan(plan);
-    setSelectedUsers(
-      plan.UserPlans ? plan.UserPlans.map((up) => up.User.id) : []
-    );
-    const modal = new window.bootstrap.Modal(
-      document.getElementById("assignModal")
-    );
+    setSelectedUsers(plan.UserPlans ? plan.UserPlans.map(up => up.User.id) : []);
+    const modal = new window.bootstrap.Modal(document.getElementById("assignModal"));
     modal.show();
   };
 
@@ -124,21 +132,18 @@ const Plan_List = () => {
     if (!assigningPlan) return;
     const token = localStorage.getItem("token");
     try {
-      await fetch(
-        "https://appo.coinagesoft.com/api/admin/plans/assign-plan-to-user",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            planId: assigningPlan.planId,
-            planShiftBufferRuleId: assigningPlan.bufferRuleId,
-            userIds: selectedUsers,
-          }),
-        }
-      );
+      await fetch("https://appo.coinagesoft.com/api/admin/plans/assign-plan-to-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          planId: assigningPlan.planId,
+          planShiftBufferRuleId: assigningPlan.bufferRuleId,
+          userIds: selectedUsers,
+        }),
+      });
       alert("Plan assigned successfully!");
       await fetchPlans();
       const modal = window.bootstrap.Modal.getInstance(
@@ -226,15 +231,10 @@ const Plan_List = () => {
     }
   };
 
-  // 🔹 Unassign user from plan
+  // 🔹 Unassign user from plan - Updated API endpoint
   const handleUnassign = async (userId) => {
-    if (!confirm("Are you sure you want to unassign this user from the plan?"))
-      return;
+    if (!confirm("Are you sure you want to unassign this user from the plan?")) return;
     const token = localStorage.getItem("token");
-
-    console.log("Unassigning user:", userId);
-    console.log("Token:", token);
-
     try {
       const response = await fetch(
         `https://appo.coinagesoft.com/api/admin/plans/unassign/${userId}`,
@@ -243,15 +243,11 @@ const Plan_List = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       if (response.ok) {
-        const data = await response.json();
-        alert(data.message || "User unassigned successfully!");
+        alert("User unassigned successfully!");
         await fetchPlans();
       } else {
-        const errorText = await response.text();
-        console.error("Unassign failed:", errorText);
-        alert("Failed to unassign user.\n" + errorText);
+        alert("Failed to unassign user.");
       }
     } catch (error) {
       console.error("Error unassigning user:", error);
@@ -324,17 +320,14 @@ const Plan_List = () => {
 
     try {
       // 🔹 Update Plan
-      await fetch(
-        `https://appo.coinagesoft.com/api/admin/plans/${plan.planId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(updatedPlan),
-        }
-      );
+      await fetch(`https://appo.coinagesoft.com/api/admin/plans/${plan.planId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedPlan),
+      });
 
       // 🔹 Update buffer
       const ruleRes = await axios.get(
@@ -360,21 +353,18 @@ const Plan_List = () => {
         );
       } else {
         // POST new buffer rule
-        await fetch(
-          `https://appo.coinagesoft.com/C:\Users\ASUS\Desktop\github clone\appointify\NewAppointify_MultiUser_Frontend\src\app\Components\Main_Dashboard\Plans\Plan_List.jsplan-shift-buffer-rule/add`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              planId: plan.planId,
-              shiftId: editedPlan.shiftId,
-              bufferInMinutes: Number(bufferInMinutes),
-            }),
-          }
-        );
+        await fetch(`https://appo.coinagesoft.com/api/plan-shift-buffer-rule/add`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            planId: plan.planId,
+            shiftId: editedPlan.shiftId,
+            bufferInMinutes: Number(bufferInMinutes),
+          }),
+        });
       }
 
       // 🔹 Update UI immediately
@@ -460,14 +450,11 @@ const Plan_List = () => {
                   <ul>
                     {plan.UserPlans && plan.UserPlans.length > 0 ? (
                       plan.UserPlans.map((up) => (
-                        <li
-                          key={up.id}
-                          className="d-flex justify-content-between align-items-center"
-                        >
+                        <li key={up.id} className="d-flex justify-content-between align-items-center">
                           {up.User.name} ({up.User.email})
                           <button
                             className="btn btn-sm btn-danger ms-2"
-                            onClick={() => handleUnassign(up.id)} // ✅ Fix is here
+                            onClick={() => handleUnassign(up.User.id)}
                           >
                             Unassign
                           </button>
