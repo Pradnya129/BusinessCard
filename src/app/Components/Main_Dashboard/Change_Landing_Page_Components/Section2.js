@@ -34,7 +34,11 @@ const Section2 = () => {
     const adminId = decoded.id;
 
     try {
-      const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
+      const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+  headers: {
+    "Authorization": `Bearer ${token}` // <-- Add this line
+  }
+});
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();

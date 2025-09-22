@@ -28,7 +28,11 @@ const Section5 = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
+        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+  headers: {
+    "Authorization": `Bearer ${token}` // <-- Add this line
+  },
+});
         const data = res.data.data;
 
         const mappedData = {

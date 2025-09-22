@@ -47,7 +47,15 @@ useEffect(() => {
       const decoded = jwtDecode(token);
       const adminId = decoded.id;
 
-      const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`);
+
+const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+  headers: {
+    "Authorization": `Bearer ${token}` // <-- Add this line
+  },
+});
+
+const data = await response.json();
+console.log(data);
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();

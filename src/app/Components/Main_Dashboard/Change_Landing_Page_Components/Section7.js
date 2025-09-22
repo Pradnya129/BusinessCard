@@ -21,7 +21,11 @@ const fetchIframeUrl = async () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`);
+    const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}` ,{
+  headers: {
+    "Authorization": `Bearer ${token}` // <-- Add this line
+  },
+});
     const data = res.data.data;
 
     setLandingId(data.id); // ✅ store landing page ID

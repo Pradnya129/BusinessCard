@@ -27,7 +27,11 @@ const Section3 = () => {
         const decoded = jwtDecode(token);
         const adminId = decoded.id;
 
-        const response = await fetch(`${API_URL}/api/landing/${adminId}`);
+        const response = await fetch(`${API_URL}/api/landing/${adminId}`, {
+  headers: {
+    "Authorization": `Bearer ${token}` // <-- Add this line
+  },
+});
         const data = await response.json();
 
         if (data && data.data) {
