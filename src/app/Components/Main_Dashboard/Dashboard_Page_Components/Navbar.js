@@ -21,43 +21,42 @@ const Navbar = ({ onToggleSidebar }) => {
     setTempSlug(slug);
     setEditingSlug(true);
   };
-
 const handleSaveSlug = async () => {
-  if (!user.id) return;
-
   try {
     const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace("/"); // fallback to login
-      return;
-    }
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
 
-    const apiUrl = slug
-      ? "http://localhost:5000/api/admin/edit-slug"    // edit
-      : "http://localhost:5000/api/admin/create-slug"; // create
+    const payload = { adminId, slug: tempSlug };
+    console.log("Sending payload:", payload);
 
-    const response = await axios({
-      method: slug ? "PUT" : "POST",
-      url: apiUrl,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      data: {
-        adminId: user.id,
-        slug: tempSlug,
-      },
-    });
+    const response = await axios.put(
+      "http://localhost:5000/api/admin/edit-slug",
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    console.log(`${slug ? "Updated" : "Created"} slug:`, response.data);
+    console.log("✅ Slug updated:", response.data);
+
     setSlug(tempSlug);
     setEditingSlug(false);
 
-  } catch (err) {
-    console.error("Error saving slug:", err.response?.data || err.message);
-    alert("Failed to save slug. Please try again.");
+    // ✅ show success message
+    alert("Slug updated successfully ✅");
+  } catch (error) {
+    console.error("❌ Error updating slug:", error.response?.data || error);
+    alert("Failed to update slug ❌");
   }
 };
+
+
+
+
+
 
 
 
@@ -71,28 +70,42 @@ const handleSaveSlug = async () => {
     import("../../../../../public/materialize/assets/js/ui-menu.js");
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.replace("/"); // or your login page
-      return;
-    }
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+ useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    router.replace("/"); // redirect to login if no token
+    return;
+  }
 
-    axios
-      .get(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        const data = res.data.data;
-        if (data) {
-          setUser(data);
-          if (data.slug) setSlug(data.slug);
-        }
-      })
-      .catch((err) => console.error("Error fetching profile:", err));
-  }, [router]);
+  const decoded = jwtDecode(token);
+  const adminId = decoded.id;
+
+  // Fetch profile
+  axios
+    .get(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      const data = res.data.data;
+      if (data) {
+        setUser(data);
+      }
+    })
+    .catch((err) => console.error("Error fetching profile:", err));
+
+  // Fetch slug by adminId
+  axios
+    .get(`http://localhost:5000/api/admin/slugbyAdminId/${adminId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data && res.data.slug) {
+        setSlug(res.data.slug);
+      }
+    })
+    .catch((err) => console.error("Error fetching slug:", err));
+}, [router]);
+
 
   return (
     <div>

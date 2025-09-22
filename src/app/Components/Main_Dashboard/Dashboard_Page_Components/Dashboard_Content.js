@@ -223,7 +223,7 @@ const handleSaveSlug = async () => {
 
         {/* Slug Input */}
         <div className="d-flex justify-content-end align-items-center mb-3">
-          <div className="input-group" style={{ maxWidth: "300px" }}>
+          {/* <div className="input-group" style={{ maxWidth: "300px" }}>
             <input
               type="text"
               className="form-control"
@@ -238,7 +238,7 @@ const handleSaveSlug = async () => {
             >
               {isSaving ? "Saving..." : "Save"}
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Widgets */}
