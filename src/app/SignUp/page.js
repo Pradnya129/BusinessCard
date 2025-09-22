@@ -185,15 +185,16 @@ const Page = () => {
           </div>
         </form>
 
-        <p className="text-center mt-4">
-          <a
-            href="/Login"
-            className="text-decoration-none ms-1 fw-bold"
-            style={{ color: "rgb(38, 43, 67)" }}
-          >
-            Log in
-          </a>
-        </p>
+       <p className="text-center mt-4">
+  <Link
+    href="/Login"
+    className="text-decoration-none ms-1 fw-bold"
+    style={{ color: "rgb(38, 43, 67)" }}
+  >
+    Log in
+  </Link>
+</p>
+
 
         <div className="divider text-center my-4 position-relative">
           <hr />

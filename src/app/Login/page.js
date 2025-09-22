@@ -95,9 +95,10 @@ const Page = () => {
                     <input className="form-check-input" type="checkbox" id="remember-me" />
                     <label className="form-check-label" htmlFor="remember-me"> Remember Me </label>
                   </div>
-                  <a href="/ForgotPassword" className="float-end mb-1 mt-2">
-                    <span>Forgot Password?</span>
-                  </a>
+                 <Link href="/ForgotPassword" className="float-end mb-1 mt-2">
+  Forgot Password?
+</Link>
+
                 </div>
 
                 {/* Login Button */}
