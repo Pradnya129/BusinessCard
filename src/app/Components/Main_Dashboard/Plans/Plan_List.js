@@ -27,58 +27,69 @@ const Plan_List = () => {
   const editorRef = useRef(null);
 
   // 🔹 Fetch plans + shifts
-  const fetchPlans = async () => {
-    const token = localStorage.getItem("token");
-    try {
-      const decoded = jwtDecode(token);
-      const adminId = decoded?.id || decoded?.adminId;
+const API_BASE = process.env.REACT_APP_API_URL || 'https://appo.coinagesoft.com/api';
 
-      const [plansRes, shiftsRes] = await Promise.all([
-        api.getPlansWithUsers(),
-        api.getShifts(),
-      ]);
+const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-      const filteredPlans = plansRes.data.filter(
-        (plan) => plan.adminId === adminId
-      );
-      const shiftData = shiftsRes;
-      setShiftList(shiftData);
+  try {
+    const decoded = jwtDecode(token);
+    const adminId = decoded?.id || decoded?.adminId;
 
-      const bufferMap = {};
-      const updatedPlans = await Promise.all(
-        filteredPlans.map(async (plan) => {
-          try {
-            const bufferRes = await axios.get(
-              `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/${plan.planId}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
+    // 🔹 Fetch all plans with users and all shifts in parallel
+    const [plansRes, shiftsRes] = await Promise.all([
+      axios.get(`${API_BASE}/admin/plans/all_plans_with_users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      axios.get(`${API_BASE}/admin/shift`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
 
-            bufferMap[plan.planId] = bufferRes.data.bufferInMinutes ?? 0;
+    const shiftData = Array.isArray(shiftsRes.data) ? shiftsRes.data : [];
+    setShiftList(shiftData);
 
-            if (bufferRes.data.shiftId) {
-              return {
-                ...plan,
-                shiftId: bufferRes.data.shiftId,
-                bufferRuleId: bufferRes.data.id,
-              };
-            }
-            return { ...plan, bufferRuleId: null };
-          } catch {
-            bufferMap[plan.planId] = 0;
-            return plan;
-          }
-        })
-      );
+    const allPlans = (plansRes.data?.data) || [];
+    const filteredPlans = allPlans.filter(plan => plan.adminId === adminId);
 
-      setPlans(updatedPlans);
-      setBufferRules(bufferMap);
-    } catch (error) {
-      console.error("Error fetching:", error);
-      setPlans([]);
-      setShiftList([]);
-      setBufferRules({});
-    }
-  };
+    // 🔹 Fetch buffer rules for each plan
+    const bufferMap = {};
+    const updatedPlans = await Promise.all(
+      filteredPlans.map(async (plan) => {
+        try {
+          const bufferRes = await axios.get(`${API_BASE}/plan-shift-buffer-rule/all`, {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { planId: plan.planId },
+          });
+
+          const rule = bufferRes.data?.rules?.[0] || {};
+          bufferMap[plan.planId] = rule.bufferInMinutes ?? 0;
+
+          return {
+            ...plan,
+            shiftId: rule.shiftId ?? null,
+            bufferRuleId: rule.id ?? null,
+          };
+        } catch (err) {
+          bufferMap[plan.planId] = 0;
+          return { ...plan, shiftId: null, bufferRuleId: null };
+        }
+      })
+    );
+
+    setPlans(updatedPlans);
+    setBufferRules(bufferMap);
+  } catch (err) {
+    console.error("Error fetching plans:", err);
+    setPlans([]);
+    setShiftList([]);
+    setBufferRules({});
+  }
+};
+
+
+
 
   useEffect(() => {
     fetchPlans();
@@ -361,7 +372,7 @@ const Plan_List = () => {
       } else {
         // POST new buffer rule
         await fetch(
-          `https://appo.coinagesoft.com/C:\Users\ASUS\Desktop\github clone\appointify\NewAppointify_MultiUser_Frontend\src\app\Components\Main_Dashboard\Plans\Plan_List.jsplan-shift-buffer-rule/add`,
+          `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/add`,
           {
             method: "POST",
             headers: {

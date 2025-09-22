@@ -1,8 +1,7 @@
-// src/components/ShiftManager.jsx
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
-import { api } from '../../../../api';
+import axios from 'axios';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './ShiftManager.css';
 
@@ -18,28 +17,30 @@ const ShiftManager = ({ planId }) => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const API_BASE = 'https://appo.coinagesoft.com/api';
+  const token = localStorage.getItem('token');
+  const axiosConfig = { headers: { Authorization: `Bearer ${token}` } };
+
   const hours = [...Array(12)].map((_, i) => (i + 1).toString().padStart(2, '0'));
   const mins = ['00', '15', '30', '45'];
 
   useEffect(() => {
-    const load = async () => {
+    const loadShifts = async () => {
       try {
-        const shiftData = await api.getShifts();
-        setShifts(Array.isArray(shiftData) ? shiftData : []);
-        if (!shiftData || (Array.isArray(shiftData) && shiftData.length === 0)) {
-          setMessage('No shifts found for this consultant.');
-        } else setMessage('');
+        const res = await axios.get(`${API_BASE}/admin/shift`, axiosConfig);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setShifts(data);
+        setMessage(data.length === 0 ? 'No shifts found for this consultant.' : '');
       } catch (err) {
         console.error(err);
         setError('Cannot load shifts');
       }
     };
-    load();
+    loadShifts();
   }, []);
 
   useEffect(() => {
     if (!selectedShift) return;
-    // selectedShift.startTime is "HH:mm:ss"
     const ps = parseTime(selectedShift.startTime);
     const pe = parseTime(selectedShift.endTime);
     setStartHour(ps.hour); setStartMinute(ps.minute); setStartPeriod(ps.period);
@@ -62,8 +63,7 @@ const ShiftManager = ({ planId }) => {
     if (p === 'PM' && hh < 12) hh += 12;
     if (p === 'AM' && hh === 12) hh = 0;
     const mm = m.toString().padStart(2, '0');
-    const hhStr = hh.toString().padStart(2, '0');
-    return `${hhStr}:${mm}:00`;
+    return `${hh.toString().padStart(2, '0')}:${mm}:00`;
   };
 
   const saveShift = async () => {
@@ -83,11 +83,10 @@ const ShiftManager = ({ planId }) => {
     const newStartMin = timeToMinutes(start);
     const newEndMin = timeToMinutes(end);
 
-    // check overlap
     const isOverlap = shifts.some(s => {
       if (selectedShift?.id && s.id === selectedShift.id) return false;
-      const existingStart = timeToMinutes(s.startTime.slice(0, 5));
-      const existingEnd = timeToMinutes(s.endTime.slice(0, 5));
+      const existingStart = timeToMinutes(s.startTime.slice(0,5));
+      const existingEnd = timeToMinutes(s.endTime.slice(0,5));
       return !(newEndMin <= existingStart || newStartMin >= existingEnd);
     });
     if (isOverlap) {
@@ -100,14 +99,14 @@ const ShiftManager = ({ planId }) => {
 
     try {
       if (selectedShift?.id) {
-        await api.updateShift(selectedShift.id, body);
+        await axios.put(`${API_BASE}/admin/shift/${selectedShift.id}`, body, axiosConfig);
       } else {
-        await api.createShift(body);
+        await axios.post(`${API_BASE}/admin/shift`, body, axiosConfig);
       }
       setMessage('Shift saved successfully');
       setError('');
-      const fresh = await api.getShifts();
-      setShifts(Array.isArray(fresh) ? fresh : []);
+      const fresh = await axios.get(`${API_BASE}/admin/shift`, axiosConfig);
+      setShifts(Array.isArray(fresh.data) ? fresh.data : []);
       setSelectedShift(null);
     } catch (err) {
       console.error(err);
@@ -118,7 +117,7 @@ const ShiftManager = ({ planId }) => {
   const handleDeleteShift = async (id) => {
     if (!window.confirm('Are you sure you want to delete this shift?')) return;
     try {
-      await api.deleteShift(id);
+      await axios.delete(`${API_BASE}/admin/shift/${id}`, axiosConfig);
       setShifts(prev => prev.filter(s => s.id !== id));
       setMessage('Shift deleted successfully');
       setError('');
