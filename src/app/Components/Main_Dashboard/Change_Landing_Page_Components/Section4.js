@@ -21,8 +21,8 @@ const ConsultantSection4 = () => {
         const response = await axios.get(`${API_URL}/api/admin/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
-        const apiStats = response.data.map(stat => ({
+console.log(response)
+        const apiStats = response.data.data.map(stat => ({
           ...stat,
           editedValue: stat.value.replace("%", ""),
           editedDescription: stat.description || "",

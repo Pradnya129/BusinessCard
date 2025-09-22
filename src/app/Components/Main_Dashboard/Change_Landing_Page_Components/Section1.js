@@ -54,8 +54,8 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
   },
 });
 
-const data = await response.json();
-console.log(data);
+// const data = await response.json();
+// console.log(data);
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();
@@ -148,7 +148,11 @@ console.log(data);
     const response = await axios.patch(
       `https://appo.coinagesoft.com/api/landing/${landingId}`,
       formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
+      { headers: {
+         "Content-Type": "multipart/form-data" ,
+          "Authorization": `Bearer ${token}` 
+
+      } }
     );
 
     if (response.data.success) {

@@ -136,7 +136,11 @@ const Section2 = () => {
       const response = await axios.patch(
         `https://appo.coinagesoft.com/api/landing/${landingId}`,
         updatedFormData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { headers: { 
+          "Content-Type": "multipart/form-data" ,
+           "Authorization": `Bearer ${token}` 
+
+        } }
       );
 
       if (response.status === 200) {
