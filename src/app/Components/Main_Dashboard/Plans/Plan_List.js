@@ -29,7 +29,7 @@ const Plan_List = () => {
   // 🔹 Fetch plans + shifts
 const API_BASE = process.env.REACT_APP_API_URL || 'https://appo.coinagesoft.com/api';
 
-const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
+const fetchPlans = async () => {
   const token = localStorage.getItem("token");
   if (!token) return;
 
@@ -37,49 +37,52 @@ const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
     const decoded = jwtDecode(token);
     const adminId = decoded?.id || decoded?.adminId;
 
-    // 🔹 Fetch all plans with users and all shifts in parallel
-    const [plansRes, shiftsRes] = await Promise.all([
+    // 1️⃣ Fetch plans + shifts + all buffer rules in parallel
+    const [plansRes, shiftsRes, bufferRes] = await Promise.all([
       axios.get(`${API_BASE}/admin/plans/all_plans_with_users`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
       axios.get(`${API_BASE}/admin/shift`, {
         headers: { Authorization: `Bearer ${token}` },
       }),
+      axios.get(`${API_BASE}/plan-shift-buffer-rule/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
     ]);
 
-    const shiftData = Array.isArray(shiftsRes.data) ? shiftsRes.data : [];
+    const shiftData = shiftsRes.data.data;
     setShiftList(shiftData);
 
-    const allPlans = (plansRes.data?.data) || [];
-    const filteredPlans = allPlans.filter(plan => plan.adminId === adminId);
+    const allPlans = plansRes.data?.data || [];
+    const filteredPlans = allPlans.filter((plan) => plan.adminId === adminId);
 
-    // 🔹 Fetch buffer rules for each plan
+    // 2️⃣ Map buffer rules for quick access
     const bufferMap = {};
-    const updatedPlans = await Promise.all(
-      filteredPlans.map(async (plan) => {
-        try {
-          const bufferRes = await axios.get(`${API_BASE}/plan-shift-buffer-rule/all`, {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { planId: plan.planId },
-          });
+    (bufferRes.data?.rules || []).forEach((rule) => {
+      bufferMap[rule.planId] = bufferMap[rule.planId] || [];
+      bufferMap[rule.planId].push(rule); // can have multiple shift buffers per plan
+    });
 
-          const rule = bufferRes.data?.rules?.[0] || {};
-          bufferMap[plan.planId] = rule.bufferInMinutes ?? 0;
-
-          return {
-            ...plan,
-            shiftId: rule.shiftId ?? null,
-            bufferRuleId: rule.id ?? null,
-          };
-        } catch (err) {
-          bufferMap[plan.planId] = 0;
-          return { ...plan, shiftId: null, bufferRuleId: null };
-        }
-      })
-    );
+    // 3️⃣ Attach buffer info to plans
+    const updatedPlans = filteredPlans.map((plan) => {
+      const planRules = bufferMap[plan.planId] || [];
+      return {
+        ...plan,
+        bufferRules: planRules, // store all rules for this plan
+        shiftId: planRules[0]?.shiftId ?? null, // default to first shift
+        bufferRuleId: planRules[0]?.id ?? null,
+      };
+    });
 
     setPlans(updatedPlans);
-    setBufferRules(bufferMap);
+    setBufferRules(
+      Object.fromEntries(
+        Object.entries(bufferMap).map(([planId, rules]) => [
+          planId,
+          rules[0]?.bufferInMinutes ?? 0,
+        ])
+      )
+    );
   } catch (err) {
     console.error("Error fetching plans:", err);
     setPlans([]);
@@ -87,6 +90,8 @@ const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
     setBufferRules({});
   }
 };
+
+
 
 
 
@@ -220,22 +225,28 @@ const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
   };
 
   // 🔹 Delete plan
-  const handleDelete = async (index) => {
-    const token = localStorage.getItem("token");
-    const planToDelete = plans[index];
-    try {
-      const response = await fetch(
-        `https://appo.coinagesoft.com/api/admin/plans/${planToDelete.planId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.ok) setPlans(plans.filter((_, i) => i !== index));
-    } catch (error) {
-      console.error("Error deleting plan:", error);
+const handleDelete = async (index) => {
+  const confirmDelete = window.confirm("Are you sure you want to delete this plan?");
+  if (!confirmDelete) return; // 🚫 cancel deletion
+
+  const token = localStorage.getItem("token");
+  const planToDelete = plans[index];
+  try {
+    const response = await fetch(
+      `https://appo.coinagesoft.com/api/admin/plans/${planToDelete.planId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    if (response.ok) {
+      setPlans(plans.filter((_, i) => i !== index));
     }
-  };
+  } catch (error) {
+    console.error("Error deleting plan:", error);
+  }
+};
+
 
   // 🔹 Unassign user from plan
   const handleUnassign = async (userId) => {
@@ -314,102 +325,98 @@ const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
   };
 
   // 🔹 Save changes
-  const handleSave = async () => {
-    if (!validateForm()) return;
-    const token = localStorage.getItem("token");
-    const plan = plans[editingIndex];
+const handleSave = async () => {
+  if (!validateForm()) return;
 
-    const featuresArray = Array.from(editorRef.current.querySelectorAll("li"))
-      .map((el) => el.innerText.trim())
-      .filter((t) => t.length > 0);
+  const token = localStorage.getItem("token");
+  const plan = plans[editingIndex];
 
-    const updatedPlan = {
-      planId: plan.planId,
-      planName: editedPlan.name,
-      planPrice: parseFloat(editedPlan.price) || 0,
-      planDuration: editedPlan.duration,
-      planDescription: editedPlan.description,
-      planFeatures: featuresArray,
+  // Prepare features array
+  const featuresArray = Array.from(editorRef.current.querySelectorAll("li"))
+    .map((el) => el.innerText.trim())
+    .filter((t) => t.length > 0);
+
+  // 🔹 Plan data (plans table)
+  const updatedPlan = {
+    planId: plan.planId,
+    planName: editedPlan.name,
+    planPrice: parseFloat(editedPlan.price) || 0,
+    planDuration: editedPlan.duration,
+    planDescription: editedPlan.description,
+    planFeatures: featuresArray,
+    assignedUsers: plan.UserPlans ? plan.UserPlans.map((up) => up.User.id) : [],
+  };
+
+  try {
+    // 1️⃣ Update plan in plans table
+    await fetch(`${API_BASE}/admin/plans/${plan.planId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updatedPlan),
+    });
+
+    // 2️⃣ Update shift & buffer in plan-shift-buffer-rule table
+    // Find existing buffer rule for this plan + shift
+    const existingRule = plan.bufferRules?.find(
+      (r) => r.shiftId === editedPlan.shiftId
+    );
+
+    const bufferPayload = {
       shiftId: editedPlan.shiftId,
+      bufferInMinutes: Number(bufferInMinutes),
+      planId: plan.planId,
     };
 
-    try {
-      // 🔹 Update Plan
-      await fetch(
-        `https://appo.coinagesoft.com/api/admin/plans/${plan.planId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(updatedPlan),
-        }
-      );
-
-      // 🔹 Update buffer
-      const ruleRes = await axios.get(
-        `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/${plan.planId}`,
+    if (existingRule) {
+      // PATCH existing buffer rule
+      await axios.patch(
+        `${API_BASE}/plan-shift-buffer-rule/${existingRule.id}`,
+        bufferPayload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (ruleRes.status === 200 && ruleRes.data) {
-        // PATCH existing buffer rule
-        await fetch(
-          `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/${ruleRes.data.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              shiftId: editedPlan.shiftId,
-              bufferInMinutes: Number(bufferInMinutes),
-            }),
-          }
-        );
-      } else {
-        // POST new buffer rule
-        await fetch(
-          `https://appo.coinagesoft.com/api/plan-shift-buffer-rule/add`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              planId: plan.planId,
-              shiftId: editedPlan.shiftId,
-              bufferInMinutes: Number(bufferInMinutes),
-            }),
-          }
-        );
-      }
-
-      // 🔹 Update UI immediately
-      const updatedPlans = [...plans];
-      updatedPlans[editingIndex] = {
-        ...updatedPlan,
-      };
-      setPlans(updatedPlans);
-
-      // 🔹 Update bufferRules state
-      setBufferRules((prev) => ({
-        ...prev,
-        [plan.planId]: Number(bufferInMinutes),
-      }));
-
-      setEditingIndex(null);
-      const modal = window.bootstrap.Modal.getInstance(
-        document.getElementById("editModal")
+    } else if (editedPlan.shiftId) {
+      // POST new buffer rule if shift selected
+      await axios.post(
+        `${API_BASE}/plan-shift-buffer-rule/add`,
+        bufferPayload,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      modal.hide();
-    } catch (err) {
-      console.error("Save failed:", err);
     }
-  };
+
+    // 3️⃣ Update UI immediately
+    const updatedPlans = [...plans];
+    updatedPlans[editingIndex] = {
+      ...updatedPlan,
+      shiftId: editedPlan.shiftId,
+      UserPlans: plan.UserPlans,
+      bufferRules: plan.bufferRules || [],
+    };
+    setPlans(updatedPlans);
+
+    // Update bufferRules map for UI
+    setBufferRules((prev) => ({
+      ...prev,
+      [plan.planId]: Number(bufferInMinutes),
+    }));
+
+    // Close modal
+    setEditingIndex(null);
+    const modal = window.bootstrap.Modal.getInstance(
+      document.getElementById("editModal")
+    );
+    modal.hide();
+
+    alert("Plan updated successfully!");
+  } catch (err) {
+    console.error("Save failed:", err);
+    alert("Failed to save plan. Check console for details.");
+  }
+};
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -424,93 +431,111 @@ const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
           <div>No plans available.</div>
         ) : (
           plans.map((plan, index) => (
-            <div
-              className="col-md mb-3 mb-md-0 col-lg-4 col-md-6 col-12 mt-4"
-              key={plan.planId}
+           <div className="col-lg-4 col-md-6 col-12 mt-4" key={plan.planId}>
+  <div className="card h-100 shadow-lg border-0 rounded-4">
+    {/* Header with duration */}
+    <div className="card-header bg-primary text-white text-center rounded-top-4">
+      <h5 className="mb-1">
+        <i className="fas fa-clock me-2"></i>
+        {plan.planDuration} min
+      </h5>
+      <span className="badge bg-light text-dark px-3 py-2">
+        {plan.planName}
+      </span>
+    </div>
+
+    {/* Card Body */}
+    <div className="card-body text-center">
+      <p className="text-muted small">{plan.planDescription}</p>
+
+      <h4 className="fw-bold text-success mb-3">
+        ₹{plan.planPrice}
+      </h4>
+
+      <h6 className="fw-semibold mb-2">Features:</h6>
+      <ul className="list-unstyled small text-start mx-auto" style={{maxWidth:"250px"}}>
+        {(Array.isArray(plan.planFeatures)
+          ? plan.planFeatures
+          : JSON.parse(plan.planFeatures || "[]")
+        ).map((f, i) => (
+          <li key={i}>
+            <i className="fas fa-check-circle text-success me-2"></i>
+            {f}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Shift & Buffer */}
+    <div className="card-body text-center pt-0">
+      <p className="mb-1">
+        <i className="fas fa-calendar-day me-2 text-primary"></i>
+        {plan.shiftId
+          ? shiftList.find((s) => String(s.id) === String(plan.shiftId))?.name ?? "None"
+          : "None"}
+      </p>
+      <p className="mb-0">
+        <i className="fas fa-hourglass-half me-2 text-warning"></i>
+        Buffer: {bufferRules[plan.planId] ?? "—"} min
+      </p>
+    </div>
+
+    {/* Assigned Users */}
+    <div className="card-body pt-0">
+      <p className="fw-semibold my-0">Assigned Users:</p>
+      <ul className="list-group list-group-flush">
+        {plan.UserPlans && plan.UserPlans.length > 0 ? (
+          plan.UserPlans.map((up) => (
+            <li
+              key={up.id}
+              className="list-group-item d-flex justify-content-between align-items-center"
             >
-              <div className="card h-100 shadow-sm border-0 rounded-4 px-0">
-                <div className="card-header text-center text-black">
-                  <div className="mb-2">
-                    <span className="fs-2 text-dark fw-semibold">
-                      {plan.planDuration}
-                      <span className="fs-5"> min</span>
-                    </span>
-                  </div>
-                  <h3 className="card-title fs-5 mt-1 lh-1">{plan.planName}</h3>
-                  <p className="card-text justify-start mt-2">
-                    {plan.planDescription}
-                  </p>
-                </div>
-                <div className="card-body d-flex flex-column align-items-center py-0">
-                  <h5 className="text-dark fw-bold mt-3">
-                    Price: ₹{plan.planPrice}
-                  </h5>
-                  <div className="text-black">
-                    <ul>
-                      {(Array.isArray(plan.planFeatures)
-                        ? plan.planFeatures
-                        : JSON.parse(plan.planFeatures || "[]")
-                      ).map((f, i) => (
-                        <li key={i}>{f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-                <div className="card-body d-flex flex-column align-items-center py-0">
-                  <p>
-                    {plan.shiftId
-                      ? shiftList.find(
-                          (s) => String(s.id) === String(plan.shiftId)
-                        )?.name ?? "None"
-                      : "None"}
-                  </p>
-                  <p>Buffer: {bufferRules[plan.planId] ?? "—"} min</p>
-                </div>
-                <div className="card-body d-flex flex-column align-items-center py-0">
-                  <p>Assigned Users:</p>
-                  <ul>
-                    {plan.UserPlans && plan.UserPlans.length > 0 ? (
-                      plan.UserPlans.map((up) => (
-                        <li
-                          key={up.id}
-                          className="d-flex justify-content-between align-items-center"
-                        >
-                          {up.User.name} ({up.User.email})
-                          <button
-                            className="btn btn-sm btn-danger ms-2"
-                            onClick={() => handleUnassign(up.id)} // ✅ Fix is here
-                          >
-                            Unassign
-                          </button>
-                        </li>
-                      ))
-                    ) : (
-                      <li>No users assigned</li>
-                    )}
-                  </ul>
-                </div>
-                <div className="card-footer text-center">
-                  <button
-                    className="btn btn-warning text-white me-2"
-                    onClick={() => handleEdit(index)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-info text-white me-2"
-                    onClick={() => handleAssign(plan)}
-                  >
-                    Assign User
-                  </button>
-                  <button
-                    className="btn btn-danger text-white"
-                    onClick={() => handleDelete(index)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
+              <span>
+                {up.User.name} ({up.User.email})
+              </span>
+            <button
+  className="btn btn-sm btn-outline-danger pe-3"
+  onClick={() => handleUnassign(up.id)}
+>
+ <i className="fas fa-user-minus me-1"></i> 
+
+</button>
+
+            </li>
+          ))
+        ) : (
+          <li className="list-group-item">No users assigned</li>
+        )}
+      </ul>
+    </div>
+
+{/* Footer Actions */}
+<div className="card-footer  rounded-bottom-4 d-flex justify-content-between flex-wrap mt-3 gap-2">
+  <button
+    className="btn btn-warning text-white flex-grow-1 shadow-sm"
+    onClick={() => handleEdit(index)}
+  >
+    <i className="fas fa-edit me-1"></i>
+  </button>
+  <button
+    className="btn btn-info text-white flex-grow-1 shadow-sm"
+    onClick={() => handleAssign(plan)}
+  >
+    <i className="fas fa-user-plus me-1"></i>
+  </button>
+  <button
+    className="btn btn-danger text-white flex-grow-1 shadow-sm"
+    onClick={() => handleDelete(index)}
+  >
+    <i className="fas fa-trash-alt me-1"></i>
+  </button>
+</div>
+
+
+
+  </div>
+</div>
+
           ))
         )}
       </div>
@@ -708,7 +733,7 @@ const fetchPlans = async (setPlans, setShiftList, setBufferRules) => {
                 <div
                   ref={editorRef}
                   contentEditable
-                  className={`form-control p-3 ${
+                  className={`form-control p-5 ${
                     errors.features ? "border-danger" : ""
                   }`}
                   style={{

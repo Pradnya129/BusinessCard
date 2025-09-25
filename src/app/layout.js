@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href="/materialize/assets/vendor/css/rtl/core.css" />
         <link rel="stylesheet" href="/materialize/assets/vendor/css/rtl/theme-default.css" />
         <link rel="stylesheet" href="/materialize/assets/css/demo.css" />
-        <link rel="stylesheet" href="/materialize/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+        {/* <link rel="stylesheet" href="/materialize/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" /> */}
         <link rel="stylesheet" href="/materialize/assets/vendor/libs/typeahead-js/typeahead.css" />
         <link rel="stylesheet" href="/materialize/assets/vendor/libs/apex-charts/apex-charts.css" />
         <link rel="stylesheet" href="/materialize/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
@@ -68,7 +68,7 @@ export default function RootLayout({ children }) {
 
         {/* After DOM Load */}
         <Script src="/materialize/assets/vendor/libs/node-waves/node-waves.js" strategy="afterInteractive" />
-        <Script src="/materialize/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js" strategy="afterInteractive" />
+        {/* <Script src="/materialize/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js" strategy="afterInteractive" /> */}
         <Script src="/materialize/assets/vendor/libs/hammer/hammer.js" strategy="afterInteractive" />
         <Script src="/materialize/assets/vendor/js/helpers.js" strategy="afterInteractive" />
         <Script src="/materialize/assets/vendor/js/menu.js" strategy="afterInteractive" />

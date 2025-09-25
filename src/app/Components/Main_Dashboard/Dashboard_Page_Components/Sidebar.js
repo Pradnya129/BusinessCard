@@ -4,6 +4,10 @@ import { usePathname } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
+import PerfectScrollbar from "perfect-scrollbar";
+if (typeof window !== "undefined") {
+  window.PerfectScrollbar = PerfectScrollbar;
+}
 
 const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
   const [openMenu, setOpenMenu] = useState(null);
@@ -22,6 +26,12 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
       }
     }
   }, []);
+useEffect(() => {
+  const el = document.querySelector("#menu-scroll");
+  if (!el) return;
+  const ps = new PerfectScrollbar(el, { suppressScrollX: true });
+  return () => ps.destroy();
+}, [userRole, openMenu, sidebarCollapsed, mobileSidebarVisible]);
 
   useEffect(() => {
     const handleOutsideClick = (e) => {
@@ -43,15 +53,19 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
   };
 
   return (
-    <div>
-      <aside
-        id="layout-menu"
-        className={`layout-menu menu-vertical menu bg-menu-theme bg-fixed
-          ${sidebarCollapsed ? "menu-collapsed" : ""} 
-          ${
-            mobileSidebarVisible ? "mobile-sidebar-show" : "mobile-sidebar-hide"
-          }`}
-      >
+    <div className="h-screen flex flex-col">
+     <aside
+  id="layout-menu"
+  className={`layout-menu menu-vertical menu bg-menu-theme bg-fixed
+    ${sidebarCollapsed ? "menu-collapsed" : ""} 
+    ${mobileSidebarVisible ? "mobile-sidebar-show" : "mobile-sidebar-hide"}`}
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",     // full screen height
+    overflow: "hidden",  // hide extra scroll
+  }}
+>
         <div className="app-brand demo">
           <Link href="/Dashboard" className="app-brand-link">
             <span className="app-brand-logo demo me-5 ">
@@ -145,6 +159,16 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
         </div>
 
         <div className="menu-inner-shadow"></div>
+ <div
+    id="menu-scroll"
+    style={{
+      flex: 1,               // takes remaining vertical space
+      overflowY: "auto",     // enable vertical scroll
+      overflowX: "hidden",   // prevent horizontal scroll
+      paddingRight: "4px",   // optional to avoid scrollbar cutoff
+      minHeight: 0           // important for flex children
+    }}
+  >
 
         {/* ✅ Show menus based on role */}
         {userRole === "admin" && (
@@ -427,6 +451,7 @@ const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
             </li>
           </ul>
         )}
+        </div>
       </aside>
     </div>
   );

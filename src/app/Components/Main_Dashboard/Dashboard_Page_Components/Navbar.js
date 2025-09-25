@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-
+import "./Dashboard.css"
 const Navbar = ({ onToggleSidebar }) => {
   const router = useRouter();
   const [user, setUser] = useState({});
@@ -14,7 +14,7 @@ const Navbar = ({ onToggleSidebar }) => {
 
   const handleLogOut = () => {
     localStorage.removeItem("token");
-    router.push("/");
+    router.push("/Login");
   };
 
   const handleEditSlug = () => {
@@ -66,9 +66,7 @@ const handleSaveSlug = async () => {
     setTempSlug("");
   };
 
-  useEffect(() => {
-    import("../../../../../public/materialize/assets/js/ui-menu.js");
-  }, []);
+
 
  useEffect(() => {
   const token = localStorage.getItem("token");
@@ -132,7 +130,7 @@ const handleSaveSlug = async () => {
         <div className="navbar-center flex-grow-1 d-flex justify-content-center align-items-center">
           {editingSlug ? (
             <div className="d-flex align-items-center flex-nowrap">
-              <span className="me-2 fw-bold">Your live URL  https://appointify.me/</span>
+              <p className="me-2 fw-bold ">Your live URL  https://appointify.me/</p>
               <input
                 type="text"
                 className="form-control form-control-sm me-2"

@@ -23,22 +23,22 @@ const Add_Plan = () => {
 
   const editorRef = useRef(null);
 
-  useEffect(() => {
-    const loadShifts = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(`https://appo.coinagesoft.com/api/admin/shift`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setShiftList(res.data);
-      } catch (err) {
-        console.error('Failed to load shifts', err);
-      }
-    };
+   const loadShifts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`https://appo.coinagesoft.com/api/admin/shift`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log(res.data);
+      setShiftList(res.data.data);
+    } catch (err) {
+      console.error('Failed to load shifts', err);
+    }
+  };
 
 
-
-    loadShifts();
+ useEffect(() => {
+    loadShifts(); // now this works fine
   }, []);
 
   const handleChange = (e) => {

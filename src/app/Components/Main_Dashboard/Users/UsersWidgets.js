@@ -13,63 +13,42 @@ const UsersWidgets = () => {
   });
 
 useEffect(() => {
-     const token = localStorage.getItem("token");
-  
-    if (!token) return;
-  
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id; 
-  axios.get(`https://appo.coinagesoft.com/api/customer-appointments/admin/${adminId}`, {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  axios
+    .get(`https://appo.coinagesoft.com/api/customer-appointments/clients`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data',
       },
     })
-    .then((data) => {
-      console.log("Appointments API response:", data.data.data);
+    .then((res) => {
+      console.log("Appointments API response:", res.data.data);
 
-      // ✅ Extract appointments correctly
-      let appointments = [];
-      if (Array.isArray(data)) {
-        appointments = data; // already an array
-      } else if (Array.isArray(data.appointments)) {
-        appointments = data.appointments; // nested inside "appointments"
-      } else if (Array.isArray(data.data.data)) {
-        appointments = data.data.data; // nested inside "data"
+      let clients = [];
+      if (Array.isArray(res.data.data)) {
+        clients = res.data.data;
       } else {
-        console.error("Unexpected API format:", data);
+        console.error("Unexpected API format:", res.data);
         return;
       }
 
-      const patientEmails = new Set();
-      let active = 0, completed = 0, pending = 0;
+      // Unique emails
+      const patientEmails = new Set(clients.map((c) => c.email).filter(Boolean));
 
-      appointments.forEach((appointment) => {
-        const status = appointment.appointmentStatus;
-
-        if (appointment.email) {
-          patientEmails.add(appointment.email);
-        }
-
-        // adjust these based on your backend's status codes
-        if (status === 0) {
-          active++;
-        } else if (status === 1) {
-          completed++;
-        } else if (status === 4) {
-          pending++;
-        }
-      });
-
+      // Since no status field is returned, we can’t count active/completed/pending here
       setStats({
         totalPatients: patientEmails.size,
-        activeAppointments: active,
-        completedAppointments: completed,
-        pendingAppointments: pending,
+        activeAppointments: 0,
+        completedAppointments: 0,
+        pendingAppointments: 0,
       });
     })
-    .catch((error) => console.error("Error fetching dashboard stats:", error));
+    .catch((error) =>
+      console.error("Error fetching dashboard stats:", error)
+    );
 }, []);
+
 
 
   return (

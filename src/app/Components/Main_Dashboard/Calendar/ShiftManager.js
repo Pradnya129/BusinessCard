@@ -28,7 +28,8 @@ const ShiftManager = ({ planId }) => {
     const loadShifts = async () => {
       try {
         const res = await axios.get(`${API_BASE}/admin/shift`, axiosConfig);
-        const data = Array.isArray(res.data) ? res.data : [];
+        const data = res.data.data;
+        console.log('shift',res)
         setShifts(data);
         setMessage(data.length === 0 ? 'No shifts found for this consultant.' : '');
       } catch (err) {

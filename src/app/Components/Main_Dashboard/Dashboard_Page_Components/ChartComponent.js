@@ -64,7 +64,8 @@ const ChartComponent = () => {
         ]);
 
         const appointmentsData = appointmentsRes.data.data || [];
-        const plansData = plansRes.data || [];
+        const plansData = plansRes.data.data || [];
+        console.log(plansData)
 
         setAppointments(appointmentsData);
         setPlanNames(plansData.map(plan => plan.planName.trim()));

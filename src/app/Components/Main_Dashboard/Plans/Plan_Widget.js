@@ -9,42 +9,44 @@ const Plan_Widget = () => {
     popularPlanCount: 0, // Number of popular plans
   });
 
-  useEffect(() => {
-    // Fetch data from the backend API
-          const token = localStorage.getItem('token');
+useEffect(() => {
+  const token = localStorage.getItem("token");
 
-           fetch(`https://appo.coinagesoft.com/api/admin/plans/all`, {
-            headers: { 'Authorization': `Bearer ${token}` },
-          })
-      .then((response) => response.json())
-      .then((data) => {
-        const totalPlans = data.length;
-         console.log(data)
-        // Calculate the count for Latest and Popular plans
-        let latestPlanCount = 0;
-        let popularPlanCount = 0;
+  fetch(`https://appo.coinagesoft.com/api/admin/plans/all`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      const plans = result.data || [];
+      const totalPlans = plans.length;
 
-        if (data.length > 0) {
-          // Find Latest Plans (example: plans created in the last 30 days)
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30); // Calculate 30 days ago
+      let latestPlanCount = 0;
+      let popularPlanCount = 0;
 
-          latestPlanCount = data.filter(plan => new Date(plan.createdAt) > thirtyDaysAgo).length;
+      if (plans.length > 0) {
+        // Latest plans = created within last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-          // Find Popular Plans (example: plans with price greater than a threshold)
-          const priceThreshold = 1000; // Example threshold for popular plans
-          popularPlanCount = data.filter(plan => plan.planPrice >= priceThreshold).length;
-        }
+        latestPlanCount = plans.filter(
+          (plan) => new Date(plan.createdAt) > thirtyDaysAgo
+        ).length;
 
-        // Update the state
-        setStats({
-          totalPlans,
-          latestPlanCount,
-          popularPlanCount,
-        });
-      })
-      .catch((error) => console.error('Error fetching data:', error));
-  }, []); // Empty dependency array means this runs once when the component mounts
+        // Popular plans = price >= threshold
+        const priceThreshold = 1000;
+        popularPlanCount = plans.filter(
+          (plan) => parseFloat(plan.planPrice) >= priceThreshold
+        ).length;
+      }
+
+      setStats({
+        totalPlans,
+        latestPlanCount,
+        popularPlanCount,
+      });
+    })
+    .catch((error) => console.error("Error fetching data:", error));
+}, []);
 
   return (
      <div className="row g-4 mb-4">

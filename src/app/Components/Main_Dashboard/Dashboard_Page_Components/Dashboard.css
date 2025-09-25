@@ -35,6 +35,26 @@
 .card-body {
   padding: 1.5rem;
 }
+/* Sidebar wrapper */
+.layout-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* prevent extra scroll */
+}
+
+/* Scrollable menu container */
+#menu-scroll {
+  flex: 1;             /* takes remaining space */
+  overflow-y: auto;    /* scroll only if content exceeds */
+  overflow-x: hidden;  /* prevent horizontal scroll */
+}
+
+/* Optional: hide default scrollbar but keep PerfectScrollbar */
+#menu-scroll.ps {
+  overflow: hidden !important;
+}
+
 
 @media (max-width: 768px) {
   .card-body {
@@ -73,7 +93,9 @@
     font-size: 0.8rem;
     padding: 0.5rem;
   }
-
+.fs-sm-12{
+  font-size: 12px!important;
+}
   /* Apply full-width only on small screens */
   .responsive-container {
     width: 100% !important;

@@ -13,6 +13,7 @@ import AppointmentForm from './AppointmentForm';
 import ShiftManager from './ShiftManager';
 import { api } from '../../../../api';
 import axios from 'axios';
+const API_BASE = process.env.REACT_APP_API_URL || "https://appo.coinagesoft.com/api";
 
 export default function CalendarComponent() {
   const offcanvasRef = useRef(null);
@@ -118,44 +119,55 @@ const fetchAppointments = async () => {
   }, [selectedUserId]);
 
   // fetch users for dropdown
+
+    // Fetch plans with assigned users and admin user for dropdown
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    // Fetch plans with assigned users and admin user for dropdown
     const fetchUsersAndPlans = async () => {
       try {
-        // Fetch admin user
+        // Decode token for admin user info
         const decoded = jwtDecode(token);
-        const currentAdminUser = { id: decoded.id, name: decoded.name || decoded.email || 'Admin' };
+        const currentAdminUser = {
+          id: decoded.id,
+          name: decoded.name || decoded.email || "Admin",
+        };
 
-        // Fetch plans with users
-        const plansResponse = await api.getPlansWithUsers();
+        // Fetch plans with users directly via full URL
+        const plansResponse = await axios.get(`${API_BASE}/admin/plans/all_plans_with_users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         let assignedUsers = [];
-        if (plansResponse && Array.isArray(plansResponse.data)) {
-          plansResponse.data.forEach(plan => {
+        if (plansResponse.data && Array.isArray(plansResponse.data.data)) {
+          plansResponse.data.data.forEach((plan) => {
             if (plan.UserPlans && Array.isArray(plan.UserPlans)) {
-              plan.UserPlans.forEach(up => {
+              plan.UserPlans.forEach((up) => {
                 if (up.User) {
-                  assignedUsers.push({ id: up.User.id, name: up.User.name || up.User.email });
+                  assignedUsers.push({
+                    id: up.User.id,
+                    name: up.User.name || up.User.email,
+                  });
                 }
               });
             }
           });
         }
 
-        // Remove duplicates from assignedUsers by id
+        // Remove duplicates by id
         const uniqueAssignedUsersMap = new Map();
-        assignedUsers.forEach(user => {
+        assignedUsers.forEach((user) => {
           if (!uniqueAssignedUsersMap.has(user.id)) {
             uniqueAssignedUsersMap.set(user.id, user);
           }
         });
         const uniqueAssignedUsers = Array.from(uniqueAssignedUsersMap.values());
 
-        // Combine assigned users, exclude admin from list
-        const combinedUsers = uniqueAssignedUsers.filter(u => u.id !== currentAdminUser.id);
+        // Exclude admin from list
+        const combinedUsers = uniqueAssignedUsers.filter(
+          (u) => u.id !== currentAdminUser.id
+        );
 
         setUsers(combinedUsers);
       } catch (error) {
@@ -167,50 +179,73 @@ const fetchAppointments = async () => {
     fetchUsersAndPlans();
   }, []);
 
+ 
+
   // fetch plans + default selected plans
-  useEffect(() => {
+ useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     const loadPlans = async () => {
       try {
-        const p = await api.getPlans();
+        const res = await axios.get(`${API_BASE}/admin/plans/all`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const p = res.data.data;
+        console.log("p",p)
         setPlans(p);
-        setSelectedPlans(p.map(x => (x.planName || '').toLowerCase()));
+        setSelectedPlans(p.map((x) => (x.planName || "").toLowerCase()));
       } catch (err) {
-        console.error('Error fetching plans', err);
+        console.error("Error fetching plans", err);
         setPlans([]);
       }
     };
+
     loadPlans();
   }, []);
 
   // whenever selectedPlanId changes, fetch plan-shift-rule and shift list
   useEffect(() => {
     if (!selectedPlanId) return;
+
     const loadShiftAndBuffer = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       try {
-        // get rules
-        const res = await api.getPlanShiftRules(selectedPlanId);
-        const rules = res.rules ?? [];
+        // Fetch plan shift rules
+        const res = await axios.get(`${API_BASE}/plan-shift-buffer-rule/all`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { planId: selectedPlanId },
+        });
+
+        const rules = res.data.rules ?? [];
         const rule = rules[0];
         if (rule) {
           setBufferInMinutes(rule.bufferInMinutes ?? 0);
           setSelectedShiftId(rule.shiftId);
         } else {
           setBufferInMinutes(0);
+          setSelectedShiftId(null);
         }
 
-        // fetch shifts
-        const shiftsRes = await api.getShifts();
-        // your API returns an array of shifts (startTime/endTime in HH:mm:ss)
-        setShifts(Array.isArray(shiftsRes) ? shiftsRes : []);
+        // Fetch shifts
+        const shiftsRes = await axios.get(`${API_BASE}/admin/shift`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("shift",shiftsRes)
+        setShifts(Array.isArray(shiftsRes.data) ? shiftsRes.data : []);
       } catch (err) {
-        console.error('Failed to load shift/rule', err);
+        console.error("Failed to load shift/rule", err);
         setShifts([]);
         setBufferInMinutes(0);
+        setSelectedShiftId(null);
       }
     };
+
     loadShiftAndBuffer();
   }, [selectedPlanId]);
-
   // when shift list or selectedShiftId changes, compute slotStartTime/EndTime (Date objects for today)
   useEffect(() => {
     if (!shifts.length || !selectedShiftId) return;
