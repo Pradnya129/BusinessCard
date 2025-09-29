@@ -6,56 +6,57 @@ import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
 import 'swiper/css/effect-fade';
 import { Pagination, Thumbs, EffectFade, Autoplay } from 'swiper/modules';
-
-const Hero = ({ scrollToSectionHeader }) => {
-  const [consultantData, setConsultantData] = useState({});
-  const [bannerImages, setBannerImages] = useState([]);
-  const [taglines, setTaglines] = useState([]);
+const API_URL = process.env.REACT_APP_API_URL;
+const dummyData = {
+  images: ['img32', 'img33', 'img34'],
+};
 
   const DEFAULT_BANNERS = [
     '/assets/img/1920x1080/img32.jpg',
     '/assets/img/1920x1080/img33.jpg',
     '/assets/img/1920x1080/img34.jpg',
   ];
-
-  const BASE_URL = 'https://appo.coinagesoft.com'; // change to your backend URL if needed
-
+const BASE_URL = 'https://appo.coinagesoft.com';
+const Hero = ({ scrollToSectionHeader }) => {
+  const [consultantData, setConsultantData] = useState({});
+  const [taglines, setTaglines] = useState([]);
+   const [bannerImages, setBannerImages] = useState([]);
   Swiper.use([Pagination, Thumbs, EffectFade, Autoplay]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const slug = window.location.pathname.split("/").pop();
+ const slug = window.location.pathname.split("/").pop();
         const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
         if (!response.ok) throw new Error("Failed to fetch consultant data");
-
-        const data = (await response.json()).data;
+        const result = await response.json();
+        console.log("first",result)
+        const data = result.data;
+                console.log("first",data)
 
         setConsultantData(data);
-        setTaglines([data?.tagline1, data?.tagline2, data?.tagline3]);
-
-        // Prepare banner images with fallback
-        setBannerImages([
+        setTaglines([data.tagline1, data.tagline2, data.tagline3]);
+         setBannerImages([
           data?.banner1_Image ? `${BASE_URL}${data.banner1_Image}` : DEFAULT_BANNERS[0],
           data?.banner2_Image ? `${BASE_URL}${data.banner2_Image}` : DEFAULT_BANNERS[1],
           data?.banner3_Image ? `${BASE_URL}${data.banner3_Image}` : DEFAULT_BANNERS[2],
         ]);
       } catch (error) {
         console.error("Error fetching consultant data:", error);
-        setBannerImages(DEFAULT_BANNERS);
+         setBannerImages(DEFAULT_BANNERS);
       }
     };
-
     fetchData();
   }, []);
 
   useEffect(() => {
-    const loadImage = (path) =>
-      new Promise((resolve) => {
+    const loadImage = (path) => {
+      return new Promise((resolve) => {
         const img = new Image();
-        img.onload = () => resolve();
+        img.addEventListener('load', () => resolve());
         img.src = path.replace(/url\("(.*?)"\)/g, '$1');
       });
+    };
 
     const $preloader = document.querySelector('.js-swiper-preloader');
     const promises = [...document.querySelectorAll('.js-swiper-slide-preload')].map((slide) =>
@@ -69,12 +70,13 @@ const Hero = ({ scrollToSectionHeader }) => {
         direction: 'vertical',
         watchSlidesVisibility: true,
         watchSlidesProgress: true,
-        slidesPerView: 2,
+        slidesPerView: 3,
+        history: false,
         on: {
-          afterInit(swiper) {
+          afterInit: function (swiper) {
             swiper.el.style.opacity = 1;
             swiper.el.querySelectorAll('.js-swiper-pagination-progress-body-helper').forEach(($progress) => {
-              $progress.style.transitionDuration = `${swiper.params.autoplay?.delay || 3000}ms`;
+              $progress.style.transitionDuration = `${swiper.params.autoplay.delay}ms`;
             });
           },
         },
@@ -88,7 +90,9 @@ const Hero = ({ scrollToSectionHeader }) => {
           el: '.js-swiper-blog-journal-hero-pagination',
           clickable: true,
         },
-        thumbs: { swiper: sliderThumbs },
+        thumbs: {
+          swiper: sliderThumbs,
+        },
       });
     });
   }, [bannerImages, taglines]);
@@ -102,7 +106,9 @@ const Hero = ({ scrollToSectionHeader }) => {
               <div
                 key={index}
                 className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
+                
                 style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
+                // , minHeight: '40rem'
               >
                 <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
                   <div className="w-lg-50 me-3">
@@ -113,7 +119,7 @@ const Hero = ({ scrollToSectionHeader }) => {
                             className="avatar-img rounded-pill"
                             src={
                               consultantData.profileImage
-                                ? `${BASE_URL}${consultantData.profileImage}`
+                                  ?  `https://appo.coinagesoft.com/${consultantData.profileImage}`
                                 : '/assets/img/160x160/img6.jpg'
                             }
                             alt="Doctor"
@@ -131,7 +137,7 @@ const Hero = ({ scrollToSectionHeader }) => {
                         {taglines[index]}
                       </h2>
                     </div>
-                    <button className="btn btn-primary btn-transition scrollBtn" type="button" onClick={scrollToSectionHeader}>
+                    <button className="btn btn-primary btn-transition scrollBtn" type="button" onClick={()=>{scrollToSectionHeader()}}>
                       Book Appointment <i className="bi-chevron-right small ms-1"></i>
                     </button>
                   </div>
@@ -139,9 +145,7 @@ const Hero = ({ scrollToSectionHeader }) => {
               </div>
             ))}
           </div>
-
           <div className="js-swiper-blog-journal-hero-pagination swiper-pagination swiper-pagination-light swiper-pagination-vertical swiper-pagination-middle-y-end me-3 d-lg-none"></div>
-
           <div className="js-swiper-preloader d-flex align-items-center justify-content-center top-0 position-absolute w-100 h-100 bg-white zi-1">
             <div className="spinner spinner-border text-primary"></div>
           </div>

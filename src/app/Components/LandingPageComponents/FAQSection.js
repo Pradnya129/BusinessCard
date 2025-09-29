@@ -9,7 +9,7 @@ const FAQSection = () => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_BASE = `https://appointify.coinagesoft.com/api/Faq`;
+  const API_BASE = `https://appo.coinagesoft.com/api/Faq`;
 
  useEffect(() => {
   const fetchFAQs = async () => {

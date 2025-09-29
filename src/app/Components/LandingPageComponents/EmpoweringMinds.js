@@ -59,7 +59,7 @@ const EmpoweringMinds = () => {
           <img
             src={
               consultantInfo.section3_Image
-                ? `https://appo.coinagesoft.com${consultantInfo.section3_Image}`
+                ? `https://appo.coinagesoft.com/${consultantInfo.section3_Image}`
                 : "/assets/img/psychological-help-jpg.jpg"
             }
             // alt="Empowering Minds"
