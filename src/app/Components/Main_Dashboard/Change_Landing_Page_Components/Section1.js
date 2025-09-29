@@ -145,10 +145,16 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
       }
     });
 
-    if (profileImageFile) {
-      formData.append('profileImage', profileImageFile);
-    }
-   
+ 
+   if (profileImageFile) {
+  formData.append("profileImage", profileImageFile);
+}
+
+// Append banners if selected
+if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
+if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
+if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
+
 
     const response = await axios.patch(
       `https://appo.coinagesoft.com/api/landing/${landingId}`,
@@ -172,14 +178,6 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
   }
 };
 
-if (profileImageFile) {
-  formData.append("profileImage", profileImageFile);
-}
-
-// Append banners if selected
-if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
-if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
-if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
 
 
   if (loading) {
