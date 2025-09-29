@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function Home({ params }) {
-  const { slug } = params; // get slug from URL
+  const { slug } = await params; // get slug from URL
 
   // Fetch admin from backend
   const res = await fetch(`https://appo.coinagesoft.com/api/admin/slug?slug=${slug}`, {

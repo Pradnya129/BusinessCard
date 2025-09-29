@@ -35,7 +35,7 @@ useEffect(() => {
 
 
   return (
-    <header id="header" className="navbar navbar-expand-lg navbar-end bg-transparent position-absolute top-0 w-100 z-3 mt-3">
+<header id="header" className="navbar navbar-expand-lg navbar-end bg-transparent position-fixed top-0 start-0 w-100 z-50 shadow-sm">
       <div className="container">
         <div className="w-100 d-flex justify-content-between">
           <div className="d-flex flex-column flex-md-row">

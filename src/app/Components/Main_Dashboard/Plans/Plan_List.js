@@ -435,18 +435,23 @@ const handleSave = async () => {
   <div className="card h-100 shadow-lg border-0 rounded-4">
     {/* Header with duration */}
     <div className="card-header bg-primary text-white text-center rounded-top-4">
-      <h5 className="mb-1">
+      <h5 className="mb-1 badge bg-light text-dark py-2 px-3">
         <i className="fas fa-clock me-2"></i>
         {plan.planDuration} min
       </h5>
-      <span className="badge bg-light text-dark px-3 py-2">
-        {plan.planName}
-      </span>
+  <span
+  className=" px-1 py-1 d-block text-wrap"
+  style={{ wordBreak: "break-word", whiteSpace: "normal" }}
+>
+  {plan.planName}
+</span>
+
+
     </div>
 
     {/* Card Body */}
     <div className="card-body text-center">
-      <p className="text-muted small">{plan.planDescription}</p>
+      <p className="text-muted small mt-4">{plan.planDescription}</p>
 
       <h4 className="fw-bold text-success mb-3">
         ₹{plan.planPrice}
@@ -480,34 +485,54 @@ const handleSave = async () => {
       </p>
     </div>
 
-    {/* Assigned Users */}
-    <div className="card-body pt-0">
-      <p className="fw-semibold my-0">Assigned Users:</p>
-      <ul className="list-group list-group-flush">
-        {plan.UserPlans && plan.UserPlans.length > 0 ? (
-          plan.UserPlans.map((up) => (
-            <li
-              key={up.id}
-              className="list-group-item d-flex justify-content-between align-items-center"
+ {/* Assigned Users */}
+{/* Assigned Users */}
+<div className="card-body pt-0">
+  <p className="fw-semibold mb-2">Assigned Users:</p>
+  <ul className="list-group">
+    {plan.UserPlans && plan.UserPlans.length > 0 ? (
+      plan.UserPlans.map((up) => (
+        <li key={up.id} className="list-group-item">
+          <div className="row align-items-center text-center">
+            {/* Name */}
+            <div
+              className="col-4 d-flex justify-content-center align-items-center"
+              style={{ minHeight: "50px" }}
             >
-              <span>
-                {up.User.name} ({up.User.email})
-              </span>
-            <button
-  className="btn btn-sm btn-outline-danger pe-3"
-  onClick={() => handleUnassign(up.id)}
->
- <i className="fas fa-user-minus me-1"></i> 
+              <span className="fw-semibold small">{up.User.name}</span>
+            </div>
 
-</button>
+            {/* Email */}
+            <div
+              className="col-6 d-flex justify-content-center align-items-center"
+              style={{ minHeight: "50px" }}
+            >
+              {/* <span className="text-muted small">{up.User.email}</span> */}
+            </div>
 
-            </li>
-          ))
-        ) : (
-          <li className="list-group-item">No users assigned</li>
-        )}
-      </ul>
-    </div>
+            {/* Button */}
+            <div
+              className="col-2 d-flex justify-content-center align-items-center"
+              style={{ minHeight: "50px" }}
+            >
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => handleUnassign(up.id)}
+              >
+                <i className="fas fa-user-minus"></i>
+              </button>
+            </div>
+          </div>
+        </li>
+      ))
+    ) : (
+      <li className="list-group-item text-muted small">No users assigned</li>
+    )}
+  </ul>
+</div>
+
+
+
 
 {/* Footer Actions */}
 <div className="card-footer  rounded-bottom-4 d-flex justify-content-between flex-wrap mt-3 gap-2">

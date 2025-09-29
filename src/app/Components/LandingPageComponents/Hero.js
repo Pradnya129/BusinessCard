@@ -6,48 +6,56 @@ import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
 import 'swiper/css/effect-fade';
 import { Pagination, Thumbs, EffectFade, Autoplay } from 'swiper/modules';
-const API_URL = process.env.REACT_APP_API_URL;
-const dummyData = {
-  images: ['img32', 'img33'],
-};
 
 const Hero = ({ scrollToSectionHeader }) => {
   const [consultantData, setConsultantData] = useState({});
+  const [bannerImages, setBannerImages] = useState([]);
   const [taglines, setTaglines] = useState([]);
+
+  const DEFAULT_BANNERS = [
+    '/assets/img/1920x1080/img32.jpg',
+    '/assets/img/1920x1080/img33.jpg',
+    '/assets/img/1920x1080/img34.jpg',
+  ];
+
+  const BASE_URL = 'https://appo.coinagesoft.com'; // change to your backend URL if needed
+
   Swiper.use([Pagination, Thumbs, EffectFade, Autoplay]);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1]; 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const slug = window.location.pathname.split("/").pop();
+        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
+        if (!response.ok) throw new Error("Failed to fetch consultant data");
 
-      // ✅ Call slug-based API
-      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
-      if (!response.ok) throw new Error("Failed to fetch consultant data");
+        const data = (await response.json()).data;
 
-      const result = await response.json();
-      const data = result.data;
+        setConsultantData(data);
+        setTaglines([data?.tagline1, data?.tagline2, data?.tagline3]);
 
-      setConsultantData(data);
-      setTaglines([data?.tagline1, data?.tagline2, data?.tagline3]);
-    } catch (error) {
-      console.error("Error fetching consultant data:", error);
-    }
-  };
+        // Prepare banner images with fallback
+        setBannerImages([
+          data?.banner1_Image ? `${BASE_URL}${data.banner1_Image}` : DEFAULT_BANNERS[0],
+          data?.banner2_Image ? `${BASE_URL}${data.banner2_Image}` : DEFAULT_BANNERS[1],
+          data?.banner3_Image ? `${BASE_URL}${data.banner3_Image}` : DEFAULT_BANNERS[2],
+        ]);
+      } catch (error) {
+        console.error("Error fetching consultant data:", error);
+        setBannerImages(DEFAULT_BANNERS);
+      }
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
   useEffect(() => {
-    const loadImage = (path) => {
-      return new Promise((resolve) => {
+    const loadImage = (path) =>
+      new Promise((resolve) => {
         const img = new Image();
-        img.addEventListener('load', () => resolve());
+        img.onload = () => resolve();
         img.src = path.replace(/url\("(.*?)"\)/g, '$1');
       });
-    };
 
     const $preloader = document.querySelector('.js-swiper-preloader');
     const promises = [...document.querySelectorAll('.js-swiper-slide-preload')].map((slide) =>
@@ -62,12 +70,11 @@ useEffect(() => {
         watchSlidesVisibility: true,
         watchSlidesProgress: true,
         slidesPerView: 2,
-        history: false,
         on: {
-          afterInit: function (swiper) {
+          afterInit(swiper) {
             swiper.el.style.opacity = 1;
             swiper.el.querySelectorAll('.js-swiper-pagination-progress-body-helper').forEach(($progress) => {
-              $progress.style.transitionDuration = `${swiper.params.autoplay.delay}ms`;
+              $progress.style.transitionDuration = `${swiper.params.autoplay?.delay || 3000}ms`;
             });
           },
         },
@@ -81,24 +88,21 @@ useEffect(() => {
           el: '.js-swiper-blog-journal-hero-pagination',
           clickable: true,
         },
-        thumbs: {
-          swiper: sliderThumbs,
-        },
+        thumbs: { swiper: sliderThumbs },
       });
     });
-  }, [taglines]);
+  }, [bannerImages, taglines]);
 
   return (
     <main id="content" role="main">
       <div className="position-relative">
         <div className="js-swiper-blog-journal-hero swiper">
           <div className="swiper-wrapper">
-            {dummyData.images.map((image, index) => (
+            {bannerImages.map((image, index) => (
               <div
                 key={index}
                 className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-                style={{ backgroundImage: `url(/assets/img/1920x1080/${image}.jpg)`, height:"100vh", backgroundPosition:"center center" }}
-                // , minHeight: '40rem'
+                style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
               >
                 <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
                   <div className="w-lg-50 me-3">
@@ -109,7 +113,7 @@ useEffect(() => {
                             className="avatar-img rounded-pill"
                             src={
                               consultantData.profileImage
-                                  ?  `https://appo.coinagesoft.com${consultantData.profileImage}`
+                                ? `${BASE_URL}${consultantData.profileImage}`
                                 : '/assets/img/160x160/img6.jpg'
                             }
                             alt="Doctor"
@@ -127,7 +131,7 @@ useEffect(() => {
                         {taglines[index]}
                       </h2>
                     </div>
-                    <button className="btn btn-primary btn-transition scrollBtn" type="button" onClick={()=>{scrollToSectionHeader()}}>
+                    <button className="btn btn-primary btn-transition scrollBtn" type="button" onClick={scrollToSectionHeader}>
                       Book Appointment <i className="bi-chevron-right small ms-1"></i>
                     </button>
                   </div>
@@ -135,7 +139,9 @@ useEffect(() => {
               </div>
             ))}
           </div>
+
           <div className="js-swiper-blog-journal-hero-pagination swiper-pagination swiper-pagination-light swiper-pagination-vertical swiper-pagination-middle-y-end me-3 d-lg-none"></div>
+
           <div className="js-swiper-preloader d-flex align-items-center justify-content-center top-0 position-absolute w-100 h-100 bg-white zi-1">
             <div className="spinner spinner-border text-primary"></div>
           </div>
