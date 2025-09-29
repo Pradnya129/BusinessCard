@@ -33,6 +33,11 @@ const Section1 = () => {
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [landingId, setLandingId] = useState(null);
+  const [bannerFiles, setBannerFiles] = useState({
+  banner1: null,
+  banner2: null,
+  banner3: null,
+});
 
 
 useEffect(() => {
@@ -166,6 +171,15 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
     setStatusMessage({ type: 'error', text: error.message });
   }
 };
+
+if (profileImageFile) {
+  formData.append("profileImage", profileImageFile);
+}
+
+// Append banners if selected
+if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
+if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
+if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
 
 
   if (loading) {
@@ -313,6 +327,44 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
             ))}
           </div>
         </div>
+
+{/* Banner Images */}
+<div className="row gx-5 mt-4">
+  {["banner1_Image", "banner2_Image", "banner3_Image"].map((field, idx) => (
+    <div className="col-md-4 text-center mb-3" key={field}>
+      <label className="form-label fw-semibold">{`Banner ${idx + 1}`}</label>
+      <img
+        src={
+          editableData[field]
+            ? editableData[field].startsWith("blob:")
+              ? editableData[field]
+              : `https://appo.coinagesoft.com${editableData[field]}`
+            : `https://via.placeholder.com/300x150?text=Banner+${idx + 1}`
+        }
+        alt={`Banner ${idx + 1}`}
+        className="border border-secondary rounded-3 mb-2"
+        style={{ width: "100%", height: "150px", objectFit: "cover" }}
+      />
+      <input
+        type="file"
+        className="form-control"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            setBannerFiles((prev) => ({ ...prev, [`banner${idx + 1}`]: file }));
+            setEditableData((prev) => ({
+              ...prev,
+              [field]: URL.createObjectURL(file),
+            }));
+            setIsEdited(true);
+          }
+        }}
+      />
+      <p className="text-muted small">Recommended size: 1200x400</p>
+    </div>
+  ))}
+</div>
 
         {/* Save Button */}
         <div className="text-center mt-4">
