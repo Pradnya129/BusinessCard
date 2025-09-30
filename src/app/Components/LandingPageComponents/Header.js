@@ -35,7 +35,7 @@ useEffect(() => {
 
 
   return (
-<header id="header" className="navbar navbar-expand-lg navbar-end bg-transparent position-fixed top-0 start-0 w-100 z-50 shadow-sm">
+<header id="header" className="navbar navbar-expand-lg navbar-end bg-primary position-fixed top-0 start-0 w-100 z-50 shadow-sm">
       <div className="container">
         <div className="w-100 d-flex justify-content-between">
           <div className="d-flex flex-column flex-md-row">
@@ -61,24 +61,52 @@ useEffect(() => {
 
           {/* Social Media and Login Button */}
           <ul className="navbar-nav d-flex align-items-center">
-            <li className="nav-item d-flex gap-2">
-              <a className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon" 
-                 href={ConsultantData.facebookId} target="_blank" rel="noopener noreferrer">
-                <i className="bi-facebook"></i>
-              </a>
-              {/* <a className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon" 
-                 href={ConsultantData.youtubeId} target="_blank" rel="noopener noreferrer">
-                <i className="bi-youtube"></i>
-              </a> */}
-              <a className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon" 
-                 href={ConsultantData.twitterId} target="_blank" rel="noopener noreferrer">
-                <i className="bi-twitter"></i>
-              </a>
-              <a className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon" 
-                 href={ConsultantData.instagramId} target="_blank" rel="noopener noreferrer">
-                <i className="bi-instagram"></i>
-              </a>
-            </li>
+           <li className="nav-item d-flex gap-2">
+  {ConsultantData.facebookId && (
+    <a
+      className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
+      href={ConsultantData.facebookId}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <i className="bi-facebook"></i>
+    </a>
+  )}
+
+  {ConsultantData.youtubeId && (
+    <a
+      className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
+      href={ConsultantData.youtubeId}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <i className="bi-youtube"></i>
+    </a>
+  )}
+
+  {ConsultantData.twitterId && (
+    <a
+      className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
+      href={ConsultantData.twitterId}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <i className="bi-twitter"></i>
+    </a>
+  )}
+
+  {ConsultantData.instagramId && (
+    <a
+      className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
+      href={ConsultantData.instagramId}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <i className="bi-instagram"></i>
+    </a>
+  )}
+</li>
+
 
             {/* Adjusted Login Button */}
             <li className="nav-item ms-4 mt-2 mt-md-0">

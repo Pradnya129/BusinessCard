@@ -293,6 +293,7 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
               { platform: 'facebookId', icon: 'bi-facebook' },
               { platform: 'instagramId', icon: 'bi-instagram' },
               { platform: 'twitterId', icon: 'bi-twitter' },
+              {platform :'youtubeId',icon:'bi-youtube'}
             ].map(({ platform, icon }) => (
               <div className="input-group mb-2" key={platform}>
                 <span className="input-group-text">

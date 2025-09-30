@@ -111,7 +111,7 @@ useEffect(() => {
 
       // 4. Fetch booked slots for that date via slug
      const bookedRes = await axios.get(
-  `http://localhost:5000/api/public-landing/booked-slots/${selected}?slug=${slug}`,
+  `https://appo.coinagesoft.com/api/public-landing/booked-slots/${selected}?slug=${slug}`,
 );
 
 

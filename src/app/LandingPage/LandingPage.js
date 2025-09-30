@@ -15,7 +15,7 @@ import LeafletMap from '../Components/LandingPageComponents/LeafletMap';
 import FAQSection from '../Components/LandingPageComponents/FAQSection';
 import './LandingPage.css'
 
-const LandingPage = () => {
+const LandingPage = ({ admin }) => {
   const targetRef = useRef(null);
   const targetRefHeader = useRef(null);
   const [selectedPlan, setSelectedPlan] = useState({
@@ -39,11 +39,11 @@ const LandingPage = () => {
         <link rel="stylesheet" href="../../../dist/assets/vendor/bootstrap/dist/css/bootstrap.min.css" />
         <link rel="stylesheet" href="https://fonts.googleapis.com" />
         <link rel="stylesheet" href="https://fonts.gstatic.com" />
-      </Head>
+      </Head >
       <div className='bg-white'>
 
         {/* Content */}
-        <Header />
+        <Header admin={admin} />
         <Hero scrollToSectionHeader={scrollToSectionHeader} />
         <div className="section-light">
           <Consultant_Info />

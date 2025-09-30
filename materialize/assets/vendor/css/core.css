@@ -15390,8 +15390,8 @@ button.list-group-item-gray.active {
 }
 
 .bg-transparent {
-  --bs-bg-opacity: 1;
-  background-color: transparent !important;
+  --bs-bg-opacity: 0;
+  background-color: white !important;
 }
 
 .bg-lighter {

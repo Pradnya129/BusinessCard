@@ -60,6 +60,11 @@ import React, { useState } from 'react';
                           ><i className="ri-bookmark-line me-2"></i> Billing & Plans
                           </Link >
                       </li>
+                       <li className="nav-item">
+                <Link className="nav-link" href="/Dashboard/Policies">
+                  <i className="ri-bookmark-line me-2"></i> Policies
+                </Link>
+              </li>
                    
                     </ul>
                   </div>

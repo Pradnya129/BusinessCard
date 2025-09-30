@@ -75,11 +75,16 @@ const Security = () => {
                   <i className="ri-lock-line me-2"></i> Security
                 </Link>
               </li>
-              {/* <li className="nav-item">
+              <li className="nav-item">
                 <Link className="nav-link" href="/Dashboard/Billing">
                   <i className="ri-bookmark-line me-2"></i> Billing & Plans
                 </Link>
-              </li> */}
+              </li>
+               <li className="nav-item">
+                <Link className="nav-link" href="/Dashboard/Policies">
+                  <i className="ri-bookmark-line me-2"></i> Policies
+                </Link>
+              </li>
             </ul>
           </div>
 
