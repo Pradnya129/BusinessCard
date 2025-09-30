@@ -20,7 +20,7 @@ const FAQSection = () => {
       const pathParts = window.location.pathname.split("/");
       const slug = pathParts[pathParts.length - 1];
 
-      const response = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-faqs/${slug}`);
+      const response = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-faqs`);
       setFaqs(response.data.data || []);
     } catch (err) {
       console.error('Error fetching FAQs:', err);

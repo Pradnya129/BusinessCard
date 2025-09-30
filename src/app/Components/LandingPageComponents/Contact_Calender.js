@@ -25,7 +25,7 @@ useEffect(() => {
     const slug = pathParts[pathParts.length - 1];
 
     try {
-      const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/all/${slug}`, {
+      const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/all`, {
       });
       const obj = await res.json();
       const data = obj.data
@@ -357,9 +357,9 @@ useEffect(() => {
 
   // fetch appointments + rules + shifts using slug
   Promise.all([
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments?slug=${slug}`),
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules/${slug}`),
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts/${slug}`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts`),
   ])
     .then(([appointmentsRes, rulesRes, shiftsRes]) => {
       const appointments = appointmentsRes.data?.data || [];

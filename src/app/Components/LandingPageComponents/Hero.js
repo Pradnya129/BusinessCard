@@ -27,7 +27,7 @@ const Hero = ({ scrollToSectionHeader }) => {
     const fetchData = async () => {
       try {
  const slug = window.location.pathname.split("/").pop();
-        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
+        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/`);
         if (!response.ok) throw new Error("Failed to fetch consultant data");
         const result = await response.json();
         console.log("first",result)

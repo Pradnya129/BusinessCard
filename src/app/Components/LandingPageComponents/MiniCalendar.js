@@ -78,7 +78,7 @@ useEffect(() => {
 
       // 1. Get plan-shift-buffer for this admin via slug
       const bufferRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/all-rules/${slug}`,
+        `https://appo.coinagesoft.com/api/public-landing/all-rules`,
       );
 
       const rule = bufferRes.data.rules.find((r) => r.planId === planId);
@@ -89,7 +89,7 @@ useEffect(() => {
 
       // 2. Get shifts for this admin via slug
       const shiftRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/all-shifts/${slug}`,
+        `https://appo.coinagesoft.com/api/public-landing/all-shifts`,
       );
       const shift = shiftRes.data.data.find((s) => s.id === rule.shiftId);
       if (!shift) {
@@ -111,7 +111,7 @@ useEffect(() => {
 
       // 4. Fetch booked slots for that date via slug
      const bookedRes = await axios.get(
-  `https://appo.coinagesoft.com/api/public-landing/booked-slots/${selected}?slug=${slug}`,
+  `https://appo.coinagesoft.com/api/public-landing/booked-slots/${selected}`,
 );
 
 

@@ -22,7 +22,7 @@ const Plans = React.forwardRef((props, ref) => {
       const pathParts = window.location.pathname.split("/");
       const slug = pathParts[pathParts.length - 1];
 
-      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/`);
       const data = res.data.data;
 
       setFormData({
@@ -43,9 +43,9 @@ const Plans = React.forwardRef((props, ref) => {
       const slug = pathParts[pathParts.length - 1];
 
       const [plansRes, shiftsRes] = await Promise.all([
-        axios.get(`https://appo.coinagesoft.com/api/public-landing/all/${slug}`, {
+        axios.get(`https://appo.coinagesoft.com/api/public-landing/all`, {
         }),
-        axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts/${slug}`, {
+        axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts`, {
         }),
       ]);
 

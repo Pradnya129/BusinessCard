@@ -7,30 +7,22 @@ import CountUp from 'react-countup';
 const Stats = () => {
   const [stats, setStats] = useState([]);
 
-  // Custom icons assigned by index
-  const iconList = [
-    'bi-bar-chart-line-fill',
-    'bi-graph-up',
-    'bi-emoji-smile-fill'
-  ];
+  const iconList = ['bi-bar-chart-line-fill', 'bi-graph-up', 'bi-emoji-smile-fill'];
 
-useEffect(() => {
-  const fetchStats = async () => {
-    try {
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
-      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-stats/${slug}`);
-      console.log(res.data)
-      setStats(res.data.data || []); // ensure it's always an array
-    } catch (err) {
-      console.error('Error fetching stats:', err);
-      setStats([]); // fallback
-    }
-  };
-
-  fetchStats();
-}, []);
-
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const slug = window.location.pathname.split("/").pop();
+        const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-stats`);
+        console.log("statsres", res.data);
+        setStats(res.data.data || []);
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+        setStats([]);
+      }
+    };
+    fetchStats();
+  }, []);
 
   return (
     <div className="rounded-2 mx-3 mx-lg-10">
@@ -46,6 +38,7 @@ useEffect(() => {
           {stats.map((stat, index) => {
             const iconClass = iconList[index % iconList.length] || 'bi-bar-chart';
             const trendClass = stat.icon === 'down' ? 'text-danger' : 'text-primary';
+            const value = parseFloat(stat.value) || 0;
 
             return (
               <div className="col-sm-6 col-md-4 mb-4" key={stat.id || index}>
@@ -57,9 +50,10 @@ useEffect(() => {
 
                     <h2 className={`display-6 fw-bold ${trendClass}`}>
                       <CountUp
-                        end={parseInt(stat.value.replace(/[^\d]/g, ''), 10) || 0}
+                        end={value}
                         duration={2}
-                        suffix="%"
+                        decimals={2}
+                        suffix="%" // always show percentage
                       />
                     </h2>
                     <p className="mb-0">

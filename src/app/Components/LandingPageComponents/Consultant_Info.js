@@ -12,7 +12,7 @@ const Consultant_Info = () => {
         const path = window.location.pathname; // e.g., "/pradnya"
         const slug = path.split('/').filter(Boolean)[0]; // get first segment      
         if (!slug) throw new Error("Slug not found in URL");
-        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/${slug}`);
+        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/`);
         if (!response.ok) throw new Error("Failed to fetch landing page data");
 
         const result = await response.json();
