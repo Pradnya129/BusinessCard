@@ -6,6 +6,11 @@
   background-color: #fafafa;
 }
 
+.landing-page-container {
+  padding-left: 80px;
+  padding-right: 80px;
+}
+
 html, body {
   margin: 0;
   padding: 0;
