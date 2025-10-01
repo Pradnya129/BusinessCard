@@ -7,11 +7,15 @@ const LeafletMap = () => {
 useEffect(() => {
   const fetchIframeUrl = async () => {
     try {
-      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1]; 
+      // ✅ Get slug from hostname (production)
+      let slug = window.location.hostname;
 
-      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/`);
+    
+
+      if (!slug) throw new Error("Slug not found in hostname or URL path");
+
+      // ✅ Fetch iframe URL using slug query param
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
       console.log("res iframeurl", res.data.data.locationIframeURL);
 
       if (res.data.data?.locationIframeURL) {
@@ -20,12 +24,13 @@ useEffect(() => {
         console.warn("No iframe URL found in response");
       }
     } catch (err) {
-      console.error('Error loading map:', err);
+      console.error("Error loading map:", err);
     }
   };
 
   fetchIframeUrl();
 }, []);
+
 
   if (!iframeUrl) return null;
 

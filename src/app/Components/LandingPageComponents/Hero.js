@@ -23,31 +23,41 @@ const Hero = ({ scrollToSectionHeader }) => {
    const [bannerImages, setBannerImages] = useState([]);
   Swiper.use([Pagination, Thumbs, EffectFade, Autoplay]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
- const slug = window.location.pathname.split("/").pop();
-        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/`);
-        if (!response.ok) throw new Error("Failed to fetch consultant data");
-        const result = await response.json();
-        console.log("first",result)
-        const data = result.data;
-                console.log("first",data)
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      // ✅ Get slug from hostname (production)
+      let slug = window.location.hostname;
 
-        setConsultantData(data);
-        setTaglines([data.tagline1, data.tagline2, data.tagline3]);
-         setBannerImages([
-          data?.banner1_Image ? `${BASE_URL}${data.banner1_Image}` : DEFAULT_BANNERS[0],
-          data?.banner2_Image ? `${BASE_URL}${data.banner2_Image}` : DEFAULT_BANNERS[1],
-          data?.banner3_Image ? `${BASE_URL}${data.banner3_Image}` : DEFAULT_BANNERS[2],
-        ]);
-      } catch (error) {
-        console.error("Error fetching consultant data:", error);
-         setBannerImages(DEFAULT_BANNERS);
-      }
-    };
-    fetchData();
-  }, []);
+   
+
+      if (!slug) throw new Error("Slug not found in hostname or URL path");
+
+      // ✅ Fetch data using slug query param
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
+      if (!response.ok) throw new Error("Failed to fetch consultant data");
+
+      const result = await response.json();
+      console.log("first", result);
+      const data = result.data;
+      console.log("first", data);
+
+      setConsultantData(data);
+      setTaglines([data.tagline1, data.tagline2, data.tagline3]);
+      setBannerImages([
+        data?.banner1_Image ? `${BASE_URL}${data.banner1_Image}` : DEFAULT_BANNERS[0],
+        data?.banner2_Image ? `${BASE_URL}${data.banner2_Image}` : DEFAULT_BANNERS[1],
+        data?.banner3_Image ? `${BASE_URL}${data.banner3_Image}` : DEFAULT_BANNERS[2],
+      ]);
+    } catch (error) {
+      console.error("Error fetching consultant data:", error);
+      setBannerImages(DEFAULT_BANNERS);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   useEffect(() => {
     const loadImage = (path) => {

@@ -5,10 +5,10 @@ import LandingPage from "../LandingPage/LandingPage";
 import { notFound } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 
-// Fetch admin without slug
-async function getAdmin() {
+// Fetch admin by slug from domain
+async function getAdmin(slug) {
   const res = await fetch(
-    `https://appo.coinagesoft.com/api/admin/slug`, // keep your fixed API endpoint
+    `https://appo.coinagesoft.com/api/admin/slug?slug=${slug}`, // send hostname as query
     { cache: "no-store" }
   );
 
@@ -30,9 +30,12 @@ export default function Home() {
 
     async function loadAdmin() {
       try {
-        const data = await getAdmin();
+        // Get hostname from browser
+        const hostname = window.location.hostname; // e.g., booking.vedratnavastu.com
+        const data = await getAdmin(hostname);
         setAdmin(data);
       } catch (err) {
+        console.error(err);
         notFound();
       } finally {
         setLoading(false);

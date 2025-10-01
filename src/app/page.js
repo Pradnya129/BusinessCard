@@ -5,10 +5,10 @@ import LandingPage from "./LandingPage/LandingPage";
 import { notFound } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 
-// Fetch admin data (no slug)
-async function getAdmin() {
+// Fetch admin by slug/domain
+async function getAdmin(slug) {
   const res = await fetch(
-    `https://appo.coinagesoft.com/api/admin/slug`, // fixed endpoint
+    `https://appo.coinagesoft.com/api/admin/slug?slug=${slug}`, // send hostname as query
     { cache: "no-store" }
   );
 
@@ -30,9 +30,12 @@ export default function Home() {
 
     async function loadAdmin() {
       try {
-        const data = await getAdmin();
+        // Get hostname from browser, e.g., booking.vedratnavastu.com
+        const hostname = window.location.hostname;
+        const data = await getAdmin(hostname);
         setAdmin(data);
       } catch (err) {
+        console.error(err);
         notFound();
       } finally {
         setLoading(false);
@@ -66,7 +69,7 @@ export default function Home() {
 
   if (!admin) return null;
 
-  // Optional: add fade-in for the page
+  // Optional: fade-in animation for the page
   return (
     <div className="transition-opacity duration-500 opacity-100">
       <LandingPage admin={admin} />

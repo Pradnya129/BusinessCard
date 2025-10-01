@@ -13,12 +13,15 @@ const Header = () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      // ✅ Get slug directly from the pathname (e.g. /landing/pradnya)
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1]; // "pradnya"
+      // ✅ Get slug from hostname first (e.g., booking.vedratnavastu.com)
+      let slug = window.location.hostname;
 
-      // ✅ Call your new slug-based API
-      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/`);
+     
+
+      if (!slug) throw new Error("Slug not found in hostname or URL path");
+
+      // ✅ Call slug-based API
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
       if (!response.ok) throw new Error("Failed to fetch landing page data");
 
       const result = await response.json();
@@ -32,6 +35,7 @@ useEffect(() => {
 
   fetchData();
 }, []);
+
 
 
   return (

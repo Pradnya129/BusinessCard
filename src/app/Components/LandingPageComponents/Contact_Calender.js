@@ -18,18 +18,21 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
 useEffect(() => {
   const fetchPlans = async () => {
-  
-
-    // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
-    const pathParts = window.location.pathname.split("/");
-    const slug = pathParts[pathParts.length - 1];
-
     try {
-      const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/all`, {
-      });
+      // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
+      const hostname = window.location.hostname;
+
+      // Send hostname as query param to backend
+      const res = await fetch(
+        `https://appo.coinagesoft.com/api/public-landing/all?slug=${hostname}`
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch plans");
+
       const obj = await res.json();
-      const data = obj.data
-      console.log(data.data)
+      const data = obj.data;
+
+      console.log("Plans Data:", data);
 
       if (Array.isArray(data) && data.length > 0) {
         setAvailablePlans(data);
@@ -51,6 +54,7 @@ useEffect(() => {
 
   fetchPlans();
 }, []);
+
 
 
   const API_URL = process.env.REACT_APP_API_URL;
@@ -191,9 +195,8 @@ const handleSubmit = async (e) => {
   setFormErrors({});
 
   try {
-    // ✅ Get slug from URL path
- const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
+    // ✅ Get tenant slug from hostname (domain) or fallback to URL path
+    let slug = window.location.hostname; // e.g., booking.vedratnavastu.com
 
     // ✅ Find selected plan
     const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
@@ -205,7 +208,7 @@ const handleSubmit = async (e) => {
     // ✅ Construct request body
     const payload = {
       ...formData,
-      slug,              // send slug instead of adminId
+      slug,              // send slug to backend
       planId: selectedPlan.planId
     };
 
@@ -260,6 +263,7 @@ const handleSubmit = async (e) => {
     showModal("failureModal");
   }
 };
+
 
 
   function openReceiptPdf(base64Pdf) {
@@ -347,26 +351,27 @@ const handleSubmit = async (e) => {
 useEffect(() => { 
   if (!formData.appointmentDate || !formData.plan) return;
 
-  // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
- const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
+  // ✅ Get slug from hostname first, fallback to URL path (for localhost/testing)
+  let slug = window.location.hostname; // e.g., booking.vedratnavastu.com
+
+
   if (!slug) {
-    console.error("Slug not found in URL");
+    console.error("Slug not found in URL or hostname");
     return;
   }
 
   // fetch appointments + rules + shifts using slug
   Promise.all([
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments`),
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules`),
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments?slug=${slug}`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`),
+    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`),
   ])
     .then(([appointmentsRes, rulesRes, shiftsRes]) => {
       const appointments = appointmentsRes.data?.data || [];
       const rules = rulesRes.data?.rules || [];
-      const shifts = shiftsRes.data.data || [];
+      const shifts = shiftsRes.data?.data || [];
+
       // find selected plan
-      console.log(rules)
       const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
       if (!selectedPlan) return;
 
@@ -386,10 +391,10 @@ useEffect(() => {
 
       // generate available slots
       const slots = generateSlots(
-        shift.startTime,           // "10:00:00"
-        shift.endTime,             // "22:00:00"
-        Number(selectedPlan.planDuration), // minutes
-        Number(rule.bufferInMinutes),      // minutes
+        shift.startTime,                    // e.g., "10:00:00"
+        shift.endTime,                      // e.g., "22:00:00"
+        Number(selectedPlan.planDuration),  // plan duration in minutes
+        Number(rule.bufferInMinutes),       // buffer in minutes
         booked
       );
 

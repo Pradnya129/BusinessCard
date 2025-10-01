@@ -11,16 +11,19 @@ const FAQSection = () => {
   const [error, setError] = useState(null);
   const API_BASE = `https://appo.coinagesoft.com/api/Faq`;
 
- useEffect(() => {
+useEffect(() => {
   const fetchFAQs = async () => {
     try {
       setLoading(true);
 
-      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
+      // ✅ Extract slug from hostname first, fallback to URL path
+      let slug = window.location.hostname; // e.g., booking.vedratnavastu.com
+     
 
-      const response = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-faqs`);
+      if (!slug) throw new Error("Slug not found in URL or hostname");
+
+      // ✅ Fetch FAQs for this tenant
+      const response = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-faqs?slug=${slug}`);
       setFaqs(response.data.data || []);
     } catch (err) {
       console.error('Error fetching FAQs:', err);
@@ -32,6 +35,7 @@ const FAQSection = () => {
 
   fetchFAQs();
 }, []);
+
 
 
   // Split FAQs into two columns

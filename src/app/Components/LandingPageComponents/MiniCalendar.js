@@ -72,13 +72,14 @@ useEffect(() => {
     try {
       const baseDate = new Date(selected);
 
-      // ✅ Get slug from URL path (e.g. /landing/pradnya → "pradnya")
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
+      // ✅ Get slug from hostname (production)
+      let slug = window.location.hostname;
+
+    
 
       // 1. Get plan-shift-buffer for this admin via slug
       const bufferRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/all-rules`,
+        `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
       );
 
       const rule = bufferRes.data.rules.find((r) => r.planId === planId);
@@ -89,7 +90,7 @@ useEffect(() => {
 
       // 2. Get shifts for this admin via slug
       const shiftRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/all-shifts`,
+        `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`
       );
       const shift = shiftRes.data.data.find((s) => s.id === rule.shiftId);
       if (!shift) {
@@ -110,10 +111,9 @@ useEffect(() => {
       );
 
       // 4. Fetch booked slots for that date via slug
-     const bookedRes = await axios.get(
-  `https://appo.coinagesoft.com/api/public-landing/booked-slots/${selected}`,
-);
-
+      const bookedRes = await axios.get(
+        `https://appo.coinagesoft.com/api/public-landing/booked-slots/${selected}?slug=${slug}`
+      );
 
       const bookedData = bookedRes.data?.data || [];
 

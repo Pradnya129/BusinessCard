@@ -9,20 +9,26 @@ const Stats = () => {
 
   const iconList = ['bi-bar-chart-line-fill', 'bi-graph-up', 'bi-emoji-smile-fill'];
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const slug = window.location.pathname.split("/").pop();
-        const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-stats`);
-        console.log("statsres", res.data);
-        setStats(res.data.data || []);
-      } catch (err) {
-        console.error('Error fetching stats:', err);
-        setStats([]);
-      }
-    };
-    fetchStats();
-  }, []);
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      // ✅ Get slug from hostname (production) or fallback to pathname (localhost)
+      let slug = window.location.hostname;
+     console.log("slug",slug)
+
+      // Fetch stats with slug
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-stats?slug=${slug}`);
+      console.log("stats response:", res.data);
+      setStats(res.data.data || []);
+    } catch (err) {
+      console.error('Error fetching stats:', err);
+      setStats([]);
+    }
+  };
+
+  fetchStats();
+}, []);
+
 
   return (
     <div className="rounded-2 mx-3 mx-lg-10">

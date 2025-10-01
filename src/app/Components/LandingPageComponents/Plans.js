@@ -15,14 +15,15 @@ const Plans = React.forwardRef((props, ref) => {
   const [plans, setPlans] = useState([]);
   const [shifts, setShifts] = useState([]);
 
- useEffect(() => {
+useEffect(() => {
   const fetchData = async () => {
     try {
-      // ✅ Get slug from URL path (e.g., /landing/pradnya → "pradnya")
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
+      // ✅ Get slug from hostname first (production)
+      let slug = window.location.hostname;
+   
 
-      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/`);
+      // Fetch landing page data for this slug
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
       const data = res.data.data;
 
       setFormData({
@@ -36,17 +37,18 @@ const Plans = React.forwardRef((props, ref) => {
   };
 
   const fetchPlans = async () => {
-    const token = localStorage.getItem('token');
     try {
-      // ✅ Use slug to fetch plans/shifts for public landing if needed
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
+      // ✅ Get slug from hostname/pathname
+      let slug = window.location.hostname;
+      if (!slug || slug === "localhost" || slug === "127.0.0.1") {
+        const pathParts = window.location.pathname.split("/").filter(Boolean);
+        slug = pathParts[pathParts.length - 1] || "shilrtna";
+      }
 
+      // Fetch plans and shifts with slug
       const [plansRes, shiftsRes] = await Promise.all([
-        axios.get(`https://appo.coinagesoft.com/api/public-landing/all`, {
-        }),
-        axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts`, {
-        }),
+        axios.get(`https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`),
+        axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`),
       ]);
 
       setPlans(plansRes.data.data || []);

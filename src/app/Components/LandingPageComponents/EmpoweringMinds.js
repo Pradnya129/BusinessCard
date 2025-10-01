@@ -8,15 +8,17 @@ const EmpoweringMinds = () => {
     section3_Image: ''
   });
 
-  useEffect(() => {
+useEffect(() => {
   const fetchData = async () => {
     try {
-      // ✅ Extract slug from URL path (/landing/pradnya → "pradnya")
-      const pathParts = window.location.pathname.split("/");
-      const slug = pathParts[pathParts.length - 1];
- 
-      // ✅ Use slug API
-      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/`);
+      // ✅ Extract slug from hostname first, fallback to URL path
+      let slug = window.location.hostname; // e.g., booking.vedratnavastu.com
+    
+
+      if (!slug) throw new Error("Slug not found in URL or hostname");
+
+      // ✅ Fetch landing page data for this tenant
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();
@@ -25,7 +27,7 @@ const EmpoweringMinds = () => {
       // ✅ Split description into array of paragraphs
       const rawDescription = data?.section3_Description || "";
       const formattedDescription = rawDescription
-        .split("',") // change to "\n" if your backend sends newlines instead
+        .split("',") // or "\n" if your backend uses newlines
         .map(s => s.replace(/^'/, "").trim())
         .filter(line => line.length > 0);
 
@@ -42,6 +44,7 @@ const EmpoweringMinds = () => {
 
   fetchData();
 }, []);
+
 
 
   return (
