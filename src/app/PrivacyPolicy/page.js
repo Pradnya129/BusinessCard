@@ -1,9 +1,21 @@
 import React from 'react'
 import PrivacyPolicy from '../Components/LandingPageComponents/PrivacyPolicy'
+import Header from 'app/Components/LandingPageComponents/Header'
+import Footer from 'app/Components/LandingPageComponents/Footer'
+import "../Components/LandingPageComponents/policies.css"
 
 const page = () => {
   return (
-    <PrivacyPolicy/>
+    <div className="page-container">
+ <div className="mb-10">
+       <Header />
+   </div>
+   <main>
+
+      <PrivacyPolicy/>
+   </main>
+      <Footer/>
+    </div>
   )
 }
 

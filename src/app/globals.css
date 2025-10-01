@@ -3,6 +3,11 @@ body {
   background-color: #f4f4f4 !important;
   /* padding: 20px; */
 }
+
+
+main {
+  flex: 1;
+}
 .chart-container {
   width: 45%;
   background: white;

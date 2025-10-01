@@ -24,6 +24,8 @@ const ConsultantSection6 = () => {
   // Load FAQs from API on mount
   useEffect(() => {
     const fetchFaqs = async () => {
+          const token = localStorage.getItem("token");
+
       try {
         const headers = getAuthHeaders();
         if (!headers.Authorization) {
@@ -31,7 +33,9 @@ const ConsultantSection6 = () => {
           return;
         }
 
-        const res = await axios.get(`https://appo.coinagesoft.com/api/admin/faq`, { headers });
+        const res = await axios.get(`https://appo.coinagesoft.com/api/admin/faq`, {  headers: {
+    "Authorization": `Bearer ${token}` // <-- Add this line
+  }, });
         setFaqs(res.data.data);
         setStatusMessage({ type: '', text: '' });
       } catch (err) {

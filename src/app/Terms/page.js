@@ -1,10 +1,25 @@
-import React from 'react'
-import Terms from '../Components/LandingPageComponents/Terms'
+"use client";
 
-const page = () => {
+import React from "react";
+import Terms from "../Components/LandingPageComponents/Terms";
+import Footer from "app/Components/LandingPageComponents/Footer";
+import Header from "app/Components/LandingPageComponents/Header";
+import "../Components/LandingPageComponents/policies.css"
+const Page = () => {
   return (
-<Terms/>
-)
-}
+    <div className="page-container"> {/* ✅ Use min-h-screen */}
+   <div className="mb-10">
+       <Header />
+   </div>
 
-export default page
+      {/* Main content grows to push footer down */}
+      <main className=""> {/* ✅ Add padding so header doesn't overlap */}
+        <Terms />
+      </main>
+
+      <Footer /> {/* ✅ Footer stays at bottom */}
+    </div>
+  );
+};
+
+export default Page;

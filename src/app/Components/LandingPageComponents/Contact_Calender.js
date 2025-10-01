@@ -208,13 +208,13 @@ const handleSubmit = async (e) => {
     // ✅ Construct request body
     const payload = {
       ...formData,
-      slug,              // send slug to backend
+                // send slug to backend
       planId: selectedPlan.planId
     };
 
     console.log("📤 Sending appointment payload:", payload);
 
-    const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid`, {
+    const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${slug}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
