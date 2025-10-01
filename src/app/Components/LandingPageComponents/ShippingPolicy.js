@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DOMPurify from "dompurify";
 
-const API_URL = "http://localhost:5000/api/admin/policy"; // ✅ your API
+const API_URL = "https://appo.coinagesoft.com/api/admin/policy"; // ✅ your API
 const tenantId = 8; // hardcoded for now, or make dynamic if needed
 
 const ShippingPolicy = () => {

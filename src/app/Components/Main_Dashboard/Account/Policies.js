@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBold, faItalic, faUnderline, faListOl, faListUl, faEraser } from '@fortawesome/free-solid-svg-icons';
 
-const API_URL = "http://localhost:5000/api/admin/policy"; // your API
+const API_URL = "https://appo.coinagesoft.com/api/admin/policy"; // your API
 
 const Policies = () => {
   const [tenantId] = useState(8); // fixed tenantId
