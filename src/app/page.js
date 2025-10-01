@@ -1,14 +1,14 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import LandingPage from "./LandingPage/LandingPage";
 import { notFound } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 
-// Fetch admin data
-async function getAdmin(slug) {
+// Fetch admin data (no slug)
+async function getAdmin() {
   const res = await fetch(
-    `https://appo.coinagesoft.com/api/admin/slug?slug=${slug}`,
+    `https://appo.coinagesoft.com/api/admin/slug`, // fixed endpoint
     { cache: "no-store" }
   );
 
@@ -20,10 +20,7 @@ async function getAdmin(slug) {
   return data.admin;
 }
 
-export default function Home({ params }) {
-  // ✅ unwrap params
-  const { slug } = use(params);
-
+export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +30,7 @@ export default function Home({ params }) {
 
     async function loadAdmin() {
       try {
-        const data = await getAdmin(slug);
+        const data = await getAdmin();
         setAdmin(data);
       } catch (err) {
         notFound();
@@ -43,7 +40,7 @@ export default function Home({ params }) {
     }
 
     loadAdmin();
-  }, [slug]);
+  }, []);
 
   // Full-page loader until hydration + API fetch complete
   if (!hydrated || loading) {
