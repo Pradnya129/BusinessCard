@@ -8,7 +8,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 // Fetch admin by slug/domain
 async function getAdmin(slug) {
   const res = await fetch(
-    `https://appo.coinagesoft.com/api/admin/slug?slug=${slug}`, // send hostname as query
+    `https://appo.coinagesoft.com/api/public-landing/slug?slug=${slug}`, // send hostname as query
     { cache: "no-store" }
   );
 
