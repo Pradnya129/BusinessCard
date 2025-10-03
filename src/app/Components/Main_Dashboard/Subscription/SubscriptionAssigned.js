@@ -158,7 +158,7 @@ const handleSubscribe = async () => {
 
     // 🔹 Initialize Razorpay
     const options = {
-      key: 'rzp_test_G5ZTKDD6ejrInm', // Razorpay test key
+      key: 'rzp_live_ROqtNyOLc21A6a', // Razorpay test key
       amount,
       currency,
       name: 'Subscription Payment',
