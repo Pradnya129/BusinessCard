@@ -62,37 +62,33 @@ const MiniCalendar = ({
     return slots;
   };
 
-  // 🔹 Fetch shift + booked slots
+
 useEffect(() => {
   const fetchShiftAndGenerateSlots = async () => {
     if (!selected || !duration || !planId) return;
 
-    const token = localStorage.getItem("token");
-
     try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const baseDate = new Date(selected);
+      const slug = "booking.vedratnavastu.com";
 
-      // ✅ Get slug from hostname (production)
-      let slug = window.location.hostname;
-
-    
-
-      // 1. Get plan-shift-buffer for this admin via slug
+      // 1️⃣ Get plan-shift-buffer
       const bufferRes = await axios.get(
         `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
       );
-
-      const rule = bufferRes.data.rules.find((r) => r.planId === planId);
+      const rule = bufferRes.data.rules.find(r => r.planId === planId);
       if (!rule) {
         setTimeSlots([]);
         return;
       }
 
-      // 2. Get shifts for this admin via slug
+      // 2️⃣ Get shifts
       const shiftRes = await axios.get(
         `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`
       );
-      const shift = shiftRes.data.data.find((s) => s.id === rule.shiftId);
+      const shift = shiftRes.data.data.find(s => s.id === rule.shiftId);
       if (!shift) {
         setTimeSlots([]);
         return;
@@ -101,7 +97,7 @@ useEffect(() => {
       const shiftStart = new Date(`${selected}T${shift.startTime}`);
       const shiftEnd = new Date(`${selected}T${shift.endTime}`);
 
-      // 3. Generate all slots
+      // 3️⃣ Generate all slots
       const slots = generateTimeSlots(
         shiftStart,
         shiftEnd,
@@ -110,28 +106,55 @@ useEffect(() => {
         baseDate
       );
 
-      // 4. Fetch booked slots for that date via slug
-      const bookedRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/booked-slots/${selected}?slug=${slug}`
+      // 4️⃣ Get only users assigned to this plan
+      const usersRes = await axios.get(
+        `http://localhost:5000/api/public-landing/allUsersByPlan`,
+        { params: { slug, planId } }
+      );
+      const users = usersRes.data?.data || [];
+      console.log("Users assigned to this plan:", users);
+
+      if (!users.length) {
+        setTimeSlots(slots); // no users, all slots are free
+        return;
+      }
+
+      // 5️⃣ Fetch booked slots (filtered by both user + planId + slug)
+      const bookedResults = await Promise.all(
+        users.map(async (user) => {
+          try {
+        const dateStr = new Date(selected).toISOString().split("T")[0];
+const res = await axios.get(
+  `http://localhost:5000/api/public-landing/booked-slots/${dateStr}`,
+  { params: { userId: user.id, planId, slug } }
+ // 👈 added slug here
+            );
+            return res.data?.data || [];
+          } catch (err) {
+            console.error(`Error fetching booked slots for user ${user.id}`, err);
+            return [];
+          }
+        })
       );
 
-      const bookedData = bookedRes.data?.data || [];
+      const allBooked = bookedResults.flat();
 
-      // Convert booked slots → Date
-      const bookedRanges = bookedData.map((b) => ({
+      // convert to Date ranges
+      const bookedRanges = allBooked.map(b => ({
         start: parse12ToDate(b.startTime, baseDate),
         end: parse12ToDate(b.endTime, baseDate),
       }));
 
-      // 5. Filter booked
-      const finalSlots = slots.map((slot) => {
-        const isBooked = bookedRanges.some((b) =>
-          isOverlapping(slot.start, slot.end, b.start, b.end)
+      // mark slots as booked only for this plan
+      const finalSlots = slots.map(slot => {
+        const isBooked = bookedRanges.some(
+          b => b.start.getTime() === slot.start.getTime() && b.end.getTime() === slot.end.getTime()
         );
         return { ...slot, isBooked };
       });
 
       setTimeSlots(finalSlots);
+
     } catch (err) {
       console.error("❌ Error fetching shift/slots:", err);
       setTimeSlots([]);

@@ -138,7 +138,7 @@ const fetchAppointments = async () => {
         const plansResponse = await axios.get(`${API_BASE}/admin/plans/all_plans_with_users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
+console.log("allplans users -",plansResponse.data.data)
         let assignedUsers = [];
         if (plansResponse.data && Array.isArray(plansResponse.data.data)) {
           plansResponse.data.data.forEach((plan) => {
@@ -149,6 +149,7 @@ const fetchAppointments = async () => {
                     id: up.User.id,
                     name: up.User.name || up.User.email,
                   });
+                  console.log("assigned users",assignedUsers)
                 }
               });
             }
@@ -234,7 +235,7 @@ const fetchAppointments = async () => {
         const shiftsRes = await axios.get(`${API_BASE}/admin/shift`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("shift",shiftsRes)
+        console.log("shift",shiftsRes.data)
         setShifts(Array.isArray(shiftsRes.data) ? shiftsRes.data : []);
       } catch (err) {
         console.error("Failed to load shift/rule", err);
