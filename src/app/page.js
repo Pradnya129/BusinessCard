@@ -1,14 +1,13 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import LandingPage from "./LandingPage/LandingPage";
 import { notFound } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 
-// Fetch admin by slug/domain
 async function getAdmin(slug) {
   const res = await fetch(
-    `https://appo.coinagesoft.com/api/public-landing/slug?slug=${slug}`, // send hostname as query
+    `https://appo.coinagesoft.com/api/public-landing/slug?slug=${slug}`,
     { cache: "no-store" }
   );
 
@@ -21,16 +20,12 @@ async function getAdmin(slug) {
 }
 
 export default function Home() {
-  const [hydrated, setHydrated] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setHydrated(true);
-
     async function loadAdmin() {
       try {
-        // Get hostname from browser, e.g., booking.vedratnavastu.com
         const hostname = window.location.hostname;
         const data = await getAdmin(hostname);
         setAdmin(data);
@@ -45,8 +40,8 @@ export default function Home() {
     loadAdmin();
   }, []);
 
-  // Full-page loader until hydration + API fetch complete
-  if (!hydrated || loading) {
+  // ✅ Show loader while loading OR no admin yet
+  if (loading || !admin) {
     return (
       <div
         style={{
@@ -67,12 +62,5 @@ export default function Home() {
     );
   }
 
-  if (!admin) return null;
-
-  // Optional: fade-in animation for the page
-  return (
-    <div className="transition-opacity duration-500 opacity-100">
-      <LandingPage admin={admin} />
-    </div>
-  );
+  return <LandingPage admin={admin} />;
 }

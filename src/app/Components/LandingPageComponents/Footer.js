@@ -1,7 +1,30 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import axios from 'axios';
 const Footer = () => {
+ const [plans, setPlans] = useState([]);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        let slug = window.location.hostname;
+       
+
+        const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`);
+        setPlans(res.data.data || []);
+      } catch (error) {
+        console.error("Error fetching plans:", error);
+        setPlans([]);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
+  if( plans.length === 0){
+  return null
+}
   return (
     <footer className="bg-black">
       <div className="container pb-1 pt-5 ">

@@ -38,9 +38,7 @@ const Hero = ({ scrollToSectionHeader }) => {
       if (!response.ok) throw new Error("Failed to fetch consultant data");
 
       const result = await response.json();
-      console.log("first", result);
       const data = result.data;
-      console.log("first", data);
 
       setConsultantData(data);
       setTaglines([data.tagline1, data.tagline2, data.tagline3]);
@@ -107,6 +105,9 @@ const Hero = ({ scrollToSectionHeader }) => {
     });
   }, [bannerImages, taglines]);
 
+  if( consultantData.length === 0){
+  return null
+}
   return (
     <main id="content" role="main">
       <div className="position-relative">
@@ -128,11 +129,8 @@ const Hero = ({ scrollToSectionHeader }) => {
                           <img
                             className="avatar-img rounded-pill"
                             src={
-                              consultantData.profileImage
-                                  ?  `https://appo.coinagesoft.com/${consultantData.profileImage}`
-                                : '/assets/img/160x160/img6.jpg'
+                                  `https://appo.coinagesoft.com/${consultantData.profileImage}`
                             }
-                            alt="Doctor"
                           />
                         </div>
                       </div>

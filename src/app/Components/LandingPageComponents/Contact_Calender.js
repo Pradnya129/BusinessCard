@@ -11,7 +11,6 @@ const TimePicker = dynamic(() => import('react-time-picker'), { ssr: false });
 
 const Contact_Calender = React.forwardRef((props, ref) => {
   const [formErrors, setFormErrors] = useState({});
-  const [loadingPayment, setLoadingPayment] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -68,7 +67,13 @@ useEffect(() => {
     appointmentTime: '',
     plan: '', // pre-filled plan name
     amount: '',     // pre-filled plan price
-    duration: '',   // pre-filled plan duration as a string representing minutes (eg: "30", "60", "90")
+    duration: '', 
+      birthDate: '',        // new
+  birthTime: '',        // new
+  birthPlace: '',       // new
+  vastuType: '',        // new
+  googleLocation: '',   // new
+  floorPlanFile: null,   // pre-filled plan duration as a string representing minutes (eg: "30", "60", "90")
   });
 
   const [bookedTimeSlots, setBookedTimeSlots] = useState([]);
@@ -207,9 +212,14 @@ const handleSubmit = async (e) => {
 
     // ✅ Construct request body
     const payload = {
-      ...formData,
-                // send slug to backend
-      planId: selectedPlan.planId
+      ...formData,             // send slug to backend
+      planId: selectedPlan.planId,
+       birthDate: formData.birthDate,
+  birthTime: formData.birthTime,
+  birthPlace: formData.birthPlace,
+  vastuType: formData.vastuType,
+  googleLocation: formData.googleLocation,
+  floorPlanFile:formData.floorPlanFile
     };
 
     console.log("📤 Sending appointment payload:", payload);
@@ -249,9 +259,7 @@ const handleSubmit = async (e) => {
     };
 
     const rzp1 = new window.Razorpay(razorpayOptions);
-    setLoadingPayment(true);
     rzp1.on("payment.failed", function () {
-      setLoadingPayment(false);
       setPaymentCompleted(true);
       showModal("failureModal");
     });
@@ -327,6 +335,12 @@ const handleSubmit = async (e) => {
           plan: '',
           amount: '',
           duration: '',
+        birthDate: '',        // new
+  birthTime: '',        // new
+  birthPlace: '',       // new
+  vastuType: '',        // new
+  googleLocation: '',   // new
+  floorPlanFile: null, 
         });
         setFormErrors({});
       } else {
@@ -407,13 +421,7 @@ useEffect(() => {
 
   return (
     <>
-      {loadingPayment && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex justify-content-center align-items-center" style={{ zIndex: 9999 }}>
-          <div className="spinner-border text-light" role="status">
-            <span className="visually-hidden">Processing payment...</span>
-          </div>
-        </div>
-      )}
+       
       <div className="bg-light mt-8">
         <div className="container row content-space-2 content-space-lg-3 mx-auto" id="target-form">
           <div className="col-lg-7 col-12 ">
@@ -537,6 +545,96 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Vastu & Birth Details */}
+<div className="row gx-2">
+  <div className="col-sm-6 mb-2">
+    <label className="form-label" htmlFor="birthDate">Birth Date</label>
+    <input
+      type="date"
+      className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
+      name="birthDate"
+      id="birthDate"
+      value={formData.birthDate}
+      onChange={handleChange}
+    />
+    {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
+  </div>
+
+  <div className="col-sm-6 mb-2">
+    <label className="form-label" htmlFor="birthTime">Birth Time</label>
+    <input
+      type="time"
+      className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
+      name="birthTime"
+      id="birthTime"
+      value={formData.birthTime}
+      onChange={handleChange}
+    />
+    {formErrors.birthTime && <div className="text-danger small">{formErrors.birthTime}</div>}
+  </div>
+
+  <div className="col-sm-6 mb-2">
+    <label className="form-label" htmlFor="birthPlace">Birth Place</label>
+    <input
+      type="text"
+      className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
+      name="birthPlace"
+      id="birthPlace"
+      value={formData.birthPlace}
+      onChange={handleChange}
+      placeholder="City or location"
+    />
+    {formErrors.birthPlace && <div className="text-danger small">{formErrors.birthPlace}</div>}
+  </div>
+
+ <div className="col-sm-6 mb-2">
+  <label className="form-label" htmlFor="vastuType">Vastu Type</label>
+  <select
+    className={`form-select form-select-sm ${formErrors.vastuType ? 'border border-danger' : ''}`}
+    name="vastuType"
+    id="vastuType"
+    value={formData.vastuType}
+    onChange={handleChange}
+  >
+    <option value="">-- Select Vastu Type --</option>
+    <option value="Residential">Residential</option>
+    <option value="Commercial">Commercial</option>
+    <option value="Industrial">Industrial</option>
+    <option value="Office">Office</option>
+    <option value="Plot">Plot</option>
+  </select>
+  {formErrors.vastuType && <div className="text-danger small">{formErrors.vastuType}</div>}
+</div>
+
+
+  <div className="col-sm-12 mb-2">
+    <label className="form-label" htmlFor="googleLocation">Google Location</label>
+    <input
+      type="text"
+      className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
+      name="googleLocation"
+      id="googleLocation"
+      value={formData.googleLocation}
+      onChange={handleChange}
+      placeholder="Paste Google Maps link"
+    />
+    {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
+  </div>
+
+  <div className="col-sm-12 mb-2">
+    <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
+    <input
+      type="file"
+      className="form-control form-control-sm"
+      name="floorPlanFile"
+      id="floorPlanFile"
+      accept=".jpg,.jpeg,.png,.pdf"
+      onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })}
+    />
+  </div>
+</div>
+
                     {/* Additional Details */}
                     <div className="mb-2">
                       <label className="form-label" htmlFor="details">Details</label>
@@ -544,7 +642,7 @@ useEffect(() => {
                         value={formData.details} onChange={handleChange} placeholder="Additional notes or questions..."></textarea>
                     </div>
                     <div className="d-grid mb-2">
-                      <button type="submit" className="btn btn-primary btn-sm" disabled={loadingPayment}>
+                      <button type="submit" className="btn btn-primary btn-sm" >
                         Book Appointment
                       </button>
                     </div>

@@ -235,211 +235,265 @@ const handleDelete = async (id) => {
   };
 
   return (
-    <>
-      <div className="card p-3 rounded-4 mt-5">
-        <div className="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-          <div className="d-block d-md-none mx-auto mb-3">
-            <h5 className="mb-0">Appointments</h5>
-          </div>
-          <div className="d-none d-md-block mb-3 d-flex justify-content-between align-items-center w-100">
-            <h5 className="mb-0">Appointment</h5>
-            <select
-              className="form-select w-auto"
-              style={{ minWidth: '200px' }}
-              value={selectedUserId}
-              onChange={handleUserChange}
-            >
-              <option value="">Admin</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="table-responsive">
-          <div className="table-responsive d-none d-md-block">
-            <table className="table align-middle table-bordered table-hover mb-0 text-nowrap">
-              <thead className="table-light">
-                <tr>
-                  <th>Sr. No</th>
-                  <th>Client Name</th>
-                  <th>Email</th>
-                  <th>Phone</th>
-                  <th>Duration</th>
-                  <th>Plan</th>
-                  <th>Amount</th>
-                  <th>Time</th>
-                  <th>Date</th>
-                  <th>Payment Method</th>
-                  <th>Payment ID</th>
-                  <th>Payment Status</th>
-                  <th>Appointment Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {appointments.map((appt, index) => (
-                  <tr key={appt.id || index}>
-                    <td>{index + 1}</td>
-                    <td>{appt.firstName} {appt.lastName}</td>
-                    <td>{appt.email}</td>
-                    <td>{appt.phoneNumber}</td>
-                    <td>{appt.duration}</td>
-                    <td>{appt.plan}</td>
-                    <td>{appt.amount}</td>
-                    <td>{appt.appointmentTime}</td>
-                    <td>{appt.appointmentDate}</td>
-                    <td>{appt.paymentMethod}</td>
-                    <td>{appt.paymentId || "None"}</td>
-                    <td>
-                      <span className={`badge bg-${getPaymentBadgeColor(appt.paymentStatus)}`}>
-                        {appt.paymentStatus}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge bg-${getAppointmentBadgeColor(appt.appointmentStatus)}`}>
-                        {appt.appointmentStatus}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="d-flex gap-2">
-                        <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(appt)}>
-                          <FaEdit />
-                        </button>
-                        <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(appt.id)}>
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+ <>
+  <div className="card p-3 rounded-4 mt-5">
+    <div className="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+      <div className="d-block d-md-none mx-auto mb-3">
+        <h5 className="mb-0">Appointments</h5>
       </div>
-      {/* Modal for editing appointment */}
-{showModal && selectedAppt && (
-  <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-    <div className="modal-dialog modal-dialog-centered">
-      <div className="modal-content rounded-4">
-        <div className="modal-header">
-          <h5 className="modal-title">Edit Appointment</h5>
-          <button type="button" className="btn-close" onClick={handleClose}></button>
-        </div>
-        <div className="modal-body">
-          <form>
-            {/* First Name */}
-            <div className="mb-3">
-              <label className="form-label">First Name</label>
-              <input type="text" className="form-control" name="firstName" value={selectedAppt.firstName} onChange={handleInputChange} />
-            </div>
+      <div className="d-none d-md-block mb-3 d-flex justify-content-between align-items-center w-100">
+        <h5 className="mb-0">Appointment</h5>
+        <select
+          className="form-select w-auto"
+          style={{ minWidth: '200px' }}
+          value={selectedUserId}
+          onChange={handleUserChange}
+        >
+          <option value="">Admin</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
 
-            {/* Last Name */}
-            <div className="mb-3">
-              <label className="form-label">Last Name</label>
-              <input type="text" className="form-control" name="lastName" value={selectedAppt.lastName} onChange={handleInputChange} />
-            </div>
-
-            {/* Email */}
-            <div className="mb-3">
-              <label className="form-label">Email</label>
-              <input type="email" className="form-control" name="email" value={selectedAppt.email} onChange={handleInputChange} />
-            </div>
-
-            {/* Phone */}
-            <div className="mb-3">
-              <label className="form-label">Phone</label>
-              <input type="text" className="form-control" name="phoneNumber" value={selectedAppt.phoneNumber} onChange={handleInputChange} />
-            </div>
-
-            {/* Duration */}
-            <div className="mb-3">
-              <label className="form-label">Duration</label>
-              <input type="text" className="form-control" name="duration" value={selectedAppt.duration} onChange={handleInputChange} />
-            </div>
-
-            {/* Plan */}
-            <div className="mb-3">
-              <label className="form-label">Plan</label>
-              <input type="text" className="form-control" name="plan" value={selectedAppt.plan} onChange={handleInputChange} />
-            </div>
-
-            {/* Amount */}
-            <div className="mb-3">
-              <label className="form-label">Amount</label>
-              <input type="number" className="form-control" name="amount" value={selectedAppt.amount} onChange={handleInputChange} />
-            </div>
-
-            {/* Time */}
-            <div className="mb-3">
-              <label className="form-label">Time</label>
-              <input type="text" className="form-control" name="appointmentTime" value={selectedAppt.appointmentTime} onChange={handleInputChange} />
-            </div>
-
-            {/* Date */}
-            <div className="mb-3">
-              <label className="form-label">Date</label>
-              <input type="date" className="form-control" name="appointmentDate" value={selectedAppt.appointmentDate} onChange={handleInputChange} />
-            </div>
-
-            {/* Payment Method */}
-            <div className="mb-3">
-              <label className="form-label">Payment Method</label>
-              <select className="form-select" name="paymentMethod" value={selectedAppt.paymentMethod || 'None'} onChange={handleInputChange}>
-                <option value="">Select Payment Method</option>
-                <option value="Cash">Cash</option>
-                <option value="Gpay/Online">Gpay/Online</option>
-              </select>
-            </div>
-
-            {/* Payment Status */}
-            <div className="mb-3">
-              <label className="form-label">Payment Status</label>
-              <select className="form-select" name="paymentStatus" value={selectedAppt.paymentStatus} onChange={handleInputChange}>
-                <option value="Pending">Pending</option>
-                <option value="Paid">Paid</option>
-                <option value="Failed">Failed</option>
-                <option value="Refunded">Refunded</option>
-              </select>
-            </div>
-
-            {/* Appointment Status */}
-            <div className="mb-3">
-              <label className="form-label">Appointment Status</label>
-              <select className="form-select" name="appointmentStatus" value={selectedAppt.appointmentStatus} onChange={handleInputChange}>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Completed">Completed</option>
-                <option value="Cancelled">Cancelled</option>
-                <option value="Rescheduled">Rescheduled</option>
-                <option value="Pending">Pending</option>
-              </select>
-            </div>
-
-            {/* Payment ID */}
-            <div className="mb-3">
-              <label className="form-label">Payment ID</label>
-              <input type="text" className="form-control" name="paymentId" readOnly value={selectedAppt.paymentId || 'None'} onChange={handleInputChange} />
-            </div>
-
-            {/* Save Button */}
-            <div className="text-center mt-3">
-              <button type="button" className="btn btn-primary" onClick={()=>{handleSaveChanges(),handleClose()}} >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
+    <div className="table-responsive">
+      <div className="table-responsive d-none d-md-block">
+        <table className="table align-middle table-bordered table-hover mb-0 text-nowrap">
+          <thead className="table-light">
+            <tr>
+              <th>Sr. No</th>
+              <th>Client Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Duration</th>
+              <th>Plan</th>
+              <th>Amount</th>
+              <th>Time</th>
+              <th>Date</th>
+              <th>Birth Date</th>
+              <th>Birth Time</th>
+              <th>Birth Place</th>
+              <th>Vastu Type</th>
+              <th>Google Location</th>
+              <th>Floor Plan</th>
+              <th>Payment Method</th>
+              <th>Payment ID</th>
+              <th>Payment Status</th>
+              <th>Appointment Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {appointments.map((appt, index) => (
+              <tr key={appt.id || index}>
+                <td>{index + 1}</td>
+                <td>{appt.firstName} {appt.lastName}</td>
+                <td>{appt.email}</td>
+                <td>{appt.phoneNumber}</td>
+                <td>{appt.duration}</td>
+                <td>{appt.plan}</td>
+                <td>{appt.amount}</td>
+                <td>{appt.appointmentTime}</td>
+                <td>{appt.appointmentDate}</td>
+                <td>{appt.birthDate}</td>
+                <td>{appt.birthTime}</td>
+                <td>{appt.birthPlace}</td>
+                <td>{appt.vastuType}</td>
+                <td>
+                  {appt.googleLocation ? (
+                    <a href={appt.googleLocation} target="_blank" rel="noreferrer">Link</a>
+                  ) : "N/A"}
+                </td>
+                <td>
+                  {appt.floorPlanFile ? (
+                    <a href={`/${appt.floorPlanFile}`} target="_blank" rel="noreferrer">View</a>
+                  ) : "N/A"}
+                </td>
+                <td>{appt.paymentMethod}</td>
+                <td>{appt.paymentId || "None"}</td>
+                <td>
+                  <span className={`badge bg-${getPaymentBadgeColor(appt.paymentStatus)}`}>
+                    {appt.paymentStatus}
+                  </span>
+                </td>
+                <td>
+                  <span className={`badge bg-${getAppointmentBadgeColor(appt.appointmentStatus)}`}>
+                    {appt.appointmentStatus}
+                  </span>
+                </td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <button className="btn btn-sm btn-outline-primary" onClick={() => handleEdit(appt)}>
+                      <FaEdit />
+                    </button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => handleDelete(appt.id)}>
+                      <FaTrash />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-)}
 
-      {/* Modal code stays the same */} 
-    </>
+  {/* Modal for editing appointment */}
+  {showModal && selectedAppt && (
+    <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-content rounded-4">
+          <div className="modal-header">
+            <h5 className="modal-title">Edit Appointment</h5>
+            <button type="button" className="btn-close" onClick={handleClose}></button>
+          </div>
+          <div className="modal-body">
+            <form>
+              {/* First Name */}
+              <div className="mb-3">
+                <label className="form-label">First Name</label>
+                <input type="text" className="form-control" name="firstName" value={selectedAppt.firstName} onChange={handleInputChange} />
+              </div>
+
+              {/* Last Name */}
+              <div className="mb-3">
+                <label className="form-label">Last Name</label>
+                <input type="text" className="form-control" name="lastName" value={selectedAppt.lastName} onChange={handleInputChange} />
+              </div>
+
+              {/* Email */}
+              <div className="mb-3">
+                <label className="form-label">Email</label>
+                <input type="email" className="form-control" name="email" value={selectedAppt.email} onChange={handleInputChange} />
+              </div>
+
+              {/* Phone */}
+              <div className="mb-3">
+                <label className="form-label">Phone</label>
+                <input type="text" className="form-control" name="phoneNumber" value={selectedAppt.phoneNumber} onChange={handleInputChange} />
+              </div>
+
+              {/* Duration */}
+              <div className="mb-3">
+                <label className="form-label">Duration</label>
+                <input type="text" className="form-control" name="duration" value={selectedAppt.duration} onChange={handleInputChange} />
+              </div>
+
+              {/* Plan */}
+              <div className="mb-3">
+                <label className="form-label">Plan</label>
+                <input type="text" className="form-control" name="plan" value={selectedAppt.plan} onChange={handleInputChange} />
+              </div>
+
+              {/* Amount */}
+              <div className="mb-3">
+                <label className="form-label">Amount</label>
+                <input type="number" className="form-control" name="amount" value={selectedAppt.amount} onChange={handleInputChange} />
+              </div>
+
+              {/* Time */}
+              <div className="mb-3">
+                <label className="form-label">Time</label>
+                <input type="text" className="form-control" name="appointmentTime" value={selectedAppt.appointmentTime} onChange={handleInputChange} />
+              </div>
+
+              {/* Date */}
+              <div className="mb-3">
+                <label className="form-label">Date</label>
+                <input type="date" className="form-control" name="appointmentDate" value={selectedAppt.appointmentDate} onChange={handleInputChange} />
+              </div>
+
+              {/* New Custom Fields */}
+              <div className="mb-3">
+                <label className="form-label">Birth Date</label>
+                <input type="date" className="form-control" name="birthDate" value={selectedAppt.birthDate} onChange={handleInputChange} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Birth Time</label>
+                <input type="time" className="form-control" name="birthTime" value={selectedAppt.birthTime} onChange={handleInputChange} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Birth Place</label>
+                <input type="text" className="form-control" name="birthPlace" value={selectedAppt.birthPlace} onChange={handleInputChange} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Vastu Type</label>
+                <input type="text" className="form-control" name="vastuType" value={selectedAppt.vastuType} onChange={handleInputChange} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Google Location</label>
+                <input type="text" className="form-control" name="googleLocation" value={selectedAppt.googleLocation} onChange={handleInputChange} />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">Floor Plan File</label>
+                {selectedAppt.floorPlanFile ? (
+                  <a href={`/${selectedAppt.floorPlanFile}`} target="_blank" rel="noreferrer">View</a>
+                ) : "N/A"}
+                <input type="file" className="form-control mt-1" name="floorPlanFile" onChange={handleFileChange} />
+              </div>
+
+              {/* Payment Method */}
+              <div className="mb-3">
+                <label className="form-label">Payment Method</label>
+                <select className="form-select" name="paymentMethod" value={selectedAppt.paymentMethod || 'None'} onChange={handleInputChange}>
+                  <option value="">Select Payment Method</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Gpay/Online">Gpay/Online</option>
+                </select>
+              </div>
+
+              {/* Payment Status */}
+              <div className="mb-3">
+                <label className="form-label">Payment Status</label>
+                <select className="form-select" name="paymentStatus" value={selectedAppt.paymentStatus} onChange={handleInputChange}>
+                  <option value="Pending">Pending</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Failed">Failed</option>
+                  <option value="Refunded">Refunded</option>
+                </select>
+              </div>
+
+              {/* Appointment Status */}
+              <div className="mb-3">
+                <label className="form-label">Appointment Status</label>
+                <select className="form-select" name="appointmentStatus" value={selectedAppt.appointmentStatus} onChange={handleInputChange}>
+                  <option value="Scheduled">Scheduled</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                  <option value="Rescheduled">Rescheduled</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+
+              {/* Payment ID */}
+              <div className="mb-3">
+                <label className="form-label">Payment ID</label>
+                <input type="text" className="form-control" name="paymentId" readOnly value={selectedAppt.paymentId || 'None'} />
+              </div>
+
+              {/* Save Button */}
+              <div className="text-center mt-3">
+                <button type="button" className="btn btn-primary" onClick={()=>{handleSaveChanges(); handleClose();}}>
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</>
+
   );
 };
 

@@ -64,7 +64,9 @@ useEffect(() => {
   fetchPlans();
 }, []);
 
-
+if( plans.length === 0){
+  return null
+}
   return (
     <div className="overflow-hidden">
       {/* Hero */}

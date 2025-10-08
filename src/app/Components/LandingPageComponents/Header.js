@@ -34,6 +34,9 @@ const Header = () => {
     fetchData();
   }, []);
 
+if (!ConsultantData || !ConsultantData.fullName) {
+  return null;
+}
   return (
     <header id="header" className="navbar navbar-expand-lg navbar-end bg-primary position-fixed top-0 start-0 w-100 z-50 shadow-sm">
       <div className="container">
@@ -43,11 +46,11 @@ const Header = () => {
               <li className="nav-item">
                 <a
                   className="btn btn-light font-semibold btn-xs text-xs"
-                  href={ConsultantData.locationURL ?? "https://www.google.com/maps?q=Apollo+Hospital,+Mumbai"}
+                  href={ConsultantData.locationURL }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  🏥 {ConsultantData.hospitalClinicAddress || "Apollo Hospital, Mumbai"}
+                  🏥 {ConsultantData.hospitalClinicAddress }
                 </a>
               </li>
             </ul>
@@ -59,7 +62,7 @@ const Header = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  📧 {ConsultantData.email || "info@example.com"}
+                  📧 {ConsultantData.email }
                 </a>
               </li>
             </ul>

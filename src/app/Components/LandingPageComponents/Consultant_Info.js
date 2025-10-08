@@ -24,8 +24,14 @@ const Consultant_Info = () => {
 
     fetchData();
   }, []);
+  
+if (!consultantData || !consultantData.fullName) {
+  return null;
+}
 
   return (
+
+    
     <div className="container py-5 px-3 px-md-4 px-lg-5">
       <div className="row align-items-center rounded-4 py-5">
         {/* Consultant Image */}
@@ -36,11 +42,9 @@ const Consultant_Info = () => {
             onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.03)')}
             onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             src={
-              consultantData.section2_Image
-                ? `https://appo.coinagesoft.com${consultantData.section2_Image}`
-                : "/assets/img/160x160/img8.jpg"
+                `https://appo.coinagesoft.com${consultantData.section2_Image}`
             }
-            alt={consultantData.fullName || "Consultant"}
+            alt={consultantData.fullName }
           />
         </div>
 

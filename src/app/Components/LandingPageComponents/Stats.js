@@ -29,7 +29,9 @@ useEffect(() => {
   fetchStats();
 }, []);
 
-
+if( stats.length === 0){
+  return null
+}
   return (
     <div className="rounded-2 mx-3 mx-lg-10">
       <div className="container bg-white content-space-2 mt-5 pt-5">

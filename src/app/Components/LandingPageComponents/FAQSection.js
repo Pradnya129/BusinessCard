@@ -36,7 +36,9 @@ useEffect(() => {
   fetchFAQs();
 }, []);
 
-
+if( faqs.length === 0){
+  return null
+}
 
   // Split FAQs into two columns
   const midIndex = Math.ceil(faqs.length / 2);
