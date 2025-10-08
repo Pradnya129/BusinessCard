@@ -431,7 +431,7 @@ useEffect(() => {
                 <div className="card-body contact" style={{ maxHeight: '60.25rem', minHeight: '35.25rem' }}>
                   <div className="text-center mb-3">
                     <h5 className="mb-1">Book Your Appointment</h5>
-                    <p className="small mb-4">Please provide your details and let us know how we can assist you.</p>
+                    <p className="small mb-4">Please fill the details of exact person for whom consultation is needed.</p>
                     <hr className='bg-dark' />
                   </div>
                   <form onSubmit={handleSubmit}>
