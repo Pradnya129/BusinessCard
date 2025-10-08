@@ -233,7 +233,7 @@ const handleSubmit = async (e) => {
       key: appointment.data.razorpayKey,
       amount: appointment.data.amount,
       currency: "INR",
-      name: "Aura Enterprises",
+      name: "Vedratna Vastu",
       description: "Book your appointment",
       order_id: appointment.data.orderId,
       handler: function (response) {

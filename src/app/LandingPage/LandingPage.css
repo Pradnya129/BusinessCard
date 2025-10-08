@@ -6,6 +6,18 @@
   background-color: #fafafa;
 }
 
+.landing-page-container {
+  padding-left: 80px;
+  padding-right: 80px;
+}
+
+@media (max-width: 768px) {
+  .landing-page-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
 html, body {
   margin: 0;
   padding: 0;

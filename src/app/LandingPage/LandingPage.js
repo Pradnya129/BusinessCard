@@ -40,11 +40,12 @@ const LandingPage = ({ admin }) => {
         <link rel="stylesheet" href="https://fonts.googleapis.com" />
         <link rel="stylesheet" href="https://fonts.gstatic.com" />
       </Head >
-      <div className='bg-white'>
+      <div className='bg-white '>
+        <Hero scrollToSectionHeader={scrollToSectionHeader} />
+      <div className='landing-page-container'>
 
         {/* Content */}
         <Header admin={admin} />
-        <Hero scrollToSectionHeader={scrollToSectionHeader} />
         <div className="section-light">
           <Consultant_Info />
         </div>
@@ -65,6 +66,7 @@ const LandingPage = ({ admin }) => {
         </div>
 
         <LeafletMap />
+      </div>
         <Footer />
 
         {/* Scripts */}
