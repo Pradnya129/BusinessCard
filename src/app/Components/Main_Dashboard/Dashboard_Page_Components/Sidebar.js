@@ -9,9 +9,8 @@ if (typeof window !== "undefined") {
   window.PerfectScrollbar = PerfectScrollbar;
 }
 
-const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible }) => {
+const Sidebar = ({ mobileSidebarVisible, setMobileSidebarVisible, sidebarCollapsed, setSidebarCollapsed }) => {
   const [openMenu, setOpenMenu] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [tenantLogo, setTenantLogo] = useState(null);
 
@@ -91,14 +90,15 @@ useEffect(() => {
     <div className="h-screen flex flex-col">
      <aside
   id="layout-menu"
-  className={`layout-menu menu-vertical menu bg-menu-theme bg-fixed
+  className={`layout-menu menu-vertical menu bg-menu-theme bg-light
     ${sidebarCollapsed ? "menu-collapsed" : ""} 
     ${mobileSidebarVisible ? "mobile-sidebar-show" : "mobile-sidebar-hide"}`}
   style={{
-    display: "flex",
-    flexDirection: "column",
-    height: "100vh",     // full screen height
-    overflow: "hidden",  // hide extra scroll
+   
+    
+      // hide extra scroll
+    backgroundColor: "#ffffff",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
   }}
 >
       <div className="app-brand demo">
@@ -220,12 +220,12 @@ useEffect(() => {
         {userRole === "admin" && (
           <ul className="menu-inner py-1">
             {/* --- Admin Menus --- */}
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard"
-                className={`menu-link ${
-                  pathname === "/Dashboard" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-dashboard-line me-2"></i>
                 <div>Dashboard</div>
@@ -253,81 +253,81 @@ useEffect(() => {
               </ul>
             </li> */}
 
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Change_Landing_Page" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Change_Landing_Page"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Change_Landing_Page" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-layout-line me-2"></i>
                 <div>Manage Landing Page</div>
               </Link>
             </li>
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Users" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Users"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Users" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-team-line me-2"></i>
                 <div>Manage Clients</div>
               </Link>
             </li>
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Users/CreateUser" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Users/CreateUser"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Users/CreateUser" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-user-add-line me-2"></i>
                 <div>Create Sub-Admin</div>
               </Link>
             </li>
 
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Calendar" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Calendar"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Calendar" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-calendar-line me-2"></i>
                 <div>Calendar</div>
               </Link>
             </li>
 
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Appointments" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Appointments"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Appointments" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
                 <div>Appointments</div>
               </Link>
             </li>
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Renewal" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Renewal"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Renewal" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
                 <div>Renewals</div>
               </Link>
             </li>
 
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/SubscriptionAssigned" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/SubscriptionAssigned"
-                className={`menu-link ${
-                  pathname === "/Dashboard/SubscriptionAssigned" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-file-text-line me-2"></i>
                 <div>My Subscription</div>
@@ -335,14 +335,14 @@ useEffect(() => {
             </li>
 
             {/* Plans submenu */}
-            <li className="menu-item">
-              <a
-                className={`menu-link menu-toggle cursor-pointer ${
-                  pathname === "/Dashboard/Add_Plan" ||
-                  pathname === "/Dashboard/Plan_List"
+            <li className={`menu-item ${
+                  (pathname === "/Dashboard/Add_Plan" ||
+                  pathname === "/Dashboard/Plan_List")
                     ? "active"
                     : ""
-                }`}
+                } ${openMenu === "plans" ? "open" : ""}`}>
+              <a
+                className="menu-link menu-toggle cursor-pointer"
                 onClick={() => toggleMenu("plans")}
               >
                 <i className="menu-icon tf-icons ri-price-tag-3-line me-2"></i>
@@ -353,22 +353,22 @@ useEffect(() => {
                   openMenu === "plans" ? "d-block" : "d-none"
                 }`}
               >
-                <li className="menu-item">
+                <li className={`menu-item ${
+                      pathname === "/Dashboard/Add_Plan" ? "active" : ""
+                    }`}>
                   <Link
                     href="/Dashboard/Add_Plan"
-                    className={`menu-link ${
-                      pathname === "/Dashboard/Add_Plan" ? "active" : ""
-                    }`}
+                    className="menu-link"
                   >
                     <div>Add Plan</div>
                   </Link>
                 </li>
-                <li className="menu-item">
+                <li className={`menu-item ${
+                      pathname === "/Dashboard/Plan_List" ? "active" : ""
+                    }`}>
                   <Link
                     href="/Dashboard/Plan_List"
-                    className={`menu-link ${
-                      pathname === "/Dashboard/Plan_List" ? "active" : ""
-                    }`}
+                    className="menu-link"
                   >
                     <div>Plan List</div>
                   </Link>
@@ -377,16 +377,16 @@ useEffect(() => {
             </li>
 
             {/* Account Settings */}
-            <li className="menu-item">
-              <a
-                className={`menu-link menu-toggle cursor-pointer ${
-                  pathname === "/Dashboard/Profile" ||
+            <li className={`menu-item ${
+                  (pathname === "/Dashboard/Profile" ||
                   pathname === "/Dashboard/Security" ||
                   pathname === "/Dashboard/Billing"||
-                  pathname === "/Dashboard/Policies"
+                  pathname === "/Dashboard/Policies")
                     ? "active"
                     : ""
-                }`}
+                } ${openMenu === "account" ? "open" : ""}`}>
+              <a
+                className="menu-link menu-toggle cursor-pointer"
                 onClick={() => toggleMenu("account")}
               >
                 <i className="menu-icon tf-icons ri-settings-3-line me-2"></i>
@@ -397,43 +397,43 @@ useEffect(() => {
                   openMenu === "account" ? "d-block" : "d-none"
                 }`}
               >
-                <li className="menu-item">
+                <li className={`menu-item ${
+                      pathname === "/Dashboard/Profile" ? "active" : ""
+                    }`}>
                   <Link
                     href="/Dashboard/Profile"
-                    className={`menu-link ${
-                      pathname === "/Dashboard/Profile" ? "active" : ""
-                    }`}
+                    className="menu-link"
                   >
                     <div>My Profile</div>
                   </Link>
                 </li>
-                <li className="menu-item">
+                <li className={`menu-item ${
+                      pathname === "/Dashboard/Security" ? "active" : ""
+                    }`}>
                   <Link
                     href="/Dashboard/Security"
-                    className={`menu-link ${
-                      pathname === "/Dashboard/Security" ? "active" : ""
-                    }`}
+                    className="menu-link"
                   >
                     <div>Security</div>
                   </Link>
                 </li>
-                <li className="menu-item">
+                <li className={`menu-item ${
+                      pathname === "/Dashboard/Billing" ? "active" : ""
+                    }`}>
                   <Link
                     href="/Dashboard/Billing"
-                    className={`menu-link ${
-                      pathname === "/Dashboard/Billing" ? "active" : ""
-                    }`}
+                    className="menu-link"
                   >
                     <div>Billing & Plans</div>
                   </Link>
                 </li>
 
-                 <li className="menu-item">
+                 <li className={`menu-item ${
+                      pathname === "/Dashboard/Policies" ? "active" : ""
+                    }`}>
                   <Link
                     href="/Dashboard/Policies"
-                    className={`menu-link ${
-                      pathname === "/Dashboard/Billing" ? "active" : ""
-                    }`}
+                    className="menu-link"
                   >
                     <div>Manage Policies</div>
                   </Link>
@@ -463,45 +463,45 @@ useEffect(() => {
                
               </ul>
               </li> */}
-              <li className="menu-item">
+              <li className={`menu-item ${
+                    pathname === "/Dashboard/AdminUsers" ? "active" : ""
+                  }`}>
                 <Link
                   href="/Dashboard/AdminUsers"
-                  className={`menu-link ${
-                    pathname === "/Dashboard/AdminUsers" ? "active" : ""
-                  }`}
+                  className="menu-link"
                 >
                    <i className="menu-icon tf-icons ri-admin-line me-2"></i>
                   <div>Manage Admins</div>
                 </Link>
               </li>
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Coupans" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Coupans"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Coupans" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-coupon-line me-2"></i>
                 <div>Coupons</div>
               </Link>
             </li>
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/Plans" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/Plans"
-                className={`menu-link ${
-                  pathname === "/Dashboard/Plans" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-price-tag-3-line me-2"></i>
                 <div>Subscription Plans</div>
               </Link>
             </li>
-            <li className="menu-item">
+            <li className={`menu-item ${
+                  pathname === "/Dashboard/SubscriptionRenewals" ? "active" : ""
+                }`}>
               <Link
                 href="/Dashboard/SubscriptionRenewals"
-                className={`menu-link ${
-                  pathname === "/Dashboard/SubscriptionRenewals" ? "active" : ""
-                }`}
+                className="menu-link"
               >
                 <i className="menu-icon tf-icons ri-wallet-line me-2"></i>
                 <div>Subscription Renewals</div>

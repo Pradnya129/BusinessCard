@@ -1,16 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import "./Dashboard.css"
+import "./Dashboard.css";
+
 const Navbar = ({ onToggleSidebar }) => {
   const router = useRouter();
   const [user, setUser] = useState({});
   const [slug, setSlug] = useState("");
   const [editingSlug, setEditingSlug] = useState(false);
   const [tempSlug, setTempSlug] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const dropdownRef = useRef(null);
 
   const handleLogOut = () => {
     localStorage.removeItem("token");
@@ -21,98 +25,101 @@ const Navbar = ({ onToggleSidebar }) => {
     setTempSlug(slug);
     setEditingSlug(true);
   };
-const handleSaveSlug = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
 
-    const payload = { adminId, slug: tempSlug };
-    console.log("Sending payload:", payload);
+  const handleSaveSlug = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const decoded = jwtDecode(token);
+      const adminId = decoded.id;
 
-    const response = await axios.put(
-      "https://appo.coinagesoft.com/api/admin/edit-slug",
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+      const payload = { adminId, slug: tempSlug };
+      console.log("Sending payload:", payload);
 
-    console.log("✅ Slug updated:", response.data);
+      const response = await axios.put(
+        "https://appo.coinagesoft.com/api/admin/edit-slug",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    setSlug(tempSlug);
-    setEditingSlug(false);
+      console.log("✅ Slug updated:", response.data);
 
-    // ✅ show success message
-    alert("Slug updated successfully ✅");
-  } catch (error) {
-    console.error("❌ Error updating slug:", error.response?.data || error);
-    alert("Failed to update slug ❌");
-  }
-};
-
-
-
-
-
-
-
-
+      setSlug(tempSlug);
+      setEditingSlug(false);
+      alert("Slug updated successfully ✅");
+    } catch (error) {
+      console.error("❌ Error updating slug:", error.response?.data || error);
+      alert("Failed to update slug ❌");
+    }
+  };
 
   const handleCancelEdit = () => {
     setEditingSlug(false);
     setTempSlug("");
   };
 
+  const handleToggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-
- useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    router.replace("/"); // redirect to login if no token
-    return;
-  }
-
-  const decoded = jwtDecode(token);
-  const adminId = decoded.id;
-
-  // Fetch profile
-  axios
-    .get(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((res) => {
-      const data = res.data.data;
-      if (data) {
-        setUser(data);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
       }
-    })
-    .catch((err) => console.error("Error fetching profile:", err));
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  // Fetch slug by adminId
-  axios
-    .get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((res) => {
-      if (res.data && res.data.slug) {
-        setSlug(res.data.slug);
-      }
-    })
-    .catch((err) => console.error("Error fetching slug:", err));
-}, [router]);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.replace("/");
+      return;
+    }
 
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
+
+    axios
+      .get(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const data = res.data.data;
+        if (data) {
+          setUser(data);
+        }
+      })
+      .catch((err) => console.error("Error fetching profile:", err));
+
+    axios
+      .get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data && res.data.slug) {
+          setSlug(res.data.slug);
+        }
+      })
+      .catch((err) => console.error("Error fetching slug:", err));
+  }, [router]);
+
+  const handleDropdownItemClick = () => {
+    setIsDropdownOpen(false);
+  };
 
   return (
     <div>
       <nav
-        className="layout-navbar  container-xxl navbar navbar-expand-xl navbar-detached  align-items-center bg-navbar-theme"
+        className="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
         id="layout-navbar"
       >
         <div
-          className="layout-menu-toggle layout-menu navbar-nav flex align-items-xl-center  me-xl-0 d-xl-none"
+          className="layout-menu-toggle layout-menu navbar-nav flex align-items-xl-center me-xl-0 d-xl-none"
           id="layout-menu"
         >
           <a
@@ -130,7 +137,7 @@ const handleSaveSlug = async () => {
         <div className="navbar-center flex-grow-1 d-flex justify-content-center align-items-center">
           {editingSlug ? (
             <div className="d-flex align-items-center flex-nowrap">
-              <p className="me-2 fw-bold ">Your live URL  https://appointify.me/</p>
+              <p className="me-2 fw-bold">Your live URL https://appointify.me/</p>
               <input
                 type="text"
                 className="form-control form-control-sm me-2"
@@ -138,16 +145,10 @@ const handleSaveSlug = async () => {
                 onChange={(e) => setTempSlug(e.target.value)}
                 style={{ width: "180px" }}
               />
-              <button
-                className="btn btn-sm btn-success me-2"
-                onClick={handleSaveSlug}
-              >
+              <button className="btn btn-sm btn-success me-2" onClick={handleSaveSlug}>
                 Save
               </button>
-              <button
-                className="btn btn-sm btn-secondary"
-                onClick={handleCancelEdit}
-              >
+              <button className="btn btn-sm btn-secondary" onClick={handleCancelEdit}>
                 Cancel
               </button>
             </div>
@@ -156,10 +157,7 @@ const handleSaveSlug = async () => {
               <span className="me-2 fw-bold" style={{ whiteSpace: "nowrap" }}>
                 Your live URL is here 👉 https://appointify.me/{slug}
               </span>
-              <button
-                className="btn btn-sm btn-outline-primary"
-                onClick={handleEditSlug}
-              >
+              <button className="btn btn-sm btn-outline-primary" onClick={handleEditSlug}>
                 Edit
               </button>
             </div>
@@ -170,12 +168,15 @@ const handleSaveSlug = async () => {
           className="navbar-nav-right d-flex justify-items-end align-items-center"
           id="navbar-collapse"
         >
-          <ul className="navbar-nav flex-row align-items-center ms-auto">
+          <ul className="navbar-nav flex-row align-items-center ms-auto" ref={dropdownRef}>
             <li className="nav-item navbar-dropdown dropdown-user dropdown">
               <a
                 className="nav-link dropdown-toggle hide-arrow"
                 href="#"
-                data-bs-toggle="dropdown"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleToggleDropdown();
+                }}
               >
                 <div className="avatar avatar-online">
                   <img
@@ -190,11 +191,10 @@ const handleSaveSlug = async () => {
                     className="rounded-circle"
                   />
                 </div>
-                {/* <span className="ms-2 d-none d-lg-inline-block">{user.fullName || 'User'}</span> */}
               </a>
-              <ul className="dropdown-menu dropdown-menu-end">
+              <ul className={`dropdown-menu dropdown-menu-end ${isDropdownOpen ? "show" : ""}`}>
                 <li>
-                  <a className="dropdown-item" href="./Security.html">
+                  <a className="dropdown-item" href="#">
                     <div className="d-flex">
                       <div className="flex-shrink-0 me-2">
                         <div className="avatar avatar-online">
@@ -215,72 +215,58 @@ const handleSaveSlug = async () => {
                         <span className="fw-medium d-block small">
                           {user.fullName || "User"}
                         </span>
-                        <small className="text-muted">
-                          {user.role || "Role"}
-                        </small>
+                        <small className="text-muted">{user.role || "Role"}</small>
                       </div>
                     </div>
                   </a>
                 </li>
+
+                <li><div className="dropdown-divider"></div></li>
+
                 <li>
-                  <div className="dropdown-divider"></div>
-                </li>
-                <li>
-                  <Link className="dropdown-item" href="/Dashboard/Profile">
+                  <Link className="dropdown-item" href="/Dashboard/Profile" onClick={handleDropdownItemClick}>
                     <i className="ri-user-3-line ri-22px me-3"></i>
                     <span className="align-middle">My Profile</span>
                   </Link>
                 </li>
+
                 <li>
-                  <Link className="dropdown-item" href="/Dashboard/Security">
+                  <Link className="dropdown-item" href="/Dashboard/Security" onClick={handleDropdownItemClick}>
                     <i className="ri-settings-4-line ri-22px me-3"></i>
                     <span className="align-middle">Security</span>
                   </Link>
                 </li>
+
                 <li>
-                  <Link className="dropdown-item" href="/Dashboard/Billing">
+                  <Link className="dropdown-item" href="/Dashboard/Billing" onClick={handleDropdownItemClick}>
                     <span className="d-flex align-items-center align-middle">
                       <i className="flex-shrink-0 ri-file-text-line ri-22px me-3"></i>
                       <span className="flex-grow-1 align-middle">Billing</span>
-                      <span className="flex-shrink-0 badge badge-center rounded-pill bg-danger">
-                        4
-                      </span>
+                      <span className="flex-shrink-0 badge badge-center rounded-pill bg-danger">4</span>
                     </span>
                   </Link>
                 </li>
-                <li>
-                  <div className="dropdown-divider"></div>
-                </li>
+
+                <li><div className="dropdown-divider"></div></li>
 
                 <li>
-                  <a className="dropdown-item" href="pages-faq.html">
+                  <a className="dropdown-item" href="#" onClick={handleDropdownItemClick}>
                     <i className="ri-question-line ri-22px me-3"></i>
                     <span className="align-middle">FAQ</span>
                   </a>
                 </li>
+
                 <li>
                   <div className="d-grid px-4 pt-2 pb-1">
-                    <a className="btn btn-sm btn-danger d-flex" target="_blank">
-                      <small className="align-middle" onClick={handleLogOut}>
-                        Logout
-                      </small>
+                    <button className="btn btn-sm btn-danger d-flex" onClick={handleLogOut}>
+                      <small className="align-middle">Logout</small>
                       <i className="ri-logout-box-r-line ms-2 ri-16px"></i>
-                    </a>
+                    </button>
                   </div>
                 </li>
               </ul>
             </li>
           </ul>
-        </div>
-
-        <div className="navbar-search-wrapper search-input-wrapper d-none">
-          <input
-            type="text"
-            className="form-control search-input container-xxl border-0"
-            placeholder="Search..."
-            aria-label="Search..."
-          />
-          <i className="ri-close-fill search-toggler cursor-pointer"></i>
         </div>
       </nav>
     </div>

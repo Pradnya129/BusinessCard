@@ -16,6 +16,7 @@ const ShiftManager = ({ planId }) => {
   const [endPeriod, setEndPeriod] = useState('PM');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
 
   const API_BASE = 'https://appo.coinagesoft.com/api';
   const token = localStorage.getItem('token');
@@ -109,6 +110,7 @@ const ShiftManager = ({ planId }) => {
       const fresh = await axios.get(`${API_BASE}/admin/shift`, axiosConfig);
       setShifts(Array.isArray(fresh.data) ? fresh.data : []);
       setSelectedShift(null);
+      setShowForm(false);
     } catch (err) {
       console.error(err);
       setError(err?.response?.data?.title || 'Save failed');
@@ -136,6 +138,7 @@ const ShiftManager = ({ planId }) => {
           variant="outline-success"
           onClick={() => {
             setSelectedShift(null);
+            setShowForm(true);
             setStartHour('01'); setStartMinute('00'); setStartPeriod('AM');
             setEndHour('01'); setEndMinute('00'); setEndPeriod('PM');
           }}
@@ -158,7 +161,7 @@ const ShiftManager = ({ planId }) => {
                   </div>
                 </div>
                 <div className="d-flex gap-2">
-                  <Button size="sm" variant="outline-primary" onClick={() => setSelectedShift(s)}><i className="bi bi-pencil-fill"></i></Button>
+                  <Button size="sm" variant="outline-primary" onClick={() => { setSelectedShift(s); setShowForm(true); }}><i className="bi bi-pencil-fill"></i></Button>
                   <Button size="sm" variant="outline-danger" onClick={() => handleDeleteShift(s.id)}><i className="bi bi-trash-fill"></i></Button>
                 </div>
               </div>
@@ -168,27 +171,32 @@ const ShiftManager = ({ planId }) => {
       )}
 
       <hr />
-      <h5>{selectedShift ? 'Edit Shift' : 'Create New Shift'}</h5>
-      <Row className="mb-3">
-        <Col>
-          <Form.Label>Start Time</Form.Label>
-          <div className="d-flex gap-2">
-            <Form.Select value={startHour} onChange={(e) => setStartHour(e.target.value)}>{hours.map(h => <option key={h} value={h}>{h}</option>)}</Form.Select>
-            <Form.Select value={startMinute} onChange={(e) => setStartMinute(e.target.value)}>{mins.map(m => <option key={m} value={m}>{m}</option>)}</Form.Select>
-            <Form.Select value={startPeriod} onChange={(e) => setStartPeriod(e.target.value)}>{['AM','PM'].map(p => <option key={p} value={p}>{p}</option>)}</Form.Select>
-          </div>
-        </Col>
-        <Col>
-          <Form.Label>End Time</Form.Label>
-          <div className="d-flex gap-2">
-            <Form.Select value={endHour} onChange={(e) => setEndHour(e.target.value)}>{hours.map(h => <option key={h} value={h}>{h}</option>)}</Form.Select>
-            <Form.Select value={endMinute} onChange={(e) => setEndMinute(e.target.value)}>{mins.map(m => <option key={m} value={m}>{m}</option>)}</Form.Select>
-            <Form.Select value={endPeriod} onChange={(e) => setEndPeriod(e.target.value)}>{['AM','PM'].map(p => <option key={p} value={p}>{p}</option>)}</Form.Select>
-          </div>
-        </Col>
-      </Row>
+      {showForm && (
+        <div className="border border-primary bg-light p-3 rounded">
+          <h5>{selectedShift ? 'Edit Shift' : 'Add Shift'}</h5>
+          <Row className="mb-3">
+            <Col>
+              <Form.Label>Start Time</Form.Label>
+              <div className="d-flex gap-2">
+                <Form.Select value={startHour} onChange={(e) => setStartHour(e.target.value)}>{hours.map(h => <option key={h} value={h}>{h}</option>)}</Form.Select>
+                <Form.Select value={startMinute} onChange={(e) => setStartMinute(e.target.value)}>{mins.map(m => <option key={m} value={m}>{m}</option>)}</Form.Select>
+                <Form.Select value={startPeriod} onChange={(e) => setStartPeriod(e.target.value)}>{['AM','PM'].map(p => <option key={p} value={p}>{p}</option>)}</Form.Select>
+              </div>
+            </Col>
+            <Col>
+              <Form.Label>End Time</Form.Label>
+              <div className="d-flex gap-2">
+                <Form.Select value={endHour} onChange={(e) => setEndHour(e.target.value)}>{hours.map(h => <option key={h} value={h}>{h}</option>)}</Form.Select>
+                <Form.Select value={endMinute} onChange={(e) => setEndMinute(e.target.value)}>{mins.map(m => <option key={m} value={m}>{m}</option>)}</Form.Select>
+                <Form.Select value={endPeriod} onChange={(e) => setEndPeriod(e.target.value)}>{['AM','PM'].map(p => <option key={p} value={p}>{p}</option>)}</Form.Select>
+              </div>
+            </Col>
+          </Row>
 
-      <Button onClick={saveShift} className="mb-4" variant="primary">{selectedShift ? 'Update Shift' : 'Save Shift'}</Button>
+          <Button onClick={saveShift} className="me-2" variant="primary">{selectedShift ? 'Update Shift' : 'Save Shift'}</Button>
+          <Button variant="secondary" onClick={() => { setShowForm(false); setSelectedShift(null); }}>Cancel</Button>
+        </div>
+      )}
 
       <hr />
       {message && <Alert variant="success" className="mt-3">{message}</Alert>}

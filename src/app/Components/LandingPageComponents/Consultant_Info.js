@@ -128,7 +128,7 @@ const Consultant_Info = () => {
                         fontSize: '18px',
                       }}
                     >
-                      <i className="bi-twitter"></i>
+                      <i className="bi-youtube"></i>
                     </a>
                   </li>
                 )}
