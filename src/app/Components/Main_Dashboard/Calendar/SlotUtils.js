@@ -65,7 +65,7 @@ export const fetchBookedSlots = async (selectedDate, planId, slug="booking.vedra
 
   try {
     const usersRes = await axios.get(
-      `http://localhost:5000/api/public-landing/allUsersByPlan`,
+      `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
       { params: { planId, slug } }
     );
     const users = usersRes.data?.data || [];
@@ -75,7 +75,7 @@ export const fetchBookedSlots = async (selectedDate, planId, slug="booking.vedra
       users.map(async user => {
         const dateStr = new Date(selectedDate).toISOString().split("T")[0];
         const res = await axios.get(
-          `http://localhost:5000/api/public-landing/booked-slots/${dateStr}`,
+          `https://appo.coinagesoft.com/api/public-landing/booked-slots/${dateStr}`,
           { params: { userId: user.id, planId, slug } }
         );
         return res.data?.data || [];

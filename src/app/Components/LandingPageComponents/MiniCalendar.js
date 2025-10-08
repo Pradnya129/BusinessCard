@@ -108,7 +108,7 @@ useEffect(() => {
 
       // 4️⃣ Get only users assigned to this plan
       const usersRes = await axios.get(
-        `http://localhost:5000/api/public-landing/allUsersByPlan`,
+        `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
         { params: { slug, planId } }
       );
       const users = usersRes.data?.data || [];
@@ -125,7 +125,7 @@ useEffect(() => {
           try {
         const dateStr = new Date(selected).toISOString().split("T")[0];
 const res = await axios.get(
-  `http://localhost:5000/api/public-landing/booked-slots/${dateStr}`,
+  `https://appo.coinagesoft.com/api/public-landing/booked-slots/${dateStr}`,
   { params: { userId: user.id, planId, slug } }
  // 👈 added slug here
             );
