@@ -135,6 +135,53 @@
 
 }
 
+.navbar-nav {
+  position: relative;
+  overflow: visible !important;
+}
+
+.dropdown-menu {
+  position: absolute !important;
+  right: 0;
+  left: auto;
+  z-index: 9999; /* keep it on top */
+  transform: translateY(10px);
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+/* Sidebar default state */
+.layout-menu {
+  width: 260px;
+  transition: width 0.3s ease, transform 0.3s ease;
+  overflow: hidden;
+}
+
+/* Collapsed state */
+.menu-collapsed {
+  width: 80px !important;
+}
+
+/* Optional — hide text labels in collapsed mode */
+.menu-collapsed .menu-link div {
+  display: none;
+}
+
+/* Adjust icons to center when collapsed */
+.menu-collapsed .menu-icon {
+  margin: 0 auto;
+  display: block;
+}
+
+/* Smooth collapse animation */
+.sidebar-arrow {
+  transition: transform 0.3s ease;
+}
+
+.sidebar-arrow.collapsed {
+  transform: rotate(180deg);
+}
 
 
 

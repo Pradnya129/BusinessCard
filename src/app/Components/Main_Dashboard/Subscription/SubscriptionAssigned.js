@@ -293,10 +293,10 @@ if (!subscription) {
           {/* Pricing */}
           <div className="d-flex justify-content-center gap-4 mb-4">
             <span className="badge bg-primary fs-6 p-3 shadow-sm">
-              Monthly: <strong>${plan?.monthlyPrice || "N/A"}</strong>
+              Monthly: <strong>₹{plan?.monthlyPrice || "N/A"}</strong>
             </span>
             <span className="badge bg-success fs-6 p-3 shadow-sm">
-              Annual: <strong>${plan?.annualPrice || "N/A"}</strong>
+              Annual: <strong>₹{plan?.annualPrice || "N/A"}</strong>
             </span>
           </div>
 

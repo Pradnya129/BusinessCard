@@ -13,6 +13,7 @@ import withAuth from '../Dashboard/WithAuth/withAuth'
 
 function Layout({ children }) {
    const [mobileSidebarVisible, setMobileSidebarVisible] = useState(false);
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const router = useRouter();
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -28,8 +29,10 @@ function Layout({ children }) {
                <Sidebar
         mobileSidebarVisible={mobileSidebarVisible}
         setMobileSidebarVisible={setMobileSidebarVisible}
+        sidebarCollapsed={sidebarCollapsed}
+        setSidebarCollapsed={setSidebarCollapsed}
       />
-            <div className="layout-page ">
+            <div className={`layout-page ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
                 <Navbar onToggleSidebar={() => setMobileSidebarVisible(prev => !prev)} />
                 {children}
             </div>

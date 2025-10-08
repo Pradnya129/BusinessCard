@@ -108,7 +108,7 @@ useEffect(() => {
 
       // 4️⃣ Get only users assigned to this plan
       const usersRes = await axios.get(
-        `http://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
+        `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
         { params: { slug, planId } }
       );
       const users = usersRes.data?.data || [];

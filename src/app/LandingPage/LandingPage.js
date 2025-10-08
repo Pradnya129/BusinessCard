@@ -106,7 +106,6 @@ const LandingPage = ({ admin }) => {
           </div>
           <LeafletMap />
         </div>
-
         <Footer />
 
         {/* Scripts */}
