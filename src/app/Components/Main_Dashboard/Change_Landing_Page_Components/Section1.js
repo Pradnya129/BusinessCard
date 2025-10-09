@@ -166,10 +166,10 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
     );
 
     if (response.data.success) {
-        toast.success("Section 3 updated successfully!");
+        toast.success("Section 1 updated successfully!");
       setIsEdited(false);
     } else {
-       toast.error("Error updating section 3!");
+       toast.error("Error updating section 1!");
     }
   } catch (error) {
     console.error("Error updating profile:", error);
