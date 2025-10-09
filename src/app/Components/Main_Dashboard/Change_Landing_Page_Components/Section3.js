@@ -82,7 +82,7 @@ const Section3 = () => {
           'Authorization': `Bearer ${token}`,
         },
       });
-
+console.log("formdata",formData)
       if (response.status === 200) {
         toast.success("Section 3 updated successfully!");
         setIsEdited(false);
