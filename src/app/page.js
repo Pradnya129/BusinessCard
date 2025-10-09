@@ -24,43 +24,73 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadAdmin() {
+    // ✅ Step 1: Fetch admin data
+    async function fetchAdmin() {
       try {
         const hostname = window.location.hostname;
-        const data = await getAdmin(hostname);
-        setAdmin(data);
+
+        const adminData = await getAdmin(hostname); // 
+        setAdmin(adminData);
       } catch (err) {
-        console.error(err);
-        notFound();
-      } finally {
-        setLoading(false);
+        console.error("Error fetching admin:", err);
       }
     }
 
-    loadAdmin();
+    fetchAdmin();
   }, []);
 
-  // ✅ Show loader while loading OR no admin yet
-  if (loading || !admin) {
-    return (
+  // ✅ Step 2: Wait for entire LandingPage (including images + APIs)
+  useEffect(() => {
+    if (!admin) return;
+
+    const handlePageLoad = async () => {
+      // Wait till window fully loaded (CSS, images, fonts)
+      await new Promise((resolve) => {
+        if (document.readyState === "complete") resolve();
+        else window.addEventListener("load", resolve, { once: true });
+      });
+
+      // Small delay for smoother transition
+      await new Promise((r) => setTimeout(r, 400));
+
+      setLoading(false);
+    };
+
+    handlePageLoad();
+  }, [admin]);
+
+  return (
+    <>
+      {/* 🔄 Loader */}
+      {loading && (
+        <div
+          style={{
+            height: "100vh",
+            width: "100vw",
+            background: "#fff",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            zIndex: 9999,
+          }}
+        >
+          <ClipLoader size={60} color="#2563EB" />
+        </div>
+      )}
+
+      {/* 🌐 LandingPage Preloads in Background */}
       <div
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          backgroundColor: "#fff",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          zIndex: 9999,
+          opacity: loading ? 0 : 1,
+          visibility: loading ? "hidden" : "visible",
+          transition: "opacity 0.6s ease",
         }}
       >
-        <ClipLoader size={60} color="#2563EB" />
+        {admin && <LandingPage admin={admin} />}
       </div>
-    );
-  }
-
-  return <LandingPage admin={admin} />;
+    </>
+  );
 }

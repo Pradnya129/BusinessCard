@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import { toast, ToastContainer } from 'react-toastify';
 
 const Section5 = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +14,6 @@ const Section5 = () => {
   const [editedData, setEditedData] = useState({ ...formData });
   const [isEdited, setIsEdited] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
   const [isTaglineValid, setIsTaglineValid] = useState(true);
   const [isDescriptionValid, setIsDescriptionValid] = useState(true);
@@ -44,9 +44,8 @@ const Section5 = () => {
 
         setFormData(mappedData);
         setEditedData(mappedData);
-        setStatusMessage({ type: '', text: '' });
       } catch (err) {
-        setStatusMessage({ type: 'error', text: 'Failed to fetch section content.' });
+         toast.error('Failed to fetch section content.');
       } finally {
         setLoading(false);
       }
@@ -115,10 +114,10 @@ const handleSave = async () => {
     // Update local state
     setFormData({ ...editedData });
     setIsEdited(false);
-    setStatusMessage({ type: 'success', text: 'Section 5 updated successfully!' });
+    toast.success('Section 5 updated successfully!');
   } catch (err) {
     console.error(err);
-    setStatusMessage({ type: 'error', text: 'Failed to update section.' });
+     toast.error('Failed to update section.');
   } finally {
     setLoading(false);
   }
@@ -130,18 +129,15 @@ const handleSave = async () => {
   const handleReset = () => {
     setEditedData(formData);
     setIsEdited(false);
-    setStatusMessage({ type: '', text: '' });
   };
 
   return (
     <div className="my-5">
+         <ToastContainer />
+      
       <h5 className="text-muted mb-4">Section 5 - Manage Plan Taglines</h5>
 
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+   
 
       <div className="card shadow-sm p-4">
         <div className="mb-3">

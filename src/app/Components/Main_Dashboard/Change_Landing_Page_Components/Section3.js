@@ -1,25 +1,26 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBold, faItalic, faUnderline, faListOl, faListUl, faEraser } from '@fortawesome/free-solid-svg-icons';
+import { toast, ToastContainer } from 'react-toastify';
 
 const API_URL = process.env.REACT_APP_API_URL || "https://appo.coinagesoft.com";
 
 const Section3 = () => {
   const [tagline, setTagline] = useState('');
-  const [description, setDescription] = useState('');
-  const [relatedImage, setRelatedImage] = useState(null);
+  const [landingId, setLandingId] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('/assets/img/stethoscope.jpg');
+  const [relatedImage, setRelatedImage] = useState(null);
   const [isEdited, setIsEdited] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
-  const [isTaglineValid, setIsTaglineValid] = useState(true);
-  const [isDescriptionValid, setIsDescriptionValid] = useState(true);
-  const [landingId, setLandingId] = useState(null);
+  const editorRef = useRef(null);
 
+  
+  // 🟢 FETCH EXISTING DATA
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -28,38 +29,23 @@ const Section3 = () => {
         const adminId = decoded.id;
 
         const response = await fetch(`${API_URL}/api/landing/${adminId}`, {
-  headers: {
-    "Authorization": `Bearer ${token}` // <-- Add this line
-  },
-});
-        const data = await response.json();
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result = await response.json();
+        const data = result?.data || {};
 
-        if (data && data.data) {
-          const section3Data = data.data;
-          setLandingId(section3Data.id || section3Data._id);
-          setTagline(section3Data?.section3_Tagline || '');
-          setDescription(section3Data?.section3_Description || '');
-          setPreviewUrl(
-            section3Data?.section3_Image
-              ? `${API_URL}${section3Data.section3_Image}`
-              : '/assets/img/stethoscope.jpg'
-          );
-          setStatusMessage({ type: '', text: '' });
-        } else {
-          setStatusMessage({ type: 'error', text: 'No data available for section 3' });
-        }
+        setLandingId(data.id || data._id);
+        setTagline(data.section3_Tagline || '');
+        if (editorRef.current) editorRef.current.innerHTML = data.section3_Description || '';
+        setPreviewUrl(data.section3_Image ? `${API_URL}${data.section3_Image}` : '/assets/img/stethoscope.jpg');
       } catch (err) {
-        console.error("Fetch error:", err);
-        setStatusMessage({ type: 'error', text: 'Failed to fetch section 3 content.' });
-      } finally {
-        setLoading(false);
+        console.error("Error fetching data:", err);
       }
     };
-
     fetchData();
   }, []);
 
-  // IMAGE CHANGE
+  // 🟢 HANDLE IMAGE UPLOAD
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -69,57 +55,41 @@ const Section3 = () => {
     }
   };
 
-  // SAVE TO DATABASE
-  const handleSave = async () => {
-    // Validate fields
-    if (!tagline.trim()) {
-      setIsTaglineValid(false);
-      return;
-    } else {
-      setIsTaglineValid(true);
-    }
+  // 🟢 TEXT FORMAT BUTTONS
+  const formatText = (cmd) => {
+    document.execCommand(cmd);
+    setIsEdited(true);
+  };
 
-    if (!description.trim()) {
-      setIsDescriptionValid(false);
-      return;
-    } else {
-      setIsDescriptionValid(true);
-    }
+  // 🟢 SAVE SECTION DATA
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("Token not found");
+
+    const content = editorRef.current?.innerHTML.trim() || '';
+    if (!tagline.trim() || !content) return toast.error("All fields are required");
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
       const formData = new FormData();
       formData.append('section3_Tagline', tagline);
-      formData.append('section3_Description', description);
-
-      if (relatedImage) {
-        formData.append('section3_Image', relatedImage); // only if new image selected
-      }
+      formData.append('section3_Description', content);
+      if (relatedImage) formData.append('section3_Image', relatedImage);
 
       setLoading(true);
-      const response = await axios.patch(
-        `${API_URL}/api/landing/${landingId}`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Authorization': `Bearer ${token}`, // include token
-          },
-        }
-      );
+      const response = await axios.patch(`${API_URL}/api/landing/${landingId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
       if (response.status === 200) {
-        setLandingId(response.data.data.id || response.data.data._id);
-        setStatusMessage({ type: 'success', text: 'Section 3 updated successfully!' });
+        toast.success("Section 3 updated successfully!");
         setIsEdited(false);
-      } else {
-        setStatusMessage({ type: 'error', text: 'Failed to update Section 3' });
       }
-    } catch (error) {
-      console.error('Error updating section 3:', error);
-      setStatusMessage({ type: 'error', text: 'An error occurred while saving Section 3.' });
+    } catch (err) {
+      console.error("Error saving section:", err);
+      toast.error("Failed to save section.");
     } finally {
       setLoading(false);
     }
@@ -127,72 +97,86 @@ const Section3 = () => {
 
   return (
     <div>
+<ToastContainer
+  position="top-right"
+  autoClose={3000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss={false}  // make auto-close uninterrupted
+  pauseOnHover={false}       // make auto-close uninterrupted
+  draggable
+/>
       <h5 className="text-start mb-4 text-muted mt-5">Section 3 - Manage Consultant Info</h5>
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+
       <div className="card p-4">
-        {/* Image Upload */}
-        <div className="row align-items-center mb-4">
+        <div className="row align-items-start">
+          {/* 🟦 Image Section */}
           <div className="col-md-4 text-center">
-            <div
-              className="border border-secondary rounded mx-auto"
-              style={{ width: '150px', height: '150px', overflow: 'hidden' }}
-            >
-              <img
-                src={previewUrl}
-                alt="Related"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+            <div className="border border-secondary rounded mx-auto"
+              style={{ width: '150px', height: '150px', overflow: 'hidden' }}>
+              <img src={previewUrl} alt="Section" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
-            <input
-              type="file"
-              className="form-control mt-3 w-75 mx-auto"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
+            <input type="file" className="form-control mt-3 w-75 mx-auto"
+              accept="image/*" onChange={handleImageChange} />
             <p className="mt-2 text-muted">Recommended size: 150x150</p>
           </div>
 
+          {/* 🟩 Editor Section */}
           <div className="col-md-8">
-            {/* Tagline Input */}
-            <div className="mb-4">
+            <div className="mb-3">
               <label className="form-label fw-semibold">Tagline:</label>
               <input
                 type="text"
-                className={`form-control editable ${!isTaglineValid ? 'is-invalid' : ''}`}
+                className="form-control"
                 value={tagline}
-                onChange={(e) => {
-                  setTagline(e.target.value);
-                  setIsEdited(true);
-                }}
+                onChange={(e) => { setTagline(e.target.value); setIsEdited(true); }}
               />
-              {!isTaglineValid && <div className="invalid-feedback">Tagline is required.</div>}
             </div>
 
-            {/* Description Input */}
-            <div>
-              <label className="form-label fw-semibold">Description:</label>
-              <textarea
-                className={`form-control editable ${!isDescriptionValid ? 'is-invalid' : ''}`}
-                rows="4"
-                value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                  setIsEdited(true);
-                }}
-              />
-              {!isDescriptionValid && <div className="invalid-feedback">Description is required.</div>}
+            {/* Toolbar */}
+            <div className="d-flex gap-2 flex-wrap mb-2">
+              <button className="btn btn-outline-primary btn-sm" onClick={() => formatText('bold')}>
+                <FontAwesomeIcon icon={faBold} />
+              </button>
+              <button className="btn btn-outline-primary btn-sm" onClick={() => formatText('italic')}>
+                <FontAwesomeIcon icon={faItalic} />
+              </button>
+              <button className="btn btn-outline-primary btn-sm" onClick={() => formatText('underline')}>
+                <FontAwesomeIcon icon={faUnderline} />
+              </button>
+              <button className="btn btn-outline-primary btn-sm" onClick={() => formatText('insertOrderedList')}>
+                <FontAwesomeIcon icon={faListOl} />
+              </button>
+              <button className="btn btn-outline-primary btn-sm" onClick={() => formatText('insertUnorderedList')}>
+                <FontAwesomeIcon icon={faListUl} />
+              </button>
+              <button className="btn btn-outline-secondary btn-sm ms-2" onClick={() => editorRef.current.innerHTML = ''}>
+                <FontAwesomeIcon icon={faEraser} />
+              </button>
             </div>
+
+            {/* Text Editor */}
+            <div
+              ref={editorRef}
+              contentEditable
+              className="form-control"
+             onInput={() => setIsEdited(true)} 
+              style={{
+                minHeight: '200px',
+                backgroundColor: '#fff',
+                outline: 'none',
+                whiteSpace: 'pre-wrap',
+              }}
+            />
           </div>
         </div>
 
         {/* Save Button */}
-        <div className="text-center">
+        <div className="text-center mt-4">
           <button
-            className="btn btn-primary px-4 py-2 rounded-pill mt-3"
+            className="btn btn-primary px-4 py-2 rounded-pill"
             onClick={handleSave}
             disabled={!isEdited || loading}
           >

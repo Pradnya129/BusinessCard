@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import { toast, ToastContainer } from 'react-toastify';
 
 const API_URL = process.env.REACT_APP_API_URL;
 const ConsultantSection6 = () => {
@@ -13,7 +14,6 @@ const ConsultantSection6 = () => {
   const [editQuestion, setEditQuestion] = useState('');
   const [editAnswer, setEditAnswer] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
   // Helper function to get token
   const getAuthHeaders = () => {
@@ -29,7 +29,7 @@ const ConsultantSection6 = () => {
       try {
         const headers = getAuthHeaders();
         if (!headers.Authorization) {
-          setStatusMessage({ type: 'error', text: 'No token found. Please log in.' });
+          toast.error('No token found. Please log in.');
           return;
         }
 
@@ -37,10 +37,9 @@ const ConsultantSection6 = () => {
     "Authorization": `Bearer ${token}` // <-- Add this line
   }, });
         setFaqs(res.data.data);
-        setStatusMessage({ type: '', text: '' });
       } catch (err) {
         console.error("Error fetching FAQs:", err);
-        setStatusMessage({ type: 'error', text: 'Error fetching FAQs' });
+        toast.error('Error fetching FAQs');
       }
     };
 
@@ -62,10 +61,10 @@ const ConsultantSection6 = () => {
       setFaqs([...faqs, res.data]);
       setQuestion('');
       setAnswer('');
-      setStatusMessage({ type: 'success', text: 'FAQ added successfully!' });
+     toast.error('FAQ added successfully!');
     } catch (err) {
       console.error('Error adding FAQ:', err);
-      setStatusMessage({ type: 'error', text: 'Error adding FAQ' });
+     toast.error('Error adding FAQ');
     }
   };
 
@@ -92,10 +91,10 @@ const ConsultantSection6 = () => {
       updatedFaqs[editIndex] = res.data;
       setFaqs(updatedFaqs);
       setShowModal(false);
-      setStatusMessage({ type: 'success', text: 'FAQ updated successfully!' });
+       toast.success('FAQ updated successfully!');
     } catch (err) {
       console.error('Error updating FAQ:', err);
-      setStatusMessage({ type: 'error', text: 'Error updating FAQ' });
+      toast.error('Error updating FAQ');
     }
   };
 
@@ -107,21 +106,18 @@ const ConsultantSection6 = () => {
 
       await axios.delete(`https://appo.coinagesoft.com/api/admin/faq/${id}`, { headers });
       setFaqs(faqs.filter((_, i) => i !== index));
-      setStatusMessage({ type: 'success', text: `FAQ index - ${index} deleted successfully!` });
+       toast.success(`FAQ index - ${index} deleted successfully!` );
     } catch (err) {
       console.error('Error deleting FAQ:', err);
-      setStatusMessage({ type: 'error', text: 'Error deleting FAQ' });
+      toast.error('Error deleting FAQ' );
     }
   };
 
   return (
     <div>
       <h5 className="text-start mb-3 text-muted mt-8">Section 6 - Manage FAQs</h5>
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+       <ToastContainer />
+    
       <div className="card p-4 mt-8">
         <div className="container mt-5">
           {/* FAQ Form */}

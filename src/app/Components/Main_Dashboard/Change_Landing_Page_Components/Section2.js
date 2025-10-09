@@ -5,6 +5,7 @@ import '../../../../../dist/assets/vendor/bootstrap-icons/font/bootstrap-icons.c
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import validator from 'validator';
+import { toast, ToastContainer } from "react-toastify";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -22,7 +23,6 @@ const Section2 = () => {
   const [imageFile, setImageFile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
   const [errors, setErrors] = useState({});
   const [landingId, setLandingId] = useState(null);
 
@@ -64,10 +64,9 @@ const Section2 = () => {
             : "/assets/img/160x160/img8.jpg",
       }));
 
-      setStatusMessage({ type: '', text: '' });
     } catch (error) {
       console.error("Error fetching consultant data:", error);
-      setStatusMessage({ type: 'error', text: 'Failed to fetch section 2 content.' });
+              toast.error("Error updating the section 2");
     } finally {
       setLoading(false);
     }
@@ -148,14 +147,15 @@ const Section2 = () => {
         setImageFile(null);
         setLandingId(response.data.data.id);
         await fetchProfile();
-        setStatusMessage({ type: 'success', text: 'Section 2 updated successfully!' });
+        toast.success("Section 2 updated successfully!");
       } else {
         setLandingId(null);
-        setStatusMessage({ type: 'error', text: 'Failed to update section 2.' });
+              toast.error("Error updating the section 2");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      setStatusMessage({ type: 'error', text: "An error occurred while updating the profile." });
+              toast.error("Error updating the section 2");
+      
     } finally {
       setLoading(false);
     }
@@ -163,13 +163,11 @@ const Section2 = () => {
 
   return (
     <>
+
+   <ToastContainer />
       <h5 className="text-muted mt-5 mb-4">Section 2 - Manage Consultant Info</h5>
 
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+    
 
       <div className="card p-4 shadow-sm">
         {/* Profile Image Upload */}

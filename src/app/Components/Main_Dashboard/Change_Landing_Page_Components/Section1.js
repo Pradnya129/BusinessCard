@@ -4,6 +4,7 @@ import '../../../../../dist/assets/vendor/aos/dist/aos.css';
 import '../../../../../dist/assets/vendor/bootstrap-icons/font/bootstrap-icons.css';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { toast, ToastContainer } from "react-toastify";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -25,7 +26,6 @@ const emptySectionData = {
 };
 
 const Section1 = () => {
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
   const [data, setData] = useState(null);
   const [editableData, setEditableData] = useState(emptySectionData);
   const [isEdited, setIsEdited] = useState(false);
@@ -76,10 +76,9 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
         setLandingId(null);
       }
 
-      setStatusMessage({ type: '', text: '' });
     } catch (error) {
       console.error("Error fetching consultant data:", error);
-      setStatusMessage({ type: 'error', text: 'Failed to fetch section content.' });
+      toast.error("Failed to save section.");
       setData(emptySectionData);
       setEditableData(emptySectionData);
       setLandingId(null);
@@ -167,14 +166,15 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
     );
 
     if (response.data.success) {
-      setStatusMessage({ type: 'success', text: 'Section 1 updated successfully!' });
+        toast.success("Section 3 updated successfully!");
       setIsEdited(false);
     } else {
-      setStatusMessage({ type: 'error', text: response.data.message || 'Failed to update profile!' });
+       toast.error("Error updating section 3!");
     }
   } catch (error) {
     console.error("Error updating profile:", error);
-    setStatusMessage({ type: 'error', text: error.message });
+            toast.error("Error updating section 3");
+    
   }
 };
 
@@ -185,13 +185,12 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
   }
 
   return (
+
+    
     <div className="mb-5">
+      <ToastContainer />
       <h5 className="mb-4 text-muted">Section 1 - Manage Banner Info</h5>
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+    
       <div className="card p-4 shadow-sm rounded-4">
 
         {/* Profile Image */}

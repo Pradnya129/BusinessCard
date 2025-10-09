@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import { toast, ToastContainer } from 'react-toastify';
 
 const Section7 = () => {
   const [iframeUrl, setIframeUrl] = useState('');
   const [savedUrl, setSavedUrl] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
   const [landingId, setLandingId] = useState('');
 
 
@@ -22,7 +22,7 @@ const fetchIframeUrl = async () => {
     const adminId = decoded.id;
 
     const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}` ,{
-  headers: {
+   headers: {
     "Authorization": `Bearer ${token}` // <-- Add this line
   },
 });
@@ -33,7 +33,7 @@ const fetchIframeUrl = async () => {
     setIframeUrl(data.locationIframeURL || '');
   } catch (err) {
     console.error('Error fetching iframe URL:', err);
-    setStatusMessage({ type: 'error', text: 'Failed to fetch map URL.' });
+     toast.error('Failed to fetch map URL.');
   }
 };
 
@@ -61,12 +61,12 @@ const handleSave = async () => {
       }
     );
 
-    setStatusMessage({ type: 'success', text: 'Map URL updated successfully!' });
+     toast.success('Map URL updated successfully!');
     setIsEditMode(false);
     fetchIframeUrl();
   } catch (err) {
     console.error('Save failed:', err.response?.data || err.message || err);
-    setStatusMessage({ type: 'error', text: 'Failed to save map URL.' });
+     toast.error('Failed to save map URL.');
   }
 };
 
@@ -79,21 +79,17 @@ const handleSave = async () => {
       await axios.delete(`https://appo.coinagesoft.com/api/landing/${adminId}`);
       setIframeUrl('');
       setSavedUrl('');
-      setStatusMessage({ type: 'success', text: 'Map URL deleted.' });
+     toast.success('Map URL deleted.');
     } catch (err) {
       console.error('Delete failed:', err);
-      setStatusMessage({ type: 'error', text: 'Failed to delete map URL.' });
+      toast.error('Failed to delete map URL.');
     }
   };
 
   return (
     <div className="card p-4 mt-5 shadow rounded">
-      {/* Status Message */}
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+          <ToastContainer />
+
 
       <h5 className="mb-3 text-muted">Paste Google Maps Iframe URL</h5>
       <p className="small text-muted">

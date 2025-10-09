@@ -14,45 +14,53 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
-
-useEffect(() => {
-  const fetchPlans = async () => {
-    try {
-      // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
-      const hostname = window.location.hostname;
-
-      // Send hostname as query param to backend
-      const res = await fetch(
-        `https://appo.coinagesoft.com/api/public-landing/all?slug=${hostname}`
-      );
-
-      if (!res.ok) throw new Error("Failed to fetch plans");
-
-      const obj = await res.json();
-      const data = obj.data;
-
-      console.log("Plans Data:", data);
-
-      if (Array.isArray(data) && data.length > 0) {
-        setAvailablePlans(data);
-
-        // Auto-select the first plan
-        const firstPlan = data[0];
-        setFormData(prev => ({
-          ...prev,
-          plan: firstPlan.planName,
-          amount: firstPlan.planPrice,
-          duration: firstPlan.planDuration,
-          appointmentTime: ''
-        }));
-      }
-    } catch (err) {
-      console.error("Error fetching plans", err);
-    }
+  
+  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+  const planFieldsMap = {
+    "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
+    "Commercial Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
+    "Industrial Vastu Consultancy": ["vastuType", "googleLocation", "floorPlanFile"],
+    "Numerology Consultancy": ["birthDate", "birthTime", "birthPlace"],
+    "Kundali Consultancy ": ["birthDate", "birthTime", "birthPlace"], // ✅ Kundali
   };
 
-  fetchPlans();
-}, []);
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
+
+        // Send hostname as query param to backend
+        const res = await fetch(
+          `https://appo.coinagesoft.com/api/public-landing/all?slug=${hostname}`
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch plans");
+
+        const obj = await res.json();
+        const data = obj.data;
+
+        console.log("Plans Data:", data);
+
+        if (Array.isArray(data) && data.length > 0) {
+          setAvailablePlans(data);
+
+          // Auto-select the first plan
+          const firstPlan = data[0];
+          setFormData(prev => ({
+            ...prev,
+            plan: firstPlan.planName,
+            amount: firstPlan.planPrice,
+            duration: firstPlan.planDuration,
+            appointmentTime: ''
+          }));
+        }
+      } catch (err) {
+        console.error("Error fetching plans", err);
+      }
+    };
+
+    fetchPlans();
+  }, []);
 
 
 
@@ -67,14 +75,15 @@ useEffect(() => {
     appointmentTime: '',
     plan: '', // pre-filled plan name
     amount: '',     // pre-filled plan price
-    duration: '', 
-      birthDate: '',        // new
-  birthTime: '',        // new
-  birthPlace: '',       // new
-  vastuType: '',        // new
-  googleLocation: '',   // new
-  floorPlanFile: null,   // pre-filled plan duration as a string representing minutes (eg: "30", "60", "90")
+    duration: '',
+    birthDate: '',        // new
+    birthTime: '',        // new
+    birthPlace: '',       // new
+    vastuType: '',        // new
+    googleLocation: '',   // new
+    floorPlanFile: null,   // pre-filled plan duration as a string representing minutes (eg: "30", "60", "90")
   });
+  const selectedPlanFields = planFieldsMap[formData.plan] || [];
 
   const [bookedTimeSlots, setBookedTimeSlots] = useState([]);
 
@@ -127,36 +136,36 @@ useEffect(() => {
   };
 
   // Utility to generate slots
-function generateSlots(startTime, endTime, durationMinutes, bufferMinutes, booked = []) {
-  const slots = [];
-  let [startHour, startMin] = startTime.split(":").map(Number);
-  let [endHour, endMin] = endTime.split(":").map(Number);
+  function generateSlots(startTime, endTime, durationMinutes, bufferMinutes, booked = []) {
+    const slots = [];
+    let [startHour, startMin] = startTime.split(":").map(Number);
+    let [endHour, endMin] = endTime.split(":").map(Number);
 
-  let start = new Date();
-  start.setHours(startHour, startMin, 0, 0);
+    let start = new Date();
+    start.setHours(startHour, startMin, 0, 0);
 
-  let end = new Date();
-  end.setHours(endHour, endMin, 0, 0);
+    let end = new Date();
+    end.setHours(endHour, endMin, 0, 0);
 
-  while (start.getTime() + durationMinutes * 60000 <= end.getTime()) {
-    const slotStart = new Date(start);
-    const slotEnd = new Date(start.getTime() + durationMinutes * 60000);
+    while (start.getTime() + durationMinutes * 60000 <= end.getTime()) {
+      const slotStart = new Date(start);
+      const slotEnd = new Date(start.getTime() + durationMinutes * 60000);
 
-    const formattedStart = slotStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const formattedEnd = slotEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const slotLabel = `${formattedStart} - ${formattedEnd}`;
+      const formattedStart = slotStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const formattedEnd = slotEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const slotLabel = `${formattedStart} - ${formattedEnd}`;
 
-    // only add if not booked
-    if (!booked.includes(formattedStart)) {
-      slots.push(formattedStart); // or slotLabel if you want range display
+      // only add if not booked
+      if (!booked.includes(formattedStart)) {
+        slots.push(formattedStart); // or slotLabel if you want range display
+      }
+
+      // move pointer (duration + buffer)
+      start = new Date(start.getTime() + (durationMinutes + bufferMinutes) * 60000);
     }
 
-    // move pointer (duration + buffer)
-    start = new Date(start.getTime() + (durationMinutes + bufferMinutes) * 60000);
+    return slots;
   }
-
-  return slots;
-}
 
   // Use a native date input so user can select any date
   // We'll keep the date in "yyyy-mm-dd" format from the input,
@@ -165,7 +174,7 @@ function generateSlots(startTime, endTime, durationMinutes, bufferMinutes, booke
     const selectedDate = e.target.value; // this is in yyyy-mm-dd format
     // Optional: block past dates
     const today = new Date().toISOString().split('T')[0];
-       
+
     if (selectedDate < today) {
       alert("Please select a future date.");
       return;
@@ -190,87 +199,89 @@ function generateSlots(startTime, endTime, durationMinutes, bufferMinutes, booke
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const errors = validateForm();
-  if (Object.keys(errors).length > 0) {
-    setFormErrors(errors);
-    return;
-  }
-  setFormErrors({});
-
-  try {
-    // ✅ Get tenant slug from hostname (domain) or fallback to URL path
-    let slug = window.location.hostname; // e.g., booking.vedratnavastu.com
-
-    // ✅ Find selected plan
-    const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
-    if (!selectedPlan) {
-      alert("Please select a valid plan.");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
+    setFormErrors({});
 
-    // ✅ Construct request body
-    const payload = {
-      ...formData,             // send slug to backend
-      planId: selectedPlan.planId,
-       birthDate: formData.birthDate,
-  birthTime: formData.birthTime,
-  birthPlace: formData.birthPlace,
-  vastuType: formData.vastuType,
-  googleLocation: formData.googleLocation,
-  floorPlanFile:formData.floorPlanFile
-    };
+    try {
+      // ✅ Get tenant slug from hostname (domain) or fallback to URL path
 
-    console.log("📤 Sending appointment payload:", payload);
+      // ✅ Find selected plan
+      const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
+      if (!selectedPlan) {
+        alert("Please select a valid plan.");
+        return;
+      }
 
-    const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${slug}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      const formDataToSend = new FormData();
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText);
-    }
+      // सर्व key-value FormData मध्ये जोडा
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "floorPlanFile" && value instanceof File) {
+          formDataToSend.append("floorPlanFile", value); // File input handle
+        } else {
+          formDataToSend.append(key, value);
+        }
+      });
 
-    const appointment = await response.json();
-    console.log("✅ Appointment created:", appointment);
+      // selectedPlan चा id वेगळं जोडा
+      formDataToSend.append("planId", selectedPlan.planId);
 
-    // 🛠️ Razorpay integration
-    const razorpayOptions = {
-      key: appointment.data.razorpayKey,
-      amount: appointment.data.amount,
-      currency: "INR",
-      name: "Vedratna Vastu",
-      description: "Book your appointment",
-      order_id: appointment.data.orderId,
-      handler: function (response) {
-        console.log("💰 Payment success:", response);
+      // slug URL मध्ये ठेवा
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
+        method: "POST",
+        body: formDataToSend, // ❌ JSON नाही, ✅ FormData
+      });
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const appointment = await response.json();
+      console.log("✅ Appointment created:", appointment);
+
+      // 🛠️ Razorpay integration
+      const razorpayOptions = {
+        key: appointment.data.razorpayKey,
+        amount: appointment.data.amount,
+        currency: "INR",
+        name: "Vedratna Vastu",
+        description: "Book your appointment",
+        order_id: appointment.data.orderId,
+        handler: function (response) {
+          console.log("💰 Payment success:", response);
+          setPaymentCompleted(true);
+          verifyPayment(response);
+        },
+        prefill: {
+          name: appointment.data.name,
+          email: appointment.data.email,
+          contact: appointment.data.phoneNumber,
+        },
+      };
+
+      const rzp1 = new window.Razorpay(razorpayOptions);
+      rzp1.on("payment.failed", function () {
         setPaymentCompleted(true);
-        verifyPayment(response);
-      },
-      prefill: {
-        name: appointment.data.name,
-        email: appointment.data.email,
-        contact: appointment.data.phoneNumber,
-      },
-    };
+        showModal("failureModal");
+      });
+      rzp1.open();
 
-    const rzp1 = new window.Razorpay(razorpayOptions);
-    rzp1.on("payment.failed", function () {
-      setPaymentCompleted(true);
+    } catch (error) {
+      console.error("❌ Error creating appointment:", error);
+      alert("An error occurred while booking the appointment.");
       showModal("failureModal");
-    });
-    rzp1.open();
-
-  } catch (error) {
-    console.error("❌ Error creating appointment:", error);
-    alert("An error occurred while booking the appointment.");
-    showModal("failureModal");
-  }
-};
+    }
+  };
 
 
 
@@ -306,12 +317,12 @@ const handleSubmit = async (e) => {
       const response = await fetch(`https://appo.coinagesoft.com/api/customer-appointments/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-  orderId: paymentResponse.razorpay_order_id,
-  paymentId: paymentResponse.razorpay_payment_id,
-  signature: paymentResponse.razorpay_signature
-})
-        
+        body: JSON.stringify({
+          orderId: paymentResponse.razorpay_order_id,
+          paymentId: paymentResponse.razorpay_payment_id,
+          signature: paymentResponse.razorpay_signature
+        })
+
       });
 
       if (response.ok) {
@@ -335,12 +346,12 @@ const handleSubmit = async (e) => {
           plan: '',
           amount: '',
           duration: '',
-        birthDate: '',        // new
-  birthTime: '',        // new
-  birthPlace: '',       // new
-  vastuType: '',        // new
-  googleLocation: '',   // new
-  floorPlanFile: null, 
+          birthDate: '',        // new
+          birthTime: '',        // new
+          birthPlace: '',       // new
+          vastuType: '',        // new
+          googleLocation: '',   // new
+          floorPlanFile: null,
         });
         setFormErrors({});
       } else {
@@ -362,66 +373,65 @@ const handleSubmit = async (e) => {
     }, 3000);
   };
 
-useEffect(() => { 
-  if (!formData.appointmentDate || !formData.plan) return;
+  useEffect(() => {
+    if (!formData.appointmentDate || !formData.plan) return;
 
-  // ✅ Get slug from hostname first, fallback to URL path (for localhost/testing)
-  let slug = window.location.hostname; // e.g., booking.vedratnavastu.com
+    // ✅ Get slug from hostname first, fallback to URL path (for localhost/testing)
 
 
-  if (!slug) {
-    console.error("Slug not found in URL or hostname");
-    return;
-  }
+    if (!hostname) {
+      console.error("Slug not found in URL or hostname");
+      return;
+    }
 
-  // fetch appointments + rules + shifts using slug
-  Promise.all([
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments?slug=${slug}`),
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`),
-    axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`),
-  ])
-    .then(([appointmentsRes, rulesRes, shiftsRes]) => {
-      const appointments = appointmentsRes.data?.data || [];
-      const rules = rulesRes.data?.rules || [];
-      const shifts = shiftsRes.data?.data || [];
+    // fetch appointments + rules + shifts using slug
+    Promise.all([
+      axios.get(`https://appo.coinagesoft.com/api/public-landing/customer-appointments?slug=${hostname}`),
+      axios.get(`https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${hostname}`),
+      axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${hostname}`),
+    ])
+      .then(([appointmentsRes, rulesRes, shiftsRes]) => {
+        const appointments = appointmentsRes.data?.data || [];
+        const rules = rulesRes.data?.rules || [];
+        const shifts = shiftsRes.data?.data || [];
 
-      // find selected plan
-      const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
-      if (!selectedPlan) return;
+        // find selected plan
+        const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
+        if (!selectedPlan) return;
 
-      // find buffer + shiftId for plan
-      const rule = rules.find((r) => r.planId === selectedPlan.planId);
-      if (!rule) return;
+        // find buffer + shiftId for plan
+        const rule = rules.find((r) => r.planId === selectedPlan.planId);
+        if (!rule) return;
 
-      const shift = shifts.find((s) => s.id === rule.shiftId);
-      if (!shift) return;
+        const shift = shifts.find((s) => s.id === rule.shiftId);
+        if (!shift) return;
 
-      // collect booked slots for this date
-      const booked = appointments
-        .filter((a) => a.appointmentDate === formData.appointmentDate)
-        .map((a) => a.appointmentTime);
+        // collect booked slots for this date
+        const booked = appointments
+          .filter((a) => a.appointmentDate === formData.appointmentDate)
+          .map((a) => a.appointmentTime);
 
-      setBookedTimeSlots(booked);
+        setBookedTimeSlots(booked);
 
-      // generate available slots
-      const slots = generateSlots(
-        shift.startTime,                    // e.g., "10:00:00"
-        shift.endTime,                      // e.g., "22:00:00"
-        Number(selectedPlan.planDuration),  // plan duration in minutes
-        Number(rule.bufferInMinutes),       // buffer in minutes
-        booked
-      );
+        // generate available slots
+        const slots = generateSlots(
+          shift.startTime,                    // e.g., "10:00:00"
+          shift.endTime,                      // e.g., "22:00:00"
+          Number(selectedPlan.planDuration),  // plan duration in minutes
+          Number(rule.bufferInMinutes),       // buffer in minutes
+          booked
+        );
 
-      setAvailableSlots(slots);
-    })
-    .catch((err) => console.error("Error fetching slots:", err));
-}, [formData.appointmentDate, formData.plan, availablePlans]);
+        setAvailableSlots(slots);
+      })
+      .catch((err) => console.error("Error fetching slots:", err));
+  }, [formData.appointmentDate, formData.plan, availablePlans]);
 
 
 
   return (
     <>
-       
+
       <div className="bg-light mt-8">
         <div className="container row content-space-2 content-space-lg-3 mx-auto" id="target-form">
           <div className="col-lg-7 col-12 ">
@@ -547,93 +557,80 @@ useEffect(() => {
                     </div>
 
                     {/* Vastu & Birth Details */}
-<div className="row gx-2">
+
+                    <div className="row gx-2">
+                      {hostname === "booking.vedratnavastu.com" || hostname === "localhost" && (
+                        <>
+
+{selectedPlanFields.includes("birthDate") && (
   <div className="col-sm-6 mb-2">
     <label className="form-label" htmlFor="birthDate">Birth Date</label>
-    <input
-      type="date"
-      className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
-      name="birthDate"
-      id="birthDate"
-      value={formData.birthDate}
-      onChange={handleChange}
-    />
+    <input type="date" className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
+           name="birthDate" id="birthDate" value={formData.birthDate} onChange={handleChange} />
     {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
   </div>
+)}
 
+{selectedPlanFields.includes("birthTime") && (
   <div className="col-sm-6 mb-2">
     <label className="form-label" htmlFor="birthTime">Birth Time</label>
-    <input
-      type="time"
-      className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
-      name="birthTime"
-      id="birthTime"
-      value={formData.birthTime}
-      onChange={handleChange}
-    />
+    <input type="time" className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
+           name="birthTime" id="birthTime" value={formData.birthTime} onChange={handleChange} />
     {formErrors.birthTime && <div className="text-danger small">{formErrors.birthTime}</div>}
   </div>
+)}
 
+{selectedPlanFields.includes("birthPlace") && (
   <div className="col-sm-6 mb-2">
     <label className="form-label" htmlFor="birthPlace">Birth Place</label>
-    <input
-      type="text"
-      className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
-      name="birthPlace"
-      id="birthPlace"
-      value={formData.birthPlace}
-      onChange={handleChange}
-      placeholder="City or location"
-    />
+    <input type="text" className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
+           name="birthPlace" id="birthPlace" value={formData.birthPlace} onChange={handleChange} />
     {formErrors.birthPlace && <div className="text-danger small">{formErrors.birthPlace}</div>}
   </div>
+)}
 
- <div className="col-sm-6 mb-2">
-  <label className="form-label" htmlFor="vastuType">Vastu Type</label>
-  <select
-    className={`form-select form-select-sm ${formErrors.vastuType ? 'border border-danger' : ''}`}
-    name="vastuType"
-    id="vastuType"
-    value={formData.vastuType}
-    onChange={handleChange}
-  >
-    <option value="">-- Select Vastu Type --</option>
-    <option value="Residential">Residential</option>
-    <option value="Commercial">Commercial</option>
-    <option value="Industrial">Industrial</option>
-    <option value="Office">Office</option>
-    <option value="Plot">Plot</option>
-  </select>
-  {formErrors.vastuType && <div className="text-danger small">{formErrors.vastuType}</div>}
-</div>
+{selectedPlanFields.includes("vastuType") && (
+  <div className="col-sm-6 mb-2">
+    <label className="form-label" htmlFor="vastuType">Vastu Type</label>
+    <select className={`form-select form-select-sm ${formErrors.vastuType ? 'border border-danger' : ''}`}
+            name="vastuType" id="vastuType" value={formData.vastuType} onChange={handleChange}>
+      <option value="">-- Select Vastu Type --</option>
+      <option value="Residential">Residential</option>
+      <option value="Commercial">Commercial</option>
+      <option value="Industrial">Industrial</option>
+      <option value="Office">Office</option>
+      <option value="Plot">Plot</option>
+    </select>
+    {formErrors.vastuType && <div className="text-danger small">{formErrors.vastuType}</div>}
+  </div>
+)}
 
-
+{selectedPlanFields.includes("googleLocation") && (
   <div className="col-sm-12 mb-2">
     <label className="form-label" htmlFor="googleLocation">Google Location</label>
-    <input
-      type="text"
-      className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
-      name="googleLocation"
-      id="googleLocation"
-      value={formData.googleLocation}
-      onChange={handleChange}
-      placeholder="Paste Google Maps link"
-    />
+    <input type="text" className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
+           name="googleLocation" id="googleLocation" value={formData.googleLocation} onChange={handleChange} placeholder="Paste Google Maps link" />
     {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
   </div>
+)}
 
+{selectedPlanFields.includes("floorPlanFile") && (
   <div className="col-sm-12 mb-2">
     <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
-    <input
-      type="file"
-      className="form-control form-control-sm"
-      name="floorPlanFile"
-      id="floorPlanFile"
-      accept=".jpg,.jpeg,.png,.pdf"
-      onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })}
-    />
+    <input type="file" className="form-control form-control-sm"
+           name="floorPlanFile" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf"
+           onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })} />
   </div>
-</div>
+)}
+
+                        </>
+                      )}
+
+                      {/* Fields visible for all tenants */}
+
+
+                    </div>
+
 
                     {/* Additional Details */}
                     <div className="mb-2">
@@ -654,37 +651,37 @@ useEffect(() => {
               </div>
             </div>
           </div>
-        <div className="col-lg-5 col-12 my-auto d-flex align-items-stretch">
-  <div className="w-100 bg-white shadow-sm rounded p-3" style={{ minHeight: '35.25rem', maxHeight: '60.25rem' }}>
-    <div className="text-center mb-3">
-      <h5 className="mb-1">Choose Your Slot</h5>
-      <p className="small mb-3">Select a date and time</p>
-      <hr className="bg-dark" />
-    </div>
+          <div className="col-lg-5 col-12 my-auto d-flex align-items-stretch">
+            <div className="w-100 bg-white shadow-sm rounded p-3" style={{ minHeight: '35.25rem', maxHeight: '60.25rem' }}>
+              <div className="text-center mb-3">
+                <h5 className="mb-1">Choose Your Slot</h5>
+                <p className="small mb-3">Select a date and time</p>
+                <hr className="bg-dark" />
+              </div>
 
-    <MiniCalendar
-      selected={formData.appointmentDate}
-      duration={formData.duration}
-      bookedTimeSlots={bookedTimeSlots}
-      availableSlots={availableSlots}
-      onDateChange={(date) => {
-        setFormData(prev => ({
-          ...prev,
-          appointmentDate: date,
-          appointmentTime: ''
-        }));
-      }}
-      onSlotSelect={(slot) => {
-        setFormData(prev => ({
-          ...prev,
-          appointmentTime: slot
-        }));
-      }}
-      selectedSlot={formData.appointmentTime}
-      planId={availablePlans.find(p => p.planName === formData.plan)?.planId}
-    />
-  </div>
-</div>
+              <MiniCalendar
+                selected={formData.appointmentDate}
+                duration={formData.duration}
+                bookedTimeSlots={bookedTimeSlots}
+                availableSlots={availableSlots}
+                onDateChange={(date) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    appointmentDate: date,
+                    appointmentTime: ''
+                  }));
+                }}
+                onSlotSelect={(slot) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    appointmentTime: slot
+                  }));
+                }}
+                selectedSlot={formData.appointmentTime}
+                planId={availablePlans.find(p => p.planName === formData.plan)?.planId}
+              />
+            </div>
+          </div>
 
         </div>
       </div>

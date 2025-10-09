@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import { toast, ToastContainer } from 'react-toastify';
 
 const API_URL = "https://appo.coinagesoft.com";
 
 const ConsultantSection4 = () => {
   const [stats, setStats] = useState([]);
-  const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
   // 🔽 Fetch stats on component mount
   useEffect(() => {
@@ -14,7 +14,8 @@ const ConsultantSection4 = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          setStatusMessage({ type: "error", text: "No token found. Please log in." });
+                  toast.error("No token found. Please log in.");
+          
           return;
         }
 
@@ -42,10 +43,9 @@ console.log(response)
           setStats(apiStats);
         }
 
-        setStatusMessage({ type: "", text: "" });
       } catch (error) {
         console.error("Error fetching stats:", error);
-        setStatusMessage({ type: "error", text: "Error fetching stats." });
+         toast.error("Error fetching stats.");
       }
     };
 
@@ -77,11 +77,11 @@ console.log(response)
 
     // Validation
     if (!stat.editedValue || isNaN(stat.editedValue) || stat.editedValue <= 0) {
-      setStatusMessage({ type: 'error', text: 'Value must be a positive number.' });
+     toast.error('Value must be a positive number.');
       return;
     }
     if (!stat.editedDescription.trim()) {
-      setStatusMessage({ type: 'error', text: 'Description cannot be empty.' });
+       toast.error('Description cannot be empty.');
       return;
     }
 
@@ -95,7 +95,7 @@ console.log(response)
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setStatusMessage({ type: "error", text: "No token found. Please log in." });
+         toast.error("No token found. Please log in.");
         return;
       }
 
@@ -108,7 +108,7 @@ console.log(response)
         stat.value = dataToSend.value;
         stat.description = dataToSend.description;
         setStats(updatedStats);
-        setStatusMessage({ type: 'success', text: `Stat ${value} updated successfully!` });
+        toast.success("Section 4 updated successfully!");
 
       } else {
         // CREATE new stat
@@ -120,11 +120,11 @@ console.log(response)
         stat.value = res.data.value;
         stat.description = res.data.description;
         setStats(updatedStats);
-        setStatusMessage({ type: 'success', text: 'New stat created successfully!' });
+         toast.success('New stat created successfully!');
       }
     } catch (error) {
       console.error('Error saving stat:', error);
-      setStatusMessage({ type: 'error', text: 'Error saving stat' });
+       toast.error('Error saving stat' );
     }
   };
 
@@ -145,10 +145,10 @@ console.log(response)
       });
 
       setStats(stats.filter((_, i) => i !== index));
-      setStatusMessage({ type: 'success', text: 'Stat deleted successfully!' });
+       toast.success('Stat deleted successfully!');
     } catch (error) {
       console.error('Error deleting stat:', error);
-      setStatusMessage({ type: 'error', text: 'Error deleting stat' });
+     toast.error("Error deleting stat");
     }
   };
 
@@ -156,11 +156,8 @@ console.log(response)
     <div>
       <h5 className="text-start mb-3 text-muted mt-5">Section 4 - Manage Stats</h5>
 
-      {statusMessage.text && (
-        <div className={`alert ${statusMessage.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+        <ToastContainer />
+     
 
       <div className="card p-4 shadow-sm mt-4">
         <div className="row">
