@@ -15,7 +15,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   
-  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+  const hostname = window.location.hostname;
   const planFieldsMap = {
     "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
     "Commercial Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
@@ -114,7 +114,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
     if (!formData.duration.trim()) errors.duration = 'Duration is required';
     return errors;
   };
-
+console.log("hostname",hostname)
   // Prefill plan, amount, and duration if provided via props
   useEffect(() => {
     if (props.prefillData) {
@@ -220,7 +220,6 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
       const formDataToSend = new FormData();
 
-      // सर्व key-value FormData मध्ये जोडा
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "floorPlanFile" && value instanceof File) {
           formDataToSend.append("floorPlanFile", value); // File input handle
@@ -229,13 +228,11 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         }
       });
 
-      // selectedPlan चा id वेगळं जोडा
       formDataToSend.append("planId", selectedPlan.planId);
 
-      // slug URL मध्ये ठेवा
       const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
         method: "POST",
-        body: formDataToSend, // ❌ JSON नाही, ✅ FormData
+        body: formDataToSend, 
       });
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value);
@@ -394,7 +391,6 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         const appointments = appointmentsRes.data?.data || [];
         const rules = rulesRes.data?.rules || [];
         const shifts = shiftsRes.data?.data || [];
-
         // find selected plan
         const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
         if (!selectedPlan) return;
@@ -559,7 +555,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
                     {/* Vastu & Birth Details */}
 
                     <div className="row gx-2">
-                      {hostname === "booking.vedratnavastu.com" || hostname === "localhost" && (
+                      {hostname === "booking.vedratnavastu.com" || hostname === "shilrtna" && (
                         <>
 
 {selectedPlanFields.includes("birthDate") && (
