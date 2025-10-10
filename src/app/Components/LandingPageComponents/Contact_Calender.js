@@ -14,7 +14,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
-const [hostname, setHostname] = useState("");
+  const [hostname, setHostname] = useState("");
 
   const planFieldsMap = {
     "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
@@ -25,15 +25,15 @@ const [hostname, setHostname] = useState("");
   };
 
   useEffect(() => {
-  if (typeof window !== "undefined") {
-    setHostname(window.location.hostname);
-  }
-}, []);
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
+  }, []);
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
-        const slug=window.location.hostname;
+        const slug = window.location.hostname;
         // Send hostname as query param to backend
         const res = await fetch(
           `https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`
@@ -435,15 +435,15 @@ const [hostname, setHostname] = useState("");
 
       <div className="bg-light mt-8">
         <div className="container row content-space-2 content-space-lg-3 mx-auto" id="target-form">
-            <div className="col-lg-5 col-12 my-auto d-flex align-items-stretch mb-8  mb-lg-0">
+          <div className="col-lg-5 col-12 my-auto d-flex align-items-stretch mb-8  mb-lg-0">
             <div className="w-100 bg-white shadow-sm rounded  p-3 pb-5"
-  style={{
-    minHeight: '35.25rem',   // optional: sets a minimum height
-    maxHeight: '60.25rem',   // maximum height
-    height: 'auto',          // dynamic height based on content
-    overflowY: 'auto',       // scroll if content exceeds maxHeight
-  }}
->
+              style={{
+                minHeight: '35.25rem',   // optional: sets a minimum height
+                maxHeight: '60.25rem',   // maximum height
+                height: 'auto',          // dynamic height based on content
+                overflowY: 'auto',       // scroll if content exceeds maxHeight
+              }}
+            >
               <div className="text-center mb-3">
                 <h5 className="mb-1">Choose Your Slot</h5>
                 <p className="small mb-3">Select a date and time</p>
@@ -478,11 +478,11 @@ const [hostname, setHostname] = useState("");
             {/* <div className="mx-auto" style={{ maxWidth: '35rem' }}> */}
             <div >
               <div className="card" ref={ref}>
- <div className="card-body contact" style={{ height: 'auto', minHeight: 'auto', maxHeight: 'none' }}>                  <div className="text-center mb-3">
-                    <h5 className="mb-1">Book Your Appointment</h5>
-                    <p className="small mb-4">Please fill the details of exact person for whom consultation is needed.</p>
-                    <hr className='bg-dark' />
-                  </div>
+                <div className="card-body contact" style={{ height: 'auto', minHeight: '35.25rem', maxHeight: '60.25rem' }}>                  <div className="text-center mb-3">
+                  <h5 className="mb-1">Book Your Appointment</h5>
+                  <p className="small mb-4">Please fill the details of exact person for whom consultation is needed.</p>
+                  <hr className='bg-dark' />
+                </div>
                   <form onSubmit={handleSubmit}>
                     {/* First and Last Name */}
                     <div className="row gx-2">
@@ -598,10 +598,10 @@ const [hostname, setHostname] = useState("");
                     {/* Vastu & Birth Details */}
 
                     <div className="row gx-2">
-                      
+
                       {hostname === "booking.vedratnavastu.com" && (
                         <>
-                          
+
                           {selectedPlanFields.includes("birthDate") && (
                             <div className="col-sm-6 mb-2">
                               <label className="form-label" htmlFor="birthDate">Birth Date</label>
@@ -691,7 +691,7 @@ const [hostname, setHostname] = useState("");
               </div>
             </div>
           </div>
-       
+
 
         </div>
       </div>
