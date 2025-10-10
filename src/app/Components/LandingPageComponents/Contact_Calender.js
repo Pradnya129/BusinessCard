@@ -36,7 +36,7 @@ const [hostname, setHostname] = useState("");
         const slug=window.location.hostname;
         // Send hostname as query param to backend
         const res = await fetch(
-          `http://localhost:5000/api/public-landing/all?slug=${slug}`
+          `https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`
         );
 
         if (!res.ok) throw new Error("Failed to fetch plans");
@@ -235,7 +235,7 @@ const [hostname, setHostname] = useState("");
 
       formDataToSend.append("planId", selectedPlan.planId);
 
-      const response = await fetch(`http://localhost:5000/api/public-landing/paid?slug=${hostname}`, {
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
         method: "POST",
         body: formDataToSend,
       });
@@ -316,7 +316,7 @@ const [hostname, setHostname] = useState("");
 
   const verifyPayment = async (paymentResponse) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/customer-appointments/verify-payment`, {
+      const response = await fetch(`https://appo.coinagesoft.com/api/customer-appointments/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -27,8 +27,13 @@ const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
-  const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+  const [hostname, setHostname] = useState("");
   
+  useEffect(() => {
+  if (typeof window !== "undefined") {
+    setHostname(window.location.hostname);
+  }
+}, []);  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -274,7 +279,7 @@ const AppointmentList = () => {
                   <th>Amount</th>
                   <th>Time</th>
                   <th>Date</th>
-                  {(hostname === "booking.vedratnavastu.com" || hostname === "localhost") && (
+                  {(hostname === "booking.vedratnavastu.com") && (
                     <>
                       <th>Birth Date</th>
                       <th>Birth Time</th>
@@ -304,7 +309,7 @@ const AppointmentList = () => {
                     <td>{appt.amount}</td>
                     <td>{appt.appointmentTime}</td>
                     <td>{appt.appointmentDate}</td>
-                    {(hostname === "booking.vedratnavastu.com" || hostname === "localhost") && (
+                    {(hostname === "booking.vedratnavastu.com") && (
                       <>
                         <td>{appt.birthDate || "N/A"}</td>
                         <td>{appt.birthTime || "N/A"}</td>
@@ -417,7 +422,7 @@ const AppointmentList = () => {
                     <input type="date" className="form-control" name="appointmentDate" value={selectedAppt.appointmentDate} onChange={handleInputChange} />
                   </div>
 
-                  {hostname === "booking.vedratnavastu.com" || hostname === "localhost" && (
+                  {(hostname === "booking.vedratnavastu.com") && (
                     <>
                       <div className="mb-3">
                         <label className="form-label">Birth Date</label>
