@@ -63,106 +63,109 @@ const MiniCalendar = ({
   };
 
 
-useEffect(() => {
-  const fetchShiftAndGenerateSlots = async () => {
-    if (!selected || !duration || !planId) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-
-      const baseDate = new Date(selected);
-      const slug = "booking.vedratnavastu.com";
-
-      // 1️⃣ Get plan-shift-buffer
-      const bufferRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
-      );
-      const rule = bufferRes.data.rules.find(r => r.planId === planId);
-      if (!rule) {
-        setTimeSlots([]);
+  useEffect(() => {
+    const fetchShiftAndGenerateSlots = async () => {
+      if (!selected || !duration || !planId) {
+        setTimeSlots([]); // ❌ No plan selected → clear slots
         return;
       }
 
-      // 2️⃣ Get shifts
-      const shiftRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`
-      );
-      const shift = shiftRes.data.data.find(s => s.id === rule.shiftId);
-      if (!shift) {
-        setTimeSlots([]);
-        return;
-      }
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-      const shiftStart = new Date(`${selected}T${shift.startTime}`);
-      const shiftEnd = new Date(`${selected}T${shift.endTime}`);
+        const baseDate = new Date(selected);
+        const slug = "booking.vedratnavastu.com";
 
-      // 3️⃣ Generate all slots
-      const slots = generateTimeSlots(
-        shiftStart,
-        shiftEnd,
-        Number(duration),
-        rule.bufferInMinutes,
-        baseDate
-      );
-
-      // 4️⃣ Get only users assigned to this plan
-      const usersRes = await axios.get(
-        `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
-        { params: { slug, planId } }
-      );
-      const users = usersRes.data?.data || [];
-      console.log("Users assigned to this plan:", users);
-
-      if (!users.length) {
-        setTimeSlots(slots); // no users, all slots are free
-        return;
-      }
-
-      // 5️⃣ Fetch booked slots (filtered by both user + planId + slug)
-      const bookedResults = await Promise.all(
-        users.map(async (user) => {
-          try {
-        const dateStr = new Date(selected).toISOString().split("T")[0];
-const res = await axios.get(
-  `https://appo.coinagesoft.com/api/public-landing/booked-slots/${dateStr}`,
-  { params: { userId: user.id, planId, slug } }
- // 👈 added slug here
-            );
-            return res.data?.data || [];
-          } catch (err) {
-            console.error(`Error fetching booked slots for user ${user.id}`, err);
-            return [];
-          }
-        })
-      );
-
-      const allBooked = bookedResults.flat();
-
-      // convert to Date ranges
-      const bookedRanges = allBooked.map(b => ({
-        start: parse12ToDate(b.startTime, baseDate),
-        end: parse12ToDate(b.endTime, baseDate),
-      }));
-
-      // mark slots as booked only for this plan
-      const finalSlots = slots.map(slot => {
-        const isBooked = bookedRanges.some(
-          b => b.start.getTime() === slot.start.getTime() && b.end.getTime() === slot.end.getTime()
+        // 1️⃣ Get plan-shift-buffer
+        const bufferRes = await axios.get(
+          `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
         );
-        return { ...slot, isBooked };
-      });
+        const rule = bufferRes.data.rules.find(r => r.planId === planId);
+        if (!rule) {
+          setTimeSlots([]);
+          return;
+        }
 
-      setTimeSlots(finalSlots);
+        // 2️⃣ Get shifts
+        const shiftRes = await axios.get(
+          `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`
+        );
+        const shift = shiftRes.data.data.find(s => s.id === rule.shiftId);
+        if (!shift) {
+          setTimeSlots([]);
+          return;
+        }
 
-    } catch (err) {
-      console.error("❌ Error fetching shift/slots:", err);
-      setTimeSlots([]);
-    }
-  };
+        const shiftStart = new Date(`${selected}T${shift.startTime}`);
+        const shiftEnd = new Date(`${selected}T${shift.endTime}`);
 
-  fetchShiftAndGenerateSlots();
-}, [selected, duration, planId]);
+        // 3️⃣ Generate all slots
+        const slots = generateTimeSlots(
+          shiftStart,
+          shiftEnd,
+          Number(duration),
+          rule.bufferInMinutes,
+          baseDate
+        );
+
+        // 4️⃣ Get only users assigned to this plan
+        const usersRes = await axios.get(
+          `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
+          { params: { slug, planId } }
+        );
+        const users = usersRes.data?.data || [];
+        console.log("Users assigned to this plan:", users);
+
+        if (!users.length) {
+          setTimeSlots(slots); // no users, all slots are free
+          return;
+        }
+
+        // 5️⃣ Fetch booked slots (filtered by both user + planId + slug)
+        const bookedResults = await Promise.all(
+          users.map(async (user) => {
+            try {
+              const dateStr = new Date(selected).toISOString().split("T")[0];
+              const res = await axios.get(
+                `https://appo.coinagesoft.com/api/public-landing/booked-slots/${dateStr}`,
+                { params: { userId: user.id, planId, slug } }
+                // 👈 added slug here
+              );
+              return res.data?.data || [];
+            } catch (err) {
+              console.error(`Error fetching booked slots for user ${user.id}`, err);
+              return [];
+            }
+          })
+        );
+
+        const allBooked = bookedResults.flat();
+
+        // convert to Date ranges
+        const bookedRanges = allBooked.map(b => ({
+          start: parse12ToDate(b.startTime, baseDate),
+          end: parse12ToDate(b.endTime, baseDate),
+        }));
+
+        // mark slots as booked only for this plan
+        const finalSlots = slots.map(slot => {
+          const isBooked = bookedRanges.some(
+            b => b.start.getTime() === slot.start.getTime() && b.end.getTime() === slot.end.getTime()
+          );
+          return { ...slot, isBooked };
+        });
+
+        setTimeSlots(finalSlots);
+
+      } catch (err) {
+        console.error("❌ Error fetching shift/slots:", err);
+        setTimeSlots([]);
+      }
+    };
+
+    fetchShiftAndGenerateSlots();
+  }, [selected, duration, planId]);
 
   return (
     <div className="mx-auto mt-5 mt-sm-0" style={{ maxWidth: "35rem" }}>
@@ -180,8 +183,13 @@ const res = await axios.get(
             }}
             minDate={new Date()}
           />
+          {!planId && (
+            <div className="text-center mt-3 text-warning">
+              Please select a plan first from form to see available slots.
+            </div>
+          )}
 
-          {timeSlots.length > 0 && (
+          {planId && timeSlots.length > 0 && (
             <>
               <h6 className="fw-semibold mb-3 text-secondary">Available Slots</h6>
               <div className="slot-grid px-2 px-sm-0">
@@ -191,13 +199,12 @@ const res = await axios.get(
                     <button
                       key={index}
                       type="button"
-                      className={`btn btn-sm rounded-pill px-3 py-2 fw-semibold ${
-                        isBooked
+                      className={`btn btn-sm rounded-pill px-3 py-2 fw-semibold ${isBooked
                           ? "btn-secondary"
                           : isSelected
-                          ? "btn-primary"
-                          : "btn-outline-primary"
-                      }`}
+                            ? "btn-primary"
+                            : "btn-outline-primary"
+                        }`}
                       disabled={isBooked}
                       onClick={() => onSlotSelect(label)}
                       title={isBooked ? "Slot already booked" : "Available"}

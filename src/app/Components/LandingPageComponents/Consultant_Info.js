@@ -73,7 +73,7 @@ if (!consultantData || !consultantData.fullName) {
             <div className="mt-4">
               <span className="me-2 fw-semibold text-muted">Connect:</span>
               <ul className="list-inline d-inline">
-                {consultantData.facebookId && (
+                 {consultantData.facebookId && consultantData.facebookId !== "null" && (
                   <li className="list-inline-item me-2">
                     <a
                       className="btn btn-soft-primary btn-sm rounded-circle shadow-sm"
@@ -94,7 +94,7 @@ if (!consultantData || !consultantData.fullName) {
                     </a>
                   </li>
                 )}
-                {consultantData.instagramId && (
+                 {consultantData.instagramId && consultantData.instagramId !== "null" && (
                   <li className="list-inline-item me-2">
                     <a
                       className="btn btn-soft-danger btn-sm rounded-circle shadow-sm"
@@ -115,13 +115,34 @@ if (!consultantData || !consultantData.fullName) {
                     </a>
                   </li>
                 )}
-                {consultantData.twitterId && (
+                {consultantData.twitterId && consultantData.twitterId !== "null" && (
                   <li className="list-inline-item me-2">
                     <a
                       className="btn btn-soft-info btn-sm rounded-circle shadow-sm"
                       target="_blank"
                       rel="noopener noreferrer"
                       href={consultantData.twitterId}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 0,
+                        fontSize: '18px',
+                      }}
+                    >
+                      <i className="bi-twitter"></i>
+                    </a>
+                  </li>
+                )}
+                 {consultantData.youtubeId && consultantData.youtubeId !== "null" && (
+                  <li className="list-inline-item me-2">
+                    <a
+                      className="btn btn-soft-info btn-sm rounded-circle shadow-sm"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={consultantData.youtubeId}
                       style={{
                         width: '40px',
                         height: '40px',

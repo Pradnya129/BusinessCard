@@ -36,9 +36,9 @@ const Header = () => {
     fetchData();
   }, []);
 
-if (!ConsultantData || !ConsultantData.fullName) {
-  return null;
-}
+  if (!ConsultantData || !ConsultantData.fullName) {
+    return null;
+  }
   return (
     <header
       id="header"
@@ -50,7 +50,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
             <ul className="navbar-nav me-md-3">
               <li className="nav-item">
                 <a
-                  className="btn btn-light font-semibold btn-xs text-xs"
+                  className="btn btn-light font-semibold btn-xs text-xs "
 
                   href={
                     ConsultantData.locationURL ??
@@ -68,12 +68,12 @@ if (!ConsultantData || !ConsultantData.fullName) {
             <ul className="navbar-nav">
               <li className="nav-item">
                 <a
-                  className="btn btn-light btn-xs text-xs font-extrabold"
+                  className="btn btn-light btn-xs text-xs font-extrabold text-lowercase"
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    const email = ConsultantData.email || "info@example.com";
-                    const gmailComposeURL = `https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${email}`;
+                    const Email = ConsultantData.email || "info@example.com";
+                    const gmailComposeURL = `https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${Email}`;
                     window.open(
                       gmailComposeURL,
                       "_blank",
@@ -81,7 +81,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
                     );
                   }}
                 >
-                  📧 {ConsultantData.email }
+                  📧 {ConsultantData.email}
                 </a>
               </li>
             </ul>
@@ -90,7 +90,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
           {/* Social Media and Login Button */}
           <ul className="navbar-nav d-flex align-items-center">
             <li className="nav-item d-flex gap-2">
-              {ConsultantData.facebookId && (
+              {ConsultantData.facebookId && ConsultantData.facebookId !== "null" && (
                 <a
                   className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
                   href={ConsultantData.facebookId}
@@ -101,7 +101,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
                 </a>
               )}
 
-              {ConsultantData.youtubeId && (
+              {ConsultantData.youtubeId && ConsultantData.youtubeId !== "null" && (
                 <a
                   className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
                   href={ConsultantData.youtubeId}
@@ -112,7 +112,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
                 </a>
               )}
 
-              {ConsultantData.twitterId && (
+              {ConsultantData.twitterId && ConsultantData.twitterId !== "null" && (
                 <a
                   className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
                   href={ConsultantData.twitterId}
@@ -123,7 +123,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
                 </a>
               )}
 
-              {ConsultantData.instagramId && (
+              {ConsultantData.instagramId && ConsultantData.instagramId !== "null" && (
                 <a
                   className="btn btn-soft-light rounded bg-light text-dark btn-xs btn-icon"
                   href={ConsultantData.instagramId}
@@ -133,6 +133,7 @@ if (!ConsultantData || !ConsultantData.fullName) {
                   <i className="bi-instagram"></i>
                 </a>
               )}
+
             </li>
 
             {/* Login Button */}

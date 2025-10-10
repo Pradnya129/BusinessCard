@@ -34,61 +34,61 @@ const Section1 = () => {
   const [errors, setErrors] = useState({});
   const [landingId, setLandingId] = useState(null);
   const [bannerFiles, setBannerFiles] = useState({
-  banner1: null,
-  banner2: null,
-  banner3: null,
-});
+    banner1: null,
+    banner2: null,
+    banner3: null,
+  });
 
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
-      const decoded = jwtDecode(token);
-      const adminId = decoded.id;
+        const decoded = jwtDecode(token);
+        const adminId = decoded.id;
 
 
-const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
-  headers: {
-    "Authorization": `Bearer ${token}` // <-- Add this line
-  },
-});
+        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}` // <-- Add this line
+          },
+        });
 
-// const data = await response.json();
-// console.log(data);
-      if (!response.ok) throw new Error("Failed to fetch consultant data");
+        // const data = await response.json();
+        // console.log(data);
+        if (!response.ok) throw new Error("Failed to fetch consultant data");
 
-      const result = await response.json();
-      console.log("section1", result.data);
+        const result = await response.json();
+        console.log("section1", result.data);
 
-      if (result && result.data) {
-        setData(result.data);
-        setEditableData(result.data);
-        setLandingId(result.data.id); // ✅ save landing id for later PATCH
-      } else {
+        if (result && result.data) {
+          setData(result.data);
+          setEditableData(result.data);
+          setLandingId(result.data.id); // ✅ save landing id for later PATCH
+        } else {
+          setData(emptySectionData);
+          setEditableData(emptySectionData);
+          setLandingId(null);
+        }
+
+      } catch (error) {
+        console.error("Error fetching consultant data:", error);
+        toast.error("Failed to save section.");
         setData(emptySectionData);
         setEditableData(emptySectionData);
         setLandingId(null);
+      } finally {
+        setLoading(false);
       }
+    };
 
-    } catch (error) {
-      console.error("Error fetching consultant data:", error);
-      toast.error("Failed to save section.");
-      setData(emptySectionData);
-      setEditableData(emptySectionData);
-      setLandingId(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
 
   const handleInputChange = (field, value) => {
@@ -114,11 +114,15 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
     if (!editableData.locationURL || !/^(ftp|http|https):\/\/[^ "]+$/.test(editableData.locationURL)) {
       formErrors.locationURL = "Valid Clinic Address URL is required";
     }
-    ['facebookId', 'instagramId', 'twitterId', 'youtubeId'].forEach(platform => {
-      if (editableData[platform] && !/^(ftp|http|https):\/\/[^ "]+$/.test(editableData[platform])) {
-        formErrors[platform] = `Valid URL is required for ${platform}`;
-      }
-    });
+  ['facebookId', 'instagramId', 'twitterId', 'youtubeId'].forEach(platform => {
+  const value = editableData[platform] ?? ''; // normalize null/undefined to ''
+  if (value && value !== "null"  && value  && !/^(ftp|http|https):\/\/[^ "]+$/.test(value)) {
+    formErrors[platform] = `Valid URL is required for ${platform}`;
+  }
+});
+
+
+
     ["tagline1", "tagline2", "tagline3"].forEach((tagline) => {
       if (!editableData[tagline]) formErrors[tagline] = `${tagline} is required`;
     });
@@ -127,56 +131,63 @@ const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId
     return Object.keys(formErrors).length === 0;
   };
 
- const handleSave = async () => {
-  if (!validateForm()) return;
+  const handleSave = async () => {
+    if (!validateForm()) return;
 
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    const decoded = jwtDecode(token);
+      const formData = new FormData();
 
-    const formData = new FormData();
+      // ✅ Always send all fields, including empty social ones
+      Object.entries(editableData).forEach(([key, value]) => {
+        // For social links, send null if empty
+        const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
 
-    Object.entries(editableData).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        formData.append(key, value);
+        if (socialFields.includes(key)) {
+          formData.append(key, (value == '' || value == " ") ? null : value);
+          console.log("k", key, value)
+        } else if (value !== undefined && value !== null && value !== '' && value !== " ") {
+          formData.append(key, value);
+          console.log("key", key, value)
+        }
+      });
+
+
+      // ✅ Profile image
+      if (profileImageFile) {
+        formData.append("profileImage", profileImageFile);
       }
-    });
 
- 
-   if (profileImageFile) {
-  formData.append("profileImage", profileImageFile);
-}
+      // ✅ Banners
+      if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
+      if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
+      if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
 
-// Append banners if selected
-if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
-if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
-if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
+      const response = await axios.patch(
+        `https://appo.coinagesoft.com/api/landing/${landingId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+      );
 
-
-    const response = await axios.patch(
-      `https://appo.coinagesoft.com/api/landing/${landingId}`,
-      formData,
-      { headers: {
-         "Content-Type": "multipart/form-data" ,
-          "Authorization": `Bearer ${token}` 
-
-      } }
-    );
-
-    if (response.data.success) {
+      if (response.data.success) {
         toast.success("Section 1 updated successfully!");
-      setIsEdited(false);
-    } else {
-       toast.error("Error updating section 1!");
+        setIsEdited(false);
+      } else {
+        toast.error("Error updating section 1!");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Error updating section 1");
     }
-  } catch (error) {
-    console.error("Error updating profile:", error);
-            toast.error("Error updating section 3");
-    
-  }
-};
+  };
+
 
 
 
@@ -186,28 +197,28 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
 
   return (
 
-    
+
     <div className="mb-5">
       <ToastContainer />
       <h5 className="mb-4 text-muted">Section 1 - Manage Banner Info</h5>
-    
+
       <div className="card p-4 shadow-sm rounded-4">
 
         {/* Profile Image */}
         <div className="row g-4 justify-content-center mb-4">
           <div className="col-md-6 text-center">
-          <img
-  src={
-    editableData.profileImage
-      ? editableData.profileImage.startsWith('blob:')
-        ? editableData.profileImage
-        : `https://appo.coinagesoft.com${editableData.profileImage}` // remove extra slash
-      : 'https://appo.coinagesoft.com/assets/img/160x160/img8.jpg'
-  }
-  alt="Profile"
-  className="border border-secondary rounded-circle"
-  style={{ width: "150px", height: "150px", objectFit: "cover" }}
-/>
+            <img
+              src={
+                editableData.profileImage
+                  ? editableData.profileImage.startsWith('blob:')
+                    ? editableData.profileImage
+                    : `https://appo.coinagesoft.com${editableData.profileImage}` // remove extra slash
+                  : 'https://appo.coinagesoft.com/assets/img/160x160/img8.jpg'
+              }
+              alt="Profile"
+              className="border border-secondary rounded-circle"
+              style={{ width: "150px", height: "150px", objectFit: "cover" }}
+            />
 
             <input
               type="file"
@@ -292,7 +303,7 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
               { platform: 'facebookId', icon: 'bi-facebook' },
               { platform: 'instagramId', icon: 'bi-instagram' },
               { platform: 'twitterId', icon: 'bi-twitter' },
-              {platform :'youtubeId',icon:'bi-youtube'}
+              { platform: 'youtubeId', icon: 'bi-youtube' }
             ].map(({ platform, icon }) => (
               <div className="input-group mb-2" key={platform}>
                 <span className="input-group-text">
@@ -301,7 +312,7 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
                 <input
                   type="text"
                   className={`form-control ${errors[platform] ? 'is-invalid' : ''}`}
-                  value={editableData[platform] || ''}
+                  value={(editableData[platform] === "null") ? '': editableData[platform]}
                   onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
                 />
                 {errors[platform] && <div className="invalid-feedback">{errors[platform]}</div>}
@@ -326,43 +337,43 @@ if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
           </div>
         </div>
 
-{/* Banner Images */}
-<div className="row gx-5 mt-4">
-  {["banner1_Image", "banner2_Image", "banner3_Image"].map((field, idx) => (
-    <div className="col-md-4 text-center mb-3" key={field}>
-      <label className="form-label fw-semibold">{`Banner ${idx + 1}`}</label>
-      <img
-        src={
-          editableData[field]
-            ? editableData[field].startsWith("blob:")
-              ? editableData[field]
-              : `https://appo.coinagesoft.com${editableData[field]}`
-            : `https://via.placeholder.com/300x150?text=Banner+${idx + 1}`
-        }
-        alt={`Banner ${idx + 1}`}
-        className="border border-secondary rounded-3 mb-2"
-        style={{ width: "100%", height: "150px", objectFit: "cover" }}
-      />
-      <input
-        type="file"
-        className="form-control"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (file) {
-            setBannerFiles((prev) => ({ ...prev, [`banner${idx + 1}`]: file }));
-            setEditableData((prev) => ({
-              ...prev,
-              [field]: URL.createObjectURL(file),
-            }));
-            setIsEdited(true);
-          }
-        }}
-      />
-      <p className="text-muted small">Recommended size: 1200x400</p>
-    </div>
-  ))}
-</div>
+        {/* Banner Images */}
+        <div className="row gx-5 mt-4">
+          {["banner1_Image", "banner2_Image", "banner3_Image"].map((field, idx) => (
+            <div className="col-md-4 text-center mb-3" key={field}>
+              <label className="form-label fw-semibold">{`Banner ${idx + 1}`}</label>
+              <img
+                src={
+                  editableData[field]
+                    ? editableData[field].startsWith("blob:")
+                      ? editableData[field]
+                      : `https://appo.coinagesoft.com${editableData[field]}`
+                    : `https://via.placeholder.com/300x150?text=Banner+${idx + 1}`
+                }
+                alt={`Banner ${idx + 1}`}
+                className="border border-secondary rounded-3 mb-2"
+                style={{ width: "100%", height: "150px", objectFit: "cover" }}
+              />
+              <input
+                type="file"
+                className="form-control"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setBannerFiles((prev) => ({ ...prev, [`banner${idx + 1}`]: file }));
+                    setEditableData((prev) => ({
+                      ...prev,
+                      [field]: URL.createObjectURL(file),
+                    }));
+                    setIsEdited(true);
+                  }
+                }}
+              />
+              <p className="text-muted small">Recommended size: 1200x400</p>
+            </div>
+          ))}
+        </div>
 
         {/* Save Button */}
         <div className="text-center mt-4">
