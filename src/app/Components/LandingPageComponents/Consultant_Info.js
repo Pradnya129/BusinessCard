@@ -51,10 +51,17 @@ if (!consultantData || !consultantData.fullName) {
         {/* Consultant Info */}
         <div className="col-md-7">
           <div className="px-md-4">
-            <p className="text-primary fst-italic fs-5 mb-3">
-              <i className="bi-quote me-2 text-secondary"></i>
-              {consultantData.section2_Tagline}
-            </p>
+<p className="text-primary fst-italic fs-5 mb-3">
+  <i className="bi-quote me-2 text-secondary"></i> {/* Opening quote icon */}
+  {consultantData.section2_Tagline}
+  <span className="ms-2 text-secondary" style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>
+    <i className="bi-quote"></i>
+  </span> {/* Rotated closing quote */}
+</p>
+
+
+
+
 
             <h3 className="text-dark fw-bold mb-1">{consultantData.fullName}</h3>
             <div className="border-top border-2 mb-3" style={{ width: "60px" }}></div>

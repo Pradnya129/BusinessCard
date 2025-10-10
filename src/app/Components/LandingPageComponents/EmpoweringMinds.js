@@ -43,7 +43,7 @@ const EmpoweringMinds = () => {
     <div className="container bg-grey py-5 px-3 px-md-4 px-lg-5">
       <div className="row justify-content-lg-between align-items-center">
         <div className="col-lg-8 mt-3 pt-3">
-          <h2>{section3_Tagline}</h2>
+          <h3 className='text-dark fw-bold mb-1'>{section3_Tagline}</h3>
 
           {/* ✅ Render formatted HTML directly */}
           <div dangerouslySetInnerHTML={{ __html: section3_Description }} />
@@ -55,7 +55,7 @@ const EmpoweringMinds = () => {
               src={`https://appo.coinagesoft.com/${section3_Image}`}
               alt={section3_Tagline}
               className="img-fluid rounded"
-              style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "cover" }}
+              style={{ maxWidth: "100%", maxHeight: "400px", objectFit: "cover" }}
             />
           )}
         </div>
