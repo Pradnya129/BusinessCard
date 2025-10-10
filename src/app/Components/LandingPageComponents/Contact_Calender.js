@@ -14,8 +14,8 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
-  
-  const hostname = window.location.hostname;
+const [hostname, setHostname] = useState("");
+
   const planFieldsMap = {
     "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
     "Commercial Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
@@ -25,13 +25,21 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   };
 
   useEffect(() => {
+  if (typeof window !== "undefined") {
+    setHostname(window.location.hostname);
+  }
+}, []);
+  useEffect(() => {
+
+      const slug = window.location.hostname;
+
     const fetchPlans = async () => {
       try {
         // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
 
         // Send hostname as query param to backend
         const res = await fetch(
-          `https://appo.coinagesoft.com/api/public-landing/all?slug=${hostname}`
+          `https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`
         );
 
         if (!res.ok) throw new Error("Failed to fetch plans");
@@ -114,7 +122,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
     if (!formData.duration.trim()) errors.duration = 'Duration is required';
     return errors;
   };
-console.log("hostname",hostname)
+  console.log("hostname", hostname)
   // Prefill plan, amount, and duration if provided via props
   useEffect(() => {
     if (props.prefillData) {
@@ -232,7 +240,7 @@ console.log("hostname",hostname)
 
       const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
         method: "POST",
-        body: formDataToSend, 
+        body: formDataToSend,
       });
       for (let [key, value] of formDataToSend.entries()) {
         console.log(key, value);
@@ -555,69 +563,75 @@ console.log("hostname",hostname)
                     {/* Vastu & Birth Details */}
 
                     <div className="row gx-2">
-                      {hostname === "booking.vedratnavastu.com" || hostname === "shilrtna" && (
+                      
+                      {hostname === "booking.vedratnavastu.com" && (
                         <>
+                           <div className="col-sm-6 mb-2">
+                              <label className="form-label" htmlFor="birthDate">Birth Date</label>
+                              <input type="date" className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
+                                name="birthDate" id="birthDate" value={formData.birthDate} onChange={handleChange} />
+                              {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
+                            </div>
+                          {selectedPlanFields.includes("birthDate") && (
+                            <div className="col-sm-6 mb-2">
+                              <label className="form-label" htmlFor="birthDate">Birth Date</label>
+                              <input type="date" className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
+                                name="birthDate" id="birthDate" value={formData.birthDate} onChange={handleChange} />
+                              {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
+                            </div>
+                          )}
 
-{selectedPlanFields.includes("birthDate") && (
-  <div className="col-sm-6 mb-2">
-    <label className="form-label" htmlFor="birthDate">Birth Date</label>
-    <input type="date" className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
-           name="birthDate" id="birthDate" value={formData.birthDate} onChange={handleChange} />
-    {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
-  </div>
-)}
+                          {selectedPlanFields.includes("birthTime") && (
+                            <div className="col-sm-6 mb-2">
+                              <label className="form-label" htmlFor="birthTime">Birth Time</label>
+                              <input type="time" className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
+                                name="birthTime" id="birthTime" value={formData.birthTime} onChange={handleChange} />
+                              {formErrors.birthTime && <div className="text-danger small">{formErrors.birthTime}</div>}
+                            </div>
+                          )}
 
-{selectedPlanFields.includes("birthTime") && (
-  <div className="col-sm-6 mb-2">
-    <label className="form-label" htmlFor="birthTime">Birth Time</label>
-    <input type="time" className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
-           name="birthTime" id="birthTime" value={formData.birthTime} onChange={handleChange} />
-    {formErrors.birthTime && <div className="text-danger small">{formErrors.birthTime}</div>}
-  </div>
-)}
+                          {selectedPlanFields.includes("birthPlace") && (
+                            <div className="col-sm-6 mb-2">
+                              <label className="form-label" htmlFor="birthPlace">Birth Place</label>
+                              <input type="text" className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
+                                name="birthPlace" id="birthPlace" value={formData.birthPlace} onChange={handleChange} />
+                              {formErrors.birthPlace && <div className="text-danger small">{formErrors.birthPlace}</div>}
+                            </div>
+                          )}
 
-{selectedPlanFields.includes("birthPlace") && (
-  <div className="col-sm-6 mb-2">
-    <label className="form-label" htmlFor="birthPlace">Birth Place</label>
-    <input type="text" className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
-           name="birthPlace" id="birthPlace" value={formData.birthPlace} onChange={handleChange} />
-    {formErrors.birthPlace && <div className="text-danger small">{formErrors.birthPlace}</div>}
-  </div>
-)}
+                          {selectedPlanFields.includes("vastuType") && (
+                            <div className="col-sm-6 mb-2">
+                              <label className="form-label" htmlFor="vastuType">Vastu Type</label>
+                              <select className={`form-select form-select-sm ${formErrors.vastuType ? 'border border-danger' : ''}`}
+                                name="vastuType" id="vastuType" value={formData.vastuType} onChange={handleChange}>
+                                <option value="">-- Select Vastu Type --</option>
+                                <option value="Residential">Residential</option>
+                                <option value="Commercial">Commercial</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Office">Office</option>
+                                <option value="Plot">Plot</option>
+                              </select>
+                              {formErrors.vastuType && <div className="text-danger small">{formErrors.vastuType}</div>}
+                            </div>
+                          )}
 
-{selectedPlanFields.includes("vastuType") && (
-  <div className="col-sm-6 mb-2">
-    <label className="form-label" htmlFor="vastuType">Vastu Type</label>
-    <select className={`form-select form-select-sm ${formErrors.vastuType ? 'border border-danger' : ''}`}
-            name="vastuType" id="vastuType" value={formData.vastuType} onChange={handleChange}>
-      <option value="">-- Select Vastu Type --</option>
-      <option value="Residential">Residential</option>
-      <option value="Commercial">Commercial</option>
-      <option value="Industrial">Industrial</option>
-      <option value="Office">Office</option>
-      <option value="Plot">Plot</option>
-    </select>
-    {formErrors.vastuType && <div className="text-danger small">{formErrors.vastuType}</div>}
-  </div>
-)}
+                          {selectedPlanFields.includes("googleLocation") && (
+                            <div className="col-sm-12 mb-2">
+                              <label className="form-label" htmlFor="googleLocation">Google Location</label>
+                              <input type="text" className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
+                                name="googleLocation" id="googleLocation" value={formData.googleLocation} onChange={handleChange} placeholder="Paste Google Maps link" />
+                              {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
+                            </div>
+                          )}
 
-{selectedPlanFields.includes("googleLocation") && (
-  <div className="col-sm-12 mb-2">
-    <label className="form-label" htmlFor="googleLocation">Google Location</label>
-    <input type="text" className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
-           name="googleLocation" id="googleLocation" value={formData.googleLocation} onChange={handleChange} placeholder="Paste Google Maps link" />
-    {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
-  </div>
-)}
-
-{selectedPlanFields.includes("floorPlanFile") && (
-  <div className="col-sm-12 mb-2">
-    <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
-    <input type="file" className="form-control form-control-sm"
-           name="floorPlanFile" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf"
-           onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })} />
-  </div>
-)}
+                          {selectedPlanFields.includes("floorPlanFile") && (
+                            <div className="col-sm-12 mb-2">
+                              <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
+                              <input type="file" className="form-control form-control-sm"
+                                name="floorPlanFile" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf"
+                                onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })} />
+                            </div>
+                          )}
 
                         </>
                       )}
