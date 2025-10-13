@@ -75,7 +75,7 @@ const MiniCalendar = ({
         if (!token) return;
 
         const baseDate = new Date(selected);
-        const slug = "booking.vedratnavastu.com";
+        const slug = window.location.hostname;
 
         // 1️⃣ Get plan-shift-buffer
         const bufferRes = await axios.get(
