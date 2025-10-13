@@ -16,6 +16,7 @@ const MiniCalendar = ({
 }) => {
   const [timeSlots, setTimeSlots] = useState([]);
   const [bookedSlots, setBookedSlots] = useState([]);
+const [loading, setLoading] = useState(false);
 
   // 🔹 Parse "10:00 AM" → Date (with baseDate = selected date)
   const parse12ToDate = (timeStr, baseDate) => {
@@ -71,6 +72,8 @@ const MiniCalendar = ({
       }
 
       try {
+              setLoading(true); // ✅ start loading
+
         const token = localStorage.getItem("token");
         if (!token) return;
 
@@ -161,7 +164,9 @@ const MiniCalendar = ({
       } catch (err) {
         console.error("❌ Error fetching shift/slots:", err);
         setTimeSlots([]);
-      }
+      }finally {
+      setLoading(false); // ✅ end loading
+    }
     };
 
     fetchShiftAndGenerateSlots();
@@ -189,34 +194,47 @@ const MiniCalendar = ({
             </div>
           )}
 
-          {planId && timeSlots.length > 0 && (
-            <>
-              <h6 className="fw-semibold mb-3 text-secondary">Available Slots</h6>
-              <div className="slot-grid px-2 px-sm-0">
-                {timeSlots.map(({ label, isBooked }, index) => {
-                  const isSelected = selectedSlot === label;
-                  return (
-                    <button
-                      key={index}
-                      type="button"
-                      className={`btn btn-sm rounded-pill px-3 py-2 fw-semibold ${isBooked
-                          ? "btn-secondary"
-                          : isSelected
-                            ? "btn-primary"
-                            : "btn-outline-primary"
-                        }`}
-                      disabled={isBooked}
-                      onClick={() => onSlotSelect(label)}
-                      title={isBooked ? "Slot already booked" : "Available"}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
+{planId && (
+  <>
+    {loading ? (
+      <div className="text-center text-info mt-3">
+        Loading available slots...
+      </div>
+    ) : timeSlots.length > 0 ? (
+      <>
+        <h6 className="fw-semibold mb-3 text-secondary">Available Slots</h6>
+        <div className="slot-grid px-2 px-sm-0">
+          {timeSlots.map(({ label, isBooked }, index) => {
+            const isSelected = selectedSlot === label;
+            return (
+              <button
+                key={index}
+                type="button"
+                className={`btn btn-sm rounded-pill px-3 py-2 fw-semibold ${
+                  isBooked
+                    ? "btn-secondary"
+                    : isSelected
+                    ? "btn-primary"
+                    : "btn-outline-primary"
+                }`}
+                disabled={isBooked}
+                onClick={() => onSlotSelect(label)}
+                title={isBooked ? "Slot already booked" : "Available"}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
+      </>
+    ) : (
+      <div className="text-center text-warning mt-3">
+        No slots available for selected date
+      </div>
+    )}
+  </>
+)}
+      </div>
       </div>
     </div>
   );
