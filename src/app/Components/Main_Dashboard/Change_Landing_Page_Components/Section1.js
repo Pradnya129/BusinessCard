@@ -312,7 +312,8 @@ const Section1 = () => {
                 <input
                   type="text"
                   className={`form-control ${errors[platform] ? 'is-invalid' : ''}`}
-                  value={(editableData[platform] === "null") ? '': editableData[platform]}
+                 value={editableData[platform] === "null" ? "" : editableData[platform] ?? ""}
+
                   onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
                 />
                 {errors[platform] && <div className="invalid-feedback">{errors[platform]}</div>}

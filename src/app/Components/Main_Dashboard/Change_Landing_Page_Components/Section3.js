@@ -15,7 +15,7 @@ const Section3 = () => {
   const [relatedImage, setRelatedImage] = useState(null);
   const [isEdited, setIsEdited] = useState(false);
   const [loading, setLoading] = useState(false);
-  const editorRef = useRef(null);
+  const editorRef = useRef(null); // ✅ define here before using anywhere
 
   
   // 🟢 FETCH EXISTING DATA

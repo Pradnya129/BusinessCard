@@ -61,7 +61,7 @@ const ConsultantSection6 = () => {
       setFaqs([...faqs, res.data]);
       setQuestion('');
       setAnswer('');
-     toast.error('FAQ added successfully!');
+     toast.success('FAQ added successfully!');
     } catch (err) {
       console.error('Error adding FAQ:', err);
      toast.error('Error adding FAQ');

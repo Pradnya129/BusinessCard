@@ -5,7 +5,7 @@ import './Consultant_Info.css';
 const Consultant_Info = () => {
   const [consultantData, setConsultantData] = useState({});
 
- useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
         // Get slug from URL path
@@ -24,14 +24,14 @@ const Consultant_Info = () => {
 
     fetchData();
   }, []);
-  
-if (!consultantData || !consultantData.fullName) {
-  return null;
-}
+
+  if (!consultantData || !consultantData.fullName) {
+    return null;
+  }
 
   return (
 
-    
+
     <div className="container py-5 px-3 px-md-4 px-lg-5">
       <div className="row align-items-center rounded-4 py-5">
         {/* Consultant Image */}
@@ -42,22 +42,22 @@ if (!consultantData || !consultantData.fullName) {
             onMouseOver={(e) => (e.currentTarget.style.transform = 'scale(1.03)')}
             onMouseOut={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             src={
-                `https://appo.coinagesoft.com${consultantData.section2_Image}`
+              `https://appo.coinagesoft.com${consultantData.section2_Image}`
             }
-            alt={consultantData.fullName }
+            alt={consultantData.fullName}
           />
         </div>
 
         {/* Consultant Info */}
         <div className="col-md-7">
           <div className="px-md-4">
-<p className="text-primary fst-italic fs-5 mb-3">
-  <i className="bi-quote me-2 text-secondary"></i> {/* Opening quote icon */}
-  {consultantData.section2_Tagline}
-  <span className="ms-2 text-secondary" style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>
-    <i className="bi-quote"></i>
-  </span> {/* Rotated closing quote */}
-</p>
+            <p className="text-primary fst-italic fs-5 mb-3">
+              <i className="bi-quote me-2 text-secondary"></i> {/* Opening quote icon */}
+              {consultantData.section2_Tagline}
+              <span className="ms-2 text-secondary" style={{ display: 'inline-block', transform: 'rotate(180deg)' }}>
+                <i className="bi-quote"></i>
+              </span> {/* Rotated closing quote */}
+            </p>
 
 
 
@@ -72,15 +72,21 @@ if (!consultantData || !consultantData.fullName) {
               <p className="text-muted small mb-3">{consultantData.certificates}</p>
             )}
 
-            <p className="text-secondary lh-lg fs-6" style={{ textAlign: "justify" }}>
-              {consultantData.description}
-            </p>
+          <div
+  className="text-secondary lh-lg fs-6"
+  style={{ textAlign: "justify" }}
+  dangerouslySetInnerHTML={{
+    __html: (consultantData.description || "").replace(/\n/g, "<br />")
+  }}
+></div>
+
+
 
             {/* Social Icons */}
             <div className="mt-4">
               <span className="me-2 fw-semibold text-muted">Connect:</span>
               <ul className="list-inline d-inline">
-                 {consultantData.facebookId && consultantData.facebookId !== "null" && (
+                {consultantData.facebookId && consultantData.facebookId !== "null" && (
                   <li className="list-inline-item me-2">
                     <a
                       className="btn btn-soft-primary btn-sm rounded-circle shadow-sm"
@@ -101,7 +107,7 @@ if (!consultantData || !consultantData.fullName) {
                     </a>
                   </li>
                 )}
-                 {consultantData.instagramId && consultantData.instagramId !== "null" && (
+                {consultantData.instagramId && consultantData.instagramId !== "null" && (
                   <li className="list-inline-item me-2">
                     <a
                       className="btn btn-soft-danger btn-sm rounded-circle shadow-sm"
@@ -143,7 +149,7 @@ if (!consultantData || !consultantData.fullName) {
                     </a>
                   </li>
                 )}
-                 {consultantData.youtubeId && consultantData.youtubeId !== "null" && (
+                {consultantData.youtubeId && consultantData.youtubeId !== "null" && (
                   <li className="list-inline-item me-2">
                     <a
                       className="btn btn-soft-info btn-sm rounded-circle shadow-sm"
