@@ -694,7 +694,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
                     <div className="row gx-2">
 
-                      {(hostname === "booking.vedratnavastu.com") || (hostname === "localhost") && (
+                      {(hostname === "booking.vedratnavastu.com") && (
                         <>
 
                           {selectedPlanFields.includes("birthDate") && (
