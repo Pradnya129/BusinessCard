@@ -438,6 +438,16 @@ useEffect(() => {
                     <div>Manage Policies</div>
                   </Link>
                 </li>
+                   <li className={`menu-item ${
+                      pathname === "/Dashboard/Admin_Coupans" ? "active" : ""
+                    }`}>
+                  <Link
+                    href="/Dashboard/Admin_Coupans"
+                    className="menu-link"
+                  >
+                    <div>Manage Coupans</div>
+                  </Link>
+                </li>
               </ul>
             </li>
           </ul>

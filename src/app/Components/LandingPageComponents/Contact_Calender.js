@@ -15,6 +15,11 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [availablePlans, setAvailablePlans] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [hostname, setHostname] = useState("");
+  const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [couponCode, setCouponCode] = useState(''); // coupon as string
+  const [appliedCouponId, setAppliedCouponId] = useState(null);
+  const [couponMessage, setCouponMessage] = useState('');
+
 
   const planFieldsMap = {
     "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
@@ -23,7 +28,9 @@ const Contact_Calender = React.forwardRef((props, ref) => {
     "Numerology Consultancy": ["birthDate", "birthTime", "birthPlace"],
     "Kundali Consultancy ": ["birthDate", "birthTime", "birthPlace"], // ✅ Kundali
   };
-
+  const handleCouponChange = (e) => {
+    setCouponCode(e.target.value);
+  };
   useEffect(() => {
     if (typeof window !== "undefined") {
       setHostname(window.location.hostname);
@@ -206,11 +213,19 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+      // Check if a slot from MiniCalendar is selected
+  if (!formData.appointmentTime) {
+    alert("Please select a time slot from the calendar before booking!");
+    return; // Stop form submission
+  }
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
     }
+
+
     setFormErrors({});
 
     try {
@@ -232,6 +247,10 @@ const Contact_Calender = React.forwardRef((props, ref) => {
           formDataToSend.append(key, value);
         }
       });
+      if (appliedCouponId) {
+        formDataToSend.append("couponId", appliedCouponId);
+      }
+
 
       formDataToSend.append("planId", selectedPlan.planId);
 
@@ -262,6 +281,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         handler: function (response) {
           console.log("💰 Payment success:", response);
           setPaymentCompleted(true);
+          setIsVerifyingPayment(true);
           verifyPayment(response);
         },
         prefill: {
@@ -274,6 +294,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
       const rzp1 = new window.Razorpay(razorpayOptions);
       rzp1.on("payment.failed", function () {
         setPaymentCompleted(true);
+        setIsVerifyingPayment(false);
         showModal("failureModal");
       });
       rzp1.open();
@@ -282,6 +303,50 @@ const Contact_Calender = React.forwardRef((props, ref) => {
       console.error("❌ Error creating appointment:", error);
       alert("An error occurred while booking the appointment.");
       showModal("failureModal");
+    }
+  };
+
+
+  const applyCoupon = async () => {
+    if (!couponCode) {
+      alert("Please enter a coupon code.");
+      return;
+    }
+
+    const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
+    if (!selectedPlan) {
+      alert("Select a valid plan first.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/validate?slug=${hostname}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: couponCode, // ✅ just the string
+          planId: selectedPlan.planId
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setAppliedCouponId(data.data.couponId || data.data.id);
+        setCouponMessage(`Coupon applied! Discount: ₹${data.data.discountAmount || 0}`);
+        setFormData(prev => ({
+          ...prev,
+          amount: Math.max(0, Number(prev.amount) - (data.data.discountAmount || 0))
+        }));
+
+      } else {
+        setAppliedCouponId(null);
+        setCouponMessage('');
+        alert(data.message || "Invalid coupon code");
+      }
+    } catch (err) {
+      console.error("Coupon validation error:", err);
+      alert("Failed to validate coupon.");
     }
   };
 
@@ -329,11 +394,13 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
       if (response.ok) {
         const data = await response.json();
+        setIsVerifyingPayment(false);
         console.log('Payment Verification Result:', data);
         if (data.success && data.receipt) {
           openReceiptPdf(data.receipt);
         } else {
           alert(data.message || 'Payment verified but no receipt.');
+          setIsVerifyingPayment(false);
         }
 
         showModal('successModal');
@@ -356,6 +423,10 @@ const Contact_Calender = React.forwardRef((props, ref) => {
           floorPlanFile: null,
         });
         setFormErrors({});
+        setCouponMessage('');    // clear coupon message
+        setCouponCode('');       // clear input
+        setAppliedCouponId(null); // reset applied coupon
+
       } else {
         const errorText = await response.text();
         console.error('Verification failed:', errorText);
@@ -434,6 +505,25 @@ const Contact_Calender = React.forwardRef((props, ref) => {
     <>
 
       <div className="bg-light mt-8">
+        {isVerifyingPayment && (
+          <div
+            className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+            style={{
+              zIndex: 2000,
+              background: 'rgba(0, 0, 0, 0.6)',
+              backdropFilter: 'blur(3px)'
+            }}
+          >
+            <div className="text-center p-4 bg-white rounded shadow">
+              <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+                <span className="visually-hidden">Verifying payment...</span>
+              </div>
+              <h6 className="mb-0">Verifying your payment...</h6>
+            </div>
+          </div>
+        )}
+
+
         <div className="container row content-space-2 content-space-lg-3 mx-auto" id="target-form">
           <div className="col-lg-5 col-12 my-auto d-flex align-items-stretch mb-8  mb-lg-0">
             <div className="w-100 bg-white shadow-sm rounded  p-3 pb-5"
@@ -582,8 +672,10 @@ const Contact_Calender = React.forwardRef((props, ref) => {
                           <label className="form-label" htmlFor="amount">Plan Price</label>
                           <input type="text" className={`form-control form-control-sm ${formErrors.amount ? 'border border-danger' : ''}`}
                             name="amount" id="amount" value={formData.amount} readOnly placeholder="Auto-filled" />
-                          {formErrors.price && <div className="text-danger small">{formErrors.price}</div>}
+                          {formErrors.amount && <div className="text-danger small">{formErrors.amount}</div>}
                         </div>
+
+
                       </div>
                       <div className="col-sm-6">
                         <div className="mb-2">
@@ -592,14 +684,17 @@ const Contact_Calender = React.forwardRef((props, ref) => {
                             name="duration" id="duration" value={formData.duration} readOnly placeholder="Auto-filled" />
                           {formErrors.duration && <div className="text-danger small">{formErrors.duration}</div>}
                         </div>
+
                       </div>
                     </div>
+
+
 
                     {/* Vastu & Birth Details */}
 
                     <div className="row gx-2">
 
-                      {hostname === "booking.vedratnavastu.com" && (
+                      {(hostname === "booking.vedratnavastu.com") || (hostname === "localhost") && (
                         <>
 
                           {selectedPlanFields.includes("birthDate") && (
@@ -665,6 +760,34 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
                         </>
                       )}
+                      <div className="col-sm-6">
+                        <div className="mb-2">
+                          <label className="form-label" htmlFor="couponCode">Coupon Code (Optional)</label>
+                          <div className="input-group input-group-sm">
+                            <input
+                              type="text"
+                              id="couponCode"
+                              placeholder="Enter coupon code"
+                              className="form-control"
+                              value={couponCode}
+                              onChange={handleCouponChange}
+                            />
+                            <button
+                              className="btn btn-primary"
+                              type="button"
+                              onClick={applyCoupon}
+                            >
+                              Apply
+                            </button>
+                          </div>
+                          {formErrors.couponCode && (
+                            <div className="text-danger small">{formErrors.couponCode}</div>
+                          )}
+                          {couponMessage && (
+                            <div className="text-success small">{couponMessage}</div>
+                          )}
+                        </div>
+                      </div>
 
                       {/* Fields visible for all tenants */}
 
