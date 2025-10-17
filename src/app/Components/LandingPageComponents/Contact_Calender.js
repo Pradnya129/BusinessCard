@@ -275,7 +275,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         key: appointment.data.razorpayKey,
         amount: appointment.data.amount,
         currency: "INR",
-        name: "Vedratna Vastu",
+        name: appointment.data.name,
         description: "Book your appointment",
         order_id: appointment.data.orderId,
         handler: function (response) {
