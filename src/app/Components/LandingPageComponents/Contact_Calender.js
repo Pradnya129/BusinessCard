@@ -19,6 +19,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [couponCode, setCouponCode] = useState(''); // coupon as string
   const [appliedCouponId, setAppliedCouponId] = useState(null);
   const [couponMessage, setCouponMessage] = useState('');
+ const [showCouponField, setShowCouponField] = useState(false);
 
 
   const planFieldsMap = {
@@ -36,6 +37,23 @@ const Contact_Calender = React.forwardRef((props, ref) => {
       setHostname(window.location.hostname);
     }
   }, []);
+
+
+const fetchCouponSetting = async () => {
+  try {
+    const slug = window.location.hostname;
+    const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/coupon-visibility?slug=${slug}`);
+    if (!res.ok) throw new Error("Failed to fetch coupon setting");
+    const data = await res.json();
+    setShowCouponField(data?.showCouponField);
+    console.log("res",data?.showCouponField)
+  } catch (err) {
+    console.error("Error fetching coupon setting:", err);
+  }
+};
+
+fetchCouponSetting();
+
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -469,6 +487,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         const shifts = shiftsRes.data?.data || [];
         // find selected plan
         const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
+        console.log("selected plan",selectedPlan)
         if (!selectedPlan) return;
 
         // find buffer + shiftId for plan
@@ -760,34 +779,33 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
                         </>
                       )}
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="couponCode">Coupon Code (Optional)</label>
-                          <div className="input-group input-group-sm">
-                            <input
-                              type="text"
-                              id="couponCode"
-                              placeholder="Enter coupon code"
-                              className="form-control"
-                              value={couponCode}
-                              onChange={handleCouponChange}
-                            />
-                            <button
-                              className="btn btn-primary"
-                              type="button"
-                              onClick={applyCoupon}
-                            >
-                              Apply
-                            </button>
-                          </div>
-                          {formErrors.couponCode && (
-                            <div className="text-danger small">{formErrors.couponCode}</div>
-                          )}
-                          {couponMessage && (
-                            <div className="text-success small">{couponMessage}</div>
-                          )}
-                        </div>
-                      </div>
+                   {showCouponField && (
+  <div className="col-sm-6">
+    <div className="mb-2">
+      <label className="form-label" htmlFor="couponCode">Coupon Code (Optional)</label>
+      <div className="input-group input-group-sm">
+        <input
+          type="text"
+          id="couponCode"
+          placeholder="Enter coupon code"
+          className="form-control"
+          value={couponCode}
+          onChange={handleCouponChange}
+        />
+        <button className="btn btn-primary" type="button" onClick={applyCoupon}>
+          Apply
+        </button>
+      </div>
+      {formErrors.couponCode && (
+        <div className="text-danger small">{formErrors.couponCode}</div>
+      )}
+      {couponMessage && (
+        <div className="text-success small">{couponMessage}</div>
+      )}
+    </div>
+  </div>
+)}
+
 
                       {/* Fields visible for all tenants */}
 

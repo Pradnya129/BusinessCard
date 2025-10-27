@@ -40,10 +40,7 @@ useEffect(() => {
     try {
       // ✅ Get slug from hostname/pathname
       let slug = window.location.hostname;
-      if (!slug || slug === "localhost" || slug === "127.0.0.1") {
-        const pathParts = window.location.pathname.split("/").filter(Boolean);
-        slug = pathParts[pathParts.length - 1] || "shilrtna";
-      }
+    
 
       // Fetch plans and shifts with slug
       const [plansRes, shiftsRes] = await Promise.all([

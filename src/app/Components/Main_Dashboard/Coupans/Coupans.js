@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash, FaSpinner, FaPlus } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 
 const API_BASE = "https://appo.coinagesoft.com/api/admin/coupans";
 
@@ -13,6 +14,10 @@ const Coupans = () => {
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
   const [alertMessage, setAlertMessage] = useState(null);
+    const [hostname, setHostname] = useState("");
+    const [showCouponField, setShowCouponField] = useState(false);
+const [visibilityLoading, setVisibilityLoading] = useState(true);
+  
   const [form, setForm] = useState({
     id: null,
     code: "",
@@ -23,7 +28,11 @@ const Coupans = () => {
   });
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
+  }, []);
   // ✅ Get token helper
   const getAuthHeaders = () => {
     return { Authorization: `Bearer ${token}` };
@@ -43,13 +52,53 @@ const Coupans = () => {
     }
   };
 
-  useEffect(() => {
-    if (!token) {
-      setLoading(false);
-      return;
+  // ✅ Fetch visibility
+  const fetchCouponVisibility = async () => {
+    
+    try {
+      
+              const slug = window.location.hostname;
+
+      const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/coupon-visibility?slug=${slug}`, {
+      });
+      setShowCouponField(res.data.showCouponField || false);
+    } catch (err) {
+      console.error("Error fetching coupon visibility:", err);
+    } finally {
+      setVisibilityLoading(false);
     }
-    fetchCoupons();
-  }, [token]);
+  };
+  
+  // ✅ Update visibility
+  const updateCouponVisibility = async (value) => {
+      const token = localStorage.getItem("token");
+    if (!token) return;
+    try {
+              const decoded = jwtDecode(token);
+
+      await axios.patch(`https://appo.coinagesoft.com/api/admin/tenantSetting/coupon-visibility`, {
+        tenantId: decoded.tenantId,
+        showCouponField: value
+      }, { headers: getAuthHeaders() });
+  
+      setShowCouponField(value);
+      setAlertMessage({ type: 'success', text: `Coupon field visibility updated to ${value ? 'Visible' : 'Hidden'}` });
+    } catch (err) {
+      console.error("Error updating visibility:", err);
+      setAlertMessage({ type: 'error', text: 'Failed to update coupon visibility.' });
+    }
+  };
+
+useEffect(() => {
+  if (!token) {
+    setLoading(false);
+    return;
+  }
+  fetchCoupons();
+  fetchCouponVisibility();
+}, [token]);
+
+
 
   // Auto-hide alert messages after 5 seconds
   useEffect(() => {
@@ -187,7 +236,45 @@ const Coupans = () => {
 
   return (
     <div className="card p-3 rounded-4 mt-5">
+        <div className="card p-3 rounded-4 mt-4 mb-4 border">
+  <h6 className="mb-3">Coupon Field Visibility on Landing Page</h6>
+
+  {visibilityLoading ? (
+    <div><FaSpinner className="fa-spin me-2" /> Loading...</div>
+  ) : (
+    <div className="d-flex gap-4">
+      <div className="form-check">
+        <input
+          className="form-check-input"
+          type="radio"
+          name="couponVisibility"
+          id="showCoupons"
+          checked={showCouponField === true}
+          onChange={() => updateCouponVisibility(true)}
+        />
+        <label className="form-check-label" htmlFor="showCoupons">
+          Show Coupon Field
+        </label>
+      </div>
+
+      <div className="form-check">
+        <input
+          className="form-check-input"
+          type="radio"
+          name="couponVisibility"
+          id="hideCoupons"
+          checked={showCouponField === false}
+          onChange={() => updateCouponVisibility(false)}
+        />
+        <label className="form-check-label" htmlFor="hideCoupons">
+          Hide Coupon Field
+        </label>
+      </div>
+    </div>
+  )}
+</div>
       <div className="card-header border-bottom mb-3 d-flex justify-content-between align-items-center">
+
         <h5 className="mb-0">Coupons Management</h5>
         <button
           className="btn btn-primary btn-sm"
