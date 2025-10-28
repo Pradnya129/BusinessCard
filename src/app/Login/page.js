@@ -3,36 +3,47 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
-const API_URL = process.env.REACT_APP_API_URL;
-const Page = () => {
+
+// ✅ Use NEXT_PUBLIC_ prefix (Next.js does not expose REACT_APP_ vars)
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://appo.coinagesoft.com/api';
+
+const page = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  // ✅ Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  
 
-  const handleTogglePassword = () => {
-    setShowPassword(!showPassword);
-  };
+  // ✅ Toggle show/hide password
+  const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
+  // ✅ Submit login
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
-      const response = await axios.post(`https://appo.coinagesoft.com/api/admin/login`, formData);
-       console.log(response);
-      // Save token or user data
-           localStorage.setItem('token', response.data.token);
-           router.push('/Dashboard'); 
+      const response = await axios.post(`${API_URL}/admin/login`, formData);
 
-      // Redirect to dashboard or home
+      // ✅ Save token securely
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+        router.push('/Dashboard');
+      } else {
+        setError('Invalid server response');
+      }
     } catch (err) {
-      console.log(err.message);
-      setError('Invalid email or password');
+      console.error('Login error:', err);
+      const msg = err.response?.data?.message || 'Invalid email or password';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,27 +53,33 @@ const Page = () => {
         <div className="authentication-inner py-6 d-flex justify-content-center">
           <div className="card p-md-7 p-1" style={{ width: '500px' }}>
             <div className="card-body mt-1">
-              <p className="mb-5 fs-4 fw-bolder text-center  mb-5" style={{ color: 'black' }}>Log In</p>
+              <p
+                className="mb-5 fs-4 fw-bolder text-center"
+                style={{ color: 'black' }}
+              >
+                Log In
+              </p>
 
               <form className="my-5" onSubmit={handleSubmit}>
                 {/* Email Field */}
-                <div className="form-floating form-floating-outline mb-5">
+                <div className="form-floating form-floating-outline mb-4">
                   <input
-                    type="text"
+                    type="email"
                     className="form-control"
                     id="email"
                     name="email"
-                    placeholder="Enter your email or username"
+                    placeholder="Enter your email"
                     autoFocus
                     style={{ borderColor: '#666cff' }}
                     value={formData.email}
                     onChange={handleChange}
+                    required
                   />
-                  <label htmlFor="email">Email or Username</label>
+                  <label htmlFor="email">Email</label>
                 </div>
 
                 {/* Password Field */}
-                <div className="mb-5">
+                <div className="mb-4">
                   <div className="form-password-toggle">
                     <div className="input-group input-group-merge">
                       <div className="form-floating form-floating-outline">
@@ -76,53 +93,65 @@ const Page = () => {
                           style={{ borderColor: '#666cff' }}
                           value={formData.password}
                           onChange={handleChange}
+                          required
                         />
                         <label htmlFor="password">Password</label>
                       </div>
-                      <span className="input-group-text cursor-pointer" onClick={handleTogglePassword}>
-                        <i className={showPassword ? 'ri-eye-line' : 'ri-eye-off-line'}></i>
+                      <span
+                        className="input-group-text cursor-pointer"
+                        onClick={handleTogglePassword}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <i
+                          className={
+                            showPassword ? 'ri-eye-line' : 'ri-eye-off-line'
+                          }
+                        ></i>
                       </span>
                     </div>
                   </div>
                 </div>
 
                 {/* Error Message */}
-                {error && <p className="text-danger mb-3 text-center">{error}</p>}
+                {error && (
+                  <p className="text-danger mb-3 text-center fw-bold">{error}</p>
+                )}
 
-                {/* Remember Me and Forgot Password */}
-                <div className="mb-5 d-flex justify-content-between mt-5">
-                  <div className="form-check mt-2">
-                    <input className="form-check-input" type="checkbox" id="remember-me" />
-                    <label className="form-check-label" htmlFor="remember-me"> Remember Me </label>
+                {/* Remember + Forgot Password */}
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="remember-me"
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="remember-me"
+                    >
+                      Remember Me
+                    </label>
                   </div>
-                 <Link href="/ForgotPassword" className="float-end mb-1 mt-2">
-  Forgot Password?
-</Link>
-
+                  <Link href="/ForgotPassword" className="text-primary">
+                    Forgot Password?
+                  </Link>
                 </div>
 
                 {/* Login Button */}
-                <div className="mb-5">                 
-                  <button type="submit" className="btn btn-primary d-grid w-100">Log in</button>
-                </div>
+                <button
+                  type="submit"
+                  className="btn btn-primary d-grid w-100 waves-effect waves-light"
+                  disabled={loading}
+                >
+                  {loading ? 'Logging in...' : 'Log In'}
+                </button>
               </form>
-
-              {/* <p className="text-center">
-                <span>New on our platform?</span>
-                <Link href="/SignUp"><span> Create an account</span></Link>
-              </p> */}
-
-              {/* <div className="divider my-5">
-                <div className="divider-text">or</div>
-              </div> */}
-
-          
             </div>
           </div>
         </div>
       </div>
 
-      {/* Inline styles to remove focus shadow */}
+      {/* Inline Style Fix */}
       <style jsx>{`
         .form-control:focus {
           box-shadow: none;
@@ -133,4 +162,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default page;

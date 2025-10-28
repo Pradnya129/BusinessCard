@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash, FaSpinner, FaPlus } from "react-icons/fa";
 
-const API_BASE = "http://localhost:5000/api/superadmin/coupans"; // superadmin only
+const API_BASE = "https://appo.coinagesoft.com/api/superadmin/coupans"; // superadmin only
 
 const Coupons = () => {
   const [coupons, setCoupons] = useState([]);
