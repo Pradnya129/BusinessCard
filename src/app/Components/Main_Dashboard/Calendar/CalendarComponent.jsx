@@ -6,7 +6,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './Calendar.css';
 import AppointmentForm from './AppointmentForm';
@@ -22,7 +22,8 @@ export default function CalendarComponent() {
   const [appointments, setAppointments] = useState([]);
   const [selectedPlans, setSelectedPlans] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState('');
   // selected plan/shift
   const [selectedPlanId, setSelectedPlanId] = useState(null);
   const [selectedShiftId, setSelectedShiftId] = useState(null);
@@ -54,50 +55,133 @@ export default function CalendarComponent() {
     return colors[index % colors.length];
   };
 
-  // fetch appointments
-const fetchAppointments = async () => {
-  const token = localStorage.getItem('token');
+
+  const fetchGoogleCalendarEvents = async () => {
+  const token = localStorage.getItem("token");
   if (!token) return;
 
   let decoded;
   try {
     decoded = jwtDecode(token);
   } catch (e) {
-    console.error('Failed to decode token', e);
+    console.error("Failed to decode token", e);
     return;
   }
 
-  const adminId = decoded.id; // or userId from token
+  const adminId = decoded.id;
+
   try {
-    const url = `https://appo.coinagesoft.com/api/customer-appointments/`;
+  const res = await axios.get(`https://appo.coinagesoft.com/api/google/calendar-events`, {
+  headers: { Authorization: `Bearer ${token}` },
+});
 
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json', // GET request doesn't need multipart
-      },
-      params: {
-        userId: selectedUserId || undefined,      // send userId if selected
-        adminId: selectedUserId ? undefined : adminId, // fallback to adminId if no user selected
-      },
-    });
 
-    const data = Array.isArray(response.data.data) ? response.data.data : [];
-    
-    // sort by appointmentDate + appointmentTime
-    const sortedAppointments = data.sort(
-      (a, b) =>
-        new Date(a.appointmentDate + ' ' + a.appointmentTime) -
-        new Date(b.appointmentDate + ' ' + b.appointmentTime)
-    );
+    if (res.data.success) {
+      const googleEvents = res.data.events.map(ev => {
+        const start = ev.start?.dateTime || ev.start?.date;
+        const end = ev.end?.dateTime || ev.end?.date;
+        return {
+          id: ev.id,
+          title: ev.summary || "Google Event",
+          start,
+          end,
+          className: "form-check-info",
+          extendedProps: { source: "google" },
+        };
+      });
 
-    setAppointments(sortedAppointments);
-  } catch (error) {
-    console.error('Error fetching appointments:', error);
-    setAppointments([]);
+      setAppointments(prev => [...prev, ...googleEvents]);
+    }
+  } catch (err) {
+    console.error("❌ Error fetching Google Calendar events:", err);
   }
 };
 
+  useEffect(() => {
+    const checkGoogleConnection = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await axios.get("https://appo.coinagesoft.com/api/google/status", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.connected) {
+          setGoogleConnected(true);
+          setGoogleEmail(res.data.email);
+            fetchGoogleCalendarEvents();
+        }
+      } catch (err) {
+        console.error("Error checking Google connection:", err);
+      }
+    };
+
+    checkGoogleConnection();
+  }, []);
+  // fetch appointments
+  const fetchAppointments = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    let decoded;
+    try {
+      decoded = jwtDecode(token);
+    } catch (e) {
+      console.error('Failed to decode token', e);
+      return;
+    }
+
+    const adminId = decoded.id; // or userId from token
+    try {
+      const url = `https://appo.coinagesoft.com/api/customer-appointments/`;
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json', // GET request doesn't need multipart
+        },
+        params: {
+          userId: selectedUserId || undefined,      // send userId if selected
+          adminId: selectedUserId ? undefined : adminId, // fallback to adminId if no user selected
+        },
+      });
+
+      const data = Array.isArray(response.data.data) ? response.data.data : [];
+
+      // sort by appointmentDate + appointmentTime
+      const sortedAppointments = data.sort(
+        (a, b) =>
+          new Date(a.appointmentDate + ' ' + a.appointmentTime) -
+          new Date(b.appointmentDate + ' ' + b.appointmentTime)
+      );
+
+      setAppointments(sortedAppointments);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      setAppointments([]);
+    }
+  };
+
+  const connectGoogleCalendar = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in first");
+        return;
+      }
+
+      const res = await axios.get("https://appo.coinagesoft.com/api/google/auth-url", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // ✅ Redirect to Google OAuth page
+      window.location.href = res.data.url;
+
+    } catch (error) {
+      console.error("❌ Failed to connect Google:", error);
+      alert("Failed to connect Google account. Please try again.");
+    }
+  };
 
   useEffect(() => {
     // offcanvas hidden handler refresh
@@ -120,7 +204,7 @@ const fetchAppointments = async () => {
 
   // fetch users for dropdown
 
-    // Fetch plans with assigned users and admin user for dropdown
+  // Fetch plans with assigned users and admin user for dropdown
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -138,7 +222,7 @@ const fetchAppointments = async () => {
         const plansResponse = await axios.get(`${API_BASE}/admin/plans/all_plans_with_users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-console.log("allplans users -",plansResponse.data.data)
+        console.log("allplans users -", plansResponse.data.data)
         let assignedUsers = [];
         if (plansResponse.data && Array.isArray(plansResponse.data.data)) {
           plansResponse.data.data.forEach((plan) => {
@@ -149,7 +233,7 @@ console.log("allplans users -",plansResponse.data.data)
                     id: up.User.id,
                     name: up.User.name || up.User.email,
                   });
-                  console.log("assigned users",assignedUsers)
+                  console.log("assigned users", assignedUsers)
                 }
               });
             }
@@ -180,10 +264,10 @@ console.log("allplans users -",plansResponse.data.data)
     fetchUsersAndPlans();
   }, []);
 
- 
+
 
   // fetch plans + default selected plans
- useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
@@ -194,7 +278,7 @@ console.log("allplans users -",plansResponse.data.data)
         });
 
         const p = res.data.data;
-        console.log("p",p)
+        console.log("p", p)
         setPlans(p);
         setSelectedPlans(p.map((x) => (x.planName || "").toLowerCase()));
       } catch (err) {
@@ -235,7 +319,7 @@ console.log("allplans users -",plansResponse.data.data)
         const shiftsRes = await axios.get(`${API_BASE}/admin/shift`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("shift",shiftsRes.data)
+        console.log("shift", shiftsRes.data)
         setShifts(Array.isArray(shiftsRes.data) ? shiftsRes.data : []);
       } catch (err) {
         console.error("Failed to load shift/rule", err);
@@ -367,8 +451,9 @@ console.log("allplans users -",plansResponse.data.data)
             </div>
           </div>
 
+
           <div className="col app-calendar-content overflow-auto ">
-            <div className="d-flex justify-content-end p-2">
+            <div className="d-flex justify-content-end p-2 ">
               <select
                 className="form-select w-auto"
                 value={selectedUserId}
@@ -381,7 +466,21 @@ console.log("allplans users -",plansResponse.data.data)
                   </option>
                 ))}
               </select>
+              {googleConnected ? (
+                <div className="text-success fw-semibold  ms-5" style={{fontSize:"14px"}}>
+                  ✅ Connected as {googleEmail}
+                </div>
+              ) : (
+                <button
+                  className="btn btn-outline-danger"
+                  onClick={connectGoogleCalendar}
+                >
+                  Connect Google Calendar
+                </button>
+              )}
             </div>
+
+
             <div className=" border-0">
               <div className=" ps-0 pb-0 ">
                 <FullCalendar
