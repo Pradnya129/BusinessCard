@@ -99,9 +99,11 @@ const [loading, setLoading] = useState(false);
           setTimeSlots([]);
           return;
         }
-
+        
         const shiftStart = new Date(`${selected}T${shift.startTime}`);
         const shiftEnd = new Date(`${selected}T${shift.endTime}`);
+        console.log("Shift start raw:", shift.startTime);
+console.log("Shift start constructed:", shiftStart.toString());
 
         // 3️⃣ Generate all slots
         const slots = generateTimeSlots(
@@ -158,6 +160,8 @@ const [loading, setLoading] = useState(false);
           );
           return { ...slot, isBooked };
         });
+
+
 
         setTimeSlots(finalSlots);
 
