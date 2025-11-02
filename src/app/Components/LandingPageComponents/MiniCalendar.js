@@ -79,7 +79,7 @@ const [loading, setLoading] = useState(false);
 
         const baseDate = new Date(selected);
         const slug = window.location.hostname;
-
+  console.log("slug by mini",slug)
         // 1️⃣ Get plan-shift-buffer
         const bufferRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
@@ -89,7 +89,7 @@ const [loading, setLoading] = useState(false);
           setTimeSlots([]);
           return;
         }
-
+console.log("mini rule",rule)
         // 2️⃣ Get shifts
         const shiftRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`
@@ -99,9 +99,14 @@ const [loading, setLoading] = useState(false);
           setTimeSlots([]);
           return;
         }
+        console.log("shift mini",shift)
         
         const shiftStart = new Date(`${selected}T${shift.startTime}`);
         const shiftEnd = new Date(`${selected}T${shift.endTime}`);
+
+        console.log("mini shiftstart",shiftStart)
+        console.log("mini shiftend",shiftEnd)
+
         console.log("Shift start raw:", shift.startTime);
 console.log("Shift start constructed:", shiftStart.toString());
 
@@ -113,7 +118,7 @@ console.log("Shift start constructed:", shiftStart.toString());
           rule.bufferInMinutes,
           baseDate
         );
-
+console.log("mini slots",slots)
         // 4️⃣ Get only users assigned to this plan
         const usersRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
@@ -164,6 +169,7 @@ console.log("Shift start constructed:", shiftStart.toString());
 
 
         setTimeSlots(finalSlots);
+        console.log("mini finalsots".finalSlots)
 
       } catch (err) {
         console.error("❌ Error fetching shift/slots:", err);
