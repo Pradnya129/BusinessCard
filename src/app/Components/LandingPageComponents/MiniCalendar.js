@@ -62,18 +62,23 @@ const [loading, setLoading] = useState(false);
     }
     return slots;
   };
+
 useEffect(() => {
   let retryCount = 0;
   const maxRetries = 10;
 
   const fetchShiftAndGenerateSlots = async () => {
-    console.log("selected ✅", selected, "planid ✅", planId);
-
+    console.log("selected ✅", selected, "planid ✅", planId,);
+console.log("start1")
     try {
+      console.log("start2")
+
       setLoading(true); // start loading
+console.log("start3")
 
       const token = localStorage.getItem("token");
       if (!token) return;
+console.log("start4")
 
       const baseDate = new Date(selected);
       const slug = window.location.hostname;
