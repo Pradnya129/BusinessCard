@@ -34,6 +34,8 @@ const AppointmentList = () => {
     setHostname(window.location.hostname);
   }
 }, []);  
+
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -47,7 +49,7 @@ const AppointmentList = () => {
 
         // Fetch plans with users
         const plansResponse = await api.getPlansWithUsers();
-
+  console.log("plan with users",plansResponse)
         let assignedUsers = [];
         if (plansResponse && Array.isArray(plansResponse.data)) {
           plansResponse.data.forEach(plan => {
@@ -90,41 +92,61 @@ const AppointmentList = () => {
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
 
-    const fetchAppointments = async () => {
-      try {
-        const idToUse = selectedUserId || adminId;
 
-        // Send as query param
-        const url = `https://appo.coinagesoft.com/api/public-landing/customer-appointments?slug=${hostname}`;
-        const response = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-          params: {
-            userId: selectedUserId || undefined, // only include if you want user-specific
-            adminId: selectedUserId ? undefined : adminId, // fallback to admin if no user selected
-          },
-        });
 
-        if (Array.isArray(response.data.data)) {
-          const sortedAppointments = [...response.data.data].sort(
-            (a, b) => new Date(a.createdDate) - new Date(b.createdDate)
-          );
-          setAppointments(sortedAppointments);
-        } else {
-          setAppointments([]);
-          console.error("Unexpected appointments response format:", response.data);
-        }
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-        setAppointments([]);
-      }
-    };
+const fetchAppointments = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
+
+    // ✅ include slug
+    const slug = window.location.hostname;
+
+    const url = `https://appo.coinagesoft.com/api/public-landing/customer-appointments`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        adminId,
+        slug, // ✅ important for resolveTenant
+        ...(selectedUserId && { userId: selectedUserId }),
+      },
+    });
+
+    console.log("📥 Appointments API Response:", response.data);
+
+    const data = response.data?.data;
+    if (Array.isArray(data)) {
+      const sortedAppointments = [...data].sort((a, b) => {
+        const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+        const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+        return dateA - dateB;
+      });
+
+      setAppointments(sortedAppointments);
+    } else {
+      setAppointments([]);
+      console.warn("⚠️ Unexpected appointments format:", response.data);
+    }
+  } catch (error) {
+    console.error("❌ Error fetching appointments:", error.response?.data || error);
+    setAppointments([]);
+  }
+};
+
+
 
 
     fetchAppointments();
   }, [selectedUserId]);
+
+
 
   function downloadPdf(base64Pdf) {
     const byteCharacters = atob(base64Pdf);

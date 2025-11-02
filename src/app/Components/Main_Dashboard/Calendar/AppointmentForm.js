@@ -168,6 +168,8 @@ const slug = window.location.hostname;
          console.log("Users assigned to this plan:", users);
    
          if (!users.length) {
+            console.log("no user")
+
            setTimeSlots(slots); // no users, all slots are free
            return;
          }
@@ -184,7 +186,7 @@ const slug = window.location.hostname;
         `https://appo.coinagesoft.com/api/public-landing/booked-slots/${dateStr}`,
         { params: { userId: user.id, planId, slug } }
       );
-
+      console.log("boo",user.id)
       return res.data?.data || [];
     } catch (err) {
       console.error(`Error fetching booked slots for user ${user.id}`, err);
@@ -192,6 +194,7 @@ const slug = window.location.hostname;
     }
   })
 );
+console.log("bokked r",bookedResults)
 
 
   
@@ -290,29 +293,73 @@ const finalSlots = slots.map(slot => {
   };
 
   // ==================== Submit ====================
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const validationErrors = validate();
+  if (Object.keys(validationErrors).length > 0) {
+    setErrors(validationErrors);
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("❌ No token found");
       return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const decoded = jwtDecode(token);
-      const adminId = decoded.id;
-      const body = { ...formData, adminId };
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
+    const userId = formData.userId || decoded.userId || decoded.id;
+    const planId = selectedPlanId || formData.planId;
 
-      await api.postAppointmentFree(body);
-      if (typeof refreshAppointments === 'function') refreshAppointments();
-
-      new window.bootstrap.Modal(document.getElementById('successModal')).show();
-    } catch (err) {
-      console.error('Booking failed', err);
-      new window.bootstrap.Modal(document.getElementById('failureModal')).show();
+    if (!planId || !userId) {
+      console.error("❌ planId or userId missing");
+      return;
     }
-  };
+
+    const body = { ...formData, adminId, userId, planId };
+
+    await axios.post(
+      "https://appo.coinagesoft.com/api/customer-appointments/free",
+      body,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    // ✅ Refresh appointments
+    if (typeof refreshAppointments === "function") refreshAppointments();
+
+    // ✅ Reset form
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phoneNumber: "",
+      details: "",
+      appointmentDate: "",
+      appointmentTime: "",
+      plan: "",
+      amount: "",
+      duration: "",
+      bufferInMinutes: 0,
+    });
+
+    const offcanvasEl = document.getElementById("addEventSidebar");
+    alert("✅ Appointment booked successfully!");
+  if (offcanvasEl) {
+    const bsOffcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasEl);
+    if (bsOffcanvas) bsOffcanvas.hide();
+  }
+    // ✅ Toast-style success message
+  } catch (err) {
+    console.error("Booking failed", err);
+    alert("❌ Failed to book appointment. Please try again.");
+  }
+};
+
+
 
   const handleTimeSelect = (value) => {
     setFormData((prev) => ({ ...prev, appointmentTime: value }));
@@ -453,6 +500,9 @@ const finalSlots = slots.map(slot => {
             Add Appointment
           </button>
         )}
+
+
+
       </form>
     </>
   );
