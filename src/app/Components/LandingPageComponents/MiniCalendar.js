@@ -66,7 +66,9 @@ const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchShiftAndGenerateSlots = async () => {
+      console.log("selected",selected,planId)
       if (!selected || !duration || !planId) {
+        console.log("time slot empty")
         setTimeSlots([]); // ❌ No plan selected → clear slots
         return;
       }
