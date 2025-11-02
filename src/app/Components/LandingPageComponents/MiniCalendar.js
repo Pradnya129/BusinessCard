@@ -76,8 +76,7 @@ console.log("start1")
       setLoading(true); // start loading
 console.log("start3")
 
-      const token = localStorage.getItem("token");
-      if (!token) return;
+    
 console.log("start4")
 
       const baseDate = new Date(selected);
