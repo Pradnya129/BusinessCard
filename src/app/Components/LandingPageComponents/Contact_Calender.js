@@ -486,6 +486,8 @@ fetchCouponSetting();
         const rules = rulesRes.data?.rules || [];
         const shifts = shiftsRes.data?.data || [];
         // find selected plan
+        console.log("rules",rules);
+        console.log("shifts",shifts)
         const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
         console.log("selected plan",selectedPlan)
         if (!selectedPlan) return;
@@ -503,7 +505,8 @@ fetchCouponSetting();
           .map((a) => a.appointmentTime);
 
         setBookedTimeSlots(booked);
-
+  console.log("shift start time",shift.startTime);
+    console.log("shift end time",shift.endTime)
         // generate available slots
         const slots = generateSlots(
           shift.startTime,                    // e.g., "10:00:00"
@@ -514,6 +517,7 @@ fetchCouponSetting();
         );
 
         setAvailableSlots(slots);
+        console.log("slots",slots)
       })
       .catch((err) => console.error("Error fetching slots:", err));
   }, [formData.appointmentDate, formData.plan, availablePlans]);
