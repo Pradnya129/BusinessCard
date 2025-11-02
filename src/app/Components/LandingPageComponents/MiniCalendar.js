@@ -63,18 +63,14 @@ const [loading, setLoading] = useState(false);
     return slots;
   };
 useEffect(() => {
-  // Run only when all values are ready
-  if (!selected || !duration || !planId) {
-    console.log("⏳ Waiting for selected, duration, or planId...");
-    setTimeSlots([]); 
-    return;
-  }
+  let retryCount = 0;
+  const maxRetries = 10;
 
   const fetchShiftAndGenerateSlots = async () => {
-    console.log("selected", selected, "planid", planId);
+    console.log("selected ✅", selected, "planid ✅", planId);
 
     try {
-      setLoading(true); // ✅ start loading
+      setLoading(true); // start loading
 
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -89,6 +85,7 @@ useEffect(() => {
       );
       const rule = bufferRes.data.rules.find((r) => r.planId === planId);
       if (!rule) {
+        console.warn("No rule found for planId", planId);
         setTimeSlots([]);
         return;
       }
@@ -100,6 +97,7 @@ useEffect(() => {
       );
       const shift = shiftRes.data.data.find((s) => s.id === rule.shiftId);
       if (!shift) {
+        console.warn("No shift found for rule.shiftId", rule.shiftId);
         setTimeSlots([]);
         return;
       }
@@ -110,9 +108,6 @@ useEffect(() => {
 
       console.log("mini shiftstart", shiftStart);
       console.log("mini shiftend", shiftEnd);
-
-      console.log("Shift start raw:", shift.startTime);
-      console.log("Shift start constructed:", shiftStart.toString());
 
       // 3️⃣ Generate all slots
       const slots = generateTimeSlots(
@@ -133,11 +128,11 @@ useEffect(() => {
       console.log("Users assigned to this plan:", users);
 
       if (!users.length) {
-        setTimeSlots(slots); // no users, all slots are free
+        setTimeSlots(slots);
         return;
       }
 
-      // 5️⃣ Fetch booked slots (filtered by both user + planId + slug)
+      // 5️⃣ Fetch booked slots
       const bookedResults = await Promise.all(
         users.map(async (user) => {
           try {
@@ -178,14 +173,28 @@ useEffect(() => {
       console.error("❌ Error fetching shift/slots:", err);
       setTimeSlots([]);
     } finally {
-      setLoading(false); // ✅ end loading
+      setLoading(false);
     }
   };
 
-  // Small delay ensures all state values are ready before running
-  const delay = setTimeout(fetchShiftAndGenerateSlots, 400);
+  // ⏳ Wait until all data is ready (avoid premature exit)
+  const waitForData = setInterval(() => {
+    if (selected && duration && planId) {
+      clearInterval(waitForData);
+      console.log("✅ All dependencies ready, fetching slots...");
+      fetchShiftAndGenerateSlots();
+    } else {
+      retryCount++;
+      console.log(`⏳ Waiting for selected/duration/planId... try ${retryCount}`);
+      if (retryCount >= maxRetries) {
+        clearInterval(waitForData);
+        console.warn("⚠️ Max retries reached. Missing:", { selected, duration, planId });
+        setTimeSlots([]);
+      }
+    }
+  }, 300);
 
-  return () => clearTimeout(delay);
+  return () => clearInterval(waitForData);
 }, [selected, duration, planId]);
 
 
