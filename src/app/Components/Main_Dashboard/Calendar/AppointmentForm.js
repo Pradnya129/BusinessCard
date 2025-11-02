@@ -119,7 +119,7 @@ export default function AppointmentForm({
 
     try {
       setLoadingSlots(true);
-      const slug = 'booking.vedratnavastu.com';
+const slug = window.location.hostname;
       const baseDate = new Date(selectedDate);
 
       // 1️⃣ Fetch rule (contains buffer + shift)
@@ -127,6 +127,7 @@ export default function AppointmentForm({
         `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
       );
       const rule = ruleRes.data.rules.find((r) => r.planId === planId);
+      console.log("appo rule",rule)
       if (!rule) {
         setLoadingSlots(false);
         return;

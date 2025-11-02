@@ -166,63 +166,139 @@ const fetchPlans = async () => {
     }
   };
 
-  const fetchBufferForPlan = async (planId, shiftId) => {
-    if (!shiftId) {
-      setBufferInMinutes(0);
-      return;
+  // const fetchBufferForPlan = async (planId, shiftId) => {
+  //   if (!shiftId) {
+  //     setBufferInMinutes(0);
+  //     return;
+  //   }
+  //   const token = localStorage.getItem("token");
+  //   try {
+  //     const response = await axios.get(
+  //       "https://appo.coinagesoft.com/api/plan-shift-buffer-rule/all",
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //         params: { planId, shiftId },
+  //       }
+  //     );
+  //     console.log("setBufferInMinutes", response.data.rules[0]);
+  //     setBufferInMinutes(response?.data?.rules[0].bufferInMinutes ?? 0);
+  //   } catch (error) {
+  //     if (error.response?.status === 404) setBufferInMinutes(0);
+  //     else console.error("Error fetching buffer rule:", error);
+  //   }
+  // };
+const fetchBufferForPlan = async (planId, shiftId) => {
+  try {
+    const slug = window.location.hostname;
+    console.log("🟢 Fetching buffer for plan:", planId, "shift:", shiftId, "slug:", slug);
+
+    const res = await axios.get(
+      `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
+    );
+
+    console.log("🟢 Rules from API:", res.data.rules);
+
+    // match both planId and shiftId if possible
+    const rule = res.data.rules.find(
+      (r) => r.planId === planId && (!shiftId || r.shiftId === shiftId)
+    );
+
+    if (!rule) {
+      console.warn("⚠️ No matching rule found for plan:", planId);
+      return null;
     }
-    const token = localStorage.getItem("token");
-    try {
-      const response = await axios.get(
-        "https://appo.coinagesoft.com/api/plan-shift-buffer-rule/all",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          params: { planId, shiftId },
-        }
-      );
-      console.log("setBufferInMinutes", response.data.rules[0]);
-      setBufferInMinutes(response?.data?.rules[0].bufferInMinutes ?? 0);
-    } catch (error) {
-      if (error.response?.status === 404) setBufferInMinutes(0);
-      else console.error("Error fetching buffer rule:", error);
-    }
-  };
+
+    console.log("✅ Matched rule for plan:", rule);
+    return rule.bufferInMinutes;
+  } catch (err) {
+    console.error("❌ Error fetching buffer:", err);
+    return null;
+  }
+};
+
+
 
   // 🔹 Edit modal
-  const handleEdit = async (index) => {
-    const selectedPlan = plans[index];
-    setEditingIndex(index);
+//   const handleEdit = async (index) => {
+//     const selectedPlan = plans[index];
+//     setEditingIndex(index);
 
-    setEditedPlan({
-      name: selectedPlan.planName ?? "",
-      price: selectedPlan.planPrice ?? "",
-      duration: selectedPlan.planDuration ?? "",
-      description: selectedPlan.planDescription ?? "",
-      shiftId: selectedPlan.shiftId ?? "",
-    });
+//     setEditedPlan({
+//       name: selectedPlan.planName ?? "",
+//       price: selectedPlan.planPrice ?? "",
+//       duration: selectedPlan.planDuration ?? "",
+//       description: selectedPlan.planDescription ?? "",
+//       shiftId: selectedPlan.shiftId ?? "",
+//     });
+// console.log("Opening modal with buffer:", bufferInMinutes);
 
-    let features = [];
-    try {
-      features = Array.isArray(selectedPlan.planFeatures)
-        ? selectedPlan.planFeatures
-        : JSON.parse(selectedPlan.planFeatures || "[]");
-    } catch {
-      features = [];
-    }
+//     let features = [];
+//     try {
+//       features = Array.isArray(selectedPlan.planFeatures)
+//         ? selectedPlan.planFeatures
+//         : JSON.parse(selectedPlan.planFeatures || "[]");
+//     } catch {
+//       features = [];
+//     }
+// console.log("Opening modal with buffer:", bufferInMinutes);
 
-    if (editorRef.current) {
-      editorRef.current.innerHTML = features
-        .map((f) => `<li>${f}</li>`)
-        .join("");
-    }
+//     if (editorRef.current) {
+//       editorRef.current.innerHTML = features
+//         .map((f) => `<li>${f}</li>`)
+//         .join("");
+//     }
+// console.log("Opening modal with buffer:", bufferInMinutes);
 
-    await fetchBufferForPlan(selectedPlan.planId, selectedPlan.shiftId);
+//     await fetchBufferForPlan(selectedPlan.planId, selectedPlan.shiftId);
+// console.log("Opening modal with buffer:", bufferInMinutes);
 
-    const editModal = new window.bootstrap.Modal(
-      document.getElementById("editModal")
-    );
-    editModal.show();
-  };
+//     const editModal = new window.bootstrap.Modal(
+//       document.getElementById("editModal")
+//     );
+//     editModal.show();
+//     console.log("Opening modal with buffer:", bufferInMinutes);
+
+//   };
+
+const handleEdit = async (index) => {
+  const selectedPlan = plans[index];
+  setEditingIndex(index);
+
+  setEditedPlan({
+    name: selectedPlan.planName ?? "",
+    price: selectedPlan.planPrice ?? "",
+    duration: selectedPlan.planDuration ?? "",
+    description: selectedPlan.planDescription ?? "",
+    shiftId: selectedPlan.shiftId ?? "",
+  });
+
+  let features = [];
+  try {
+    features = Array.isArray(selectedPlan.planFeatures)
+      ? selectedPlan.planFeatures
+      : JSON.parse(selectedPlan.planFeatures || "[]");
+  } catch {
+    features = [];
+  }
+
+  if (editorRef.current) {
+    editorRef.current.innerHTML = features
+      .map((f) => `<li>${f}</li>`)
+      .join("");
+  }
+
+  // ✅ Fetch buffer synchronously and set it before opening modal
+  const buffer = await fetchBufferForPlan(selectedPlan.planId, selectedPlan.shiftId);
+  setBufferInMinutes(buffer);
+  console.log("Opening modal with buffer:", buffer);
+
+  // ✅ Now open modal (after buffer is set)
+  const editModal = new window.bootstrap.Modal(
+    document.getElementById("editModal")
+  );
+  editModal.show();
+};
+
 
   // 🔹 Delete plan
 const handleDelete = async (index) => {
