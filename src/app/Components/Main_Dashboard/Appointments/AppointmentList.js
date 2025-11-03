@@ -85,66 +85,49 @@ const AppointmentList = () => {
     fetchUsersAndPlans();
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token || !selectedUserId) return; // ⬅️ add this check
 
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+  const fetchAppointments = async () => {
+    try {
+      const decoded = jwtDecode(token);
+      const adminId = decoded.id;
+      const userId = selectedUserId;
 
+      const url = `https://appo.coinagesoft.com/api/customer-appointments/users/${userId}/appointments`;
 
-
-const fetchAppointments = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
-
-    // ✅ include slug
-    const slug = window.location.hostname;
-
-    const url = `https://appo.coinagesoft.com/api/public-landing/customer-appointments`;
-
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      params: {
-        adminId,
-        slug, // ✅ important for resolveTenant
-        ...(selectedUserId && { userId: selectedUserId }),
-      },
-    });
-
-    console.log("📥 Appointments API Response:", response.data);
-
-    const data = response.data?.data;
-    if (Array.isArray(data)) {
-      const sortedAppointments = [...data].sort((a, b) => {
-        const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
-        const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
-        return dateA - dateB;
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
-      setAppointments(sortedAppointments);
-    } else {
+      console.log("📥 Appointments API Response:", response.data);
+
+      const data = response.data?.data;
+      if (Array.isArray(data)) {
+        const sortedAppointments = [...data].sort((a, b) => {
+          const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+          const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+          return dateA - dateB;
+        });
+
+        setAppointments(sortedAppointments);
+      } else {
+        setAppointments([]);
+        console.warn("⚠️ Unexpected appointments format:", response.data);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching appointments:", error.response?.data || error);
       setAppointments([]);
-      console.warn("⚠️ Unexpected appointments format:", response.data);
     }
-  } catch (error) {
-    console.error("❌ Error fetching appointments:", error.response?.data || error);
-    setAppointments([]);
-  }
-};
+  };
 
+  fetchAppointments();
+}, [selectedUserId]);
 
-
-
-    fetchAppointments();
-  }, [selectedUserId]);
 
 
 
@@ -277,7 +260,7 @@ const fetchAppointments = async () => {
               value={selectedUserId}
               onChange={handleUserChange}
             >
-              <option value="">Admin</option>
+              {/* <option value="">Admin</option> */}
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.name}
