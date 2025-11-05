@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
@@ -13,12 +13,22 @@ const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+    const [slug, setSlug] = useState('');
 
   // ✅ Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+ // ✅ Get slug when page loads
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      setSlug(hostname);
 
+      // Store in localStorage for use in other pages
+      localStorage.setItem('tenantSlug', hostname);
+    }
+  }, []);
   // ✅ Toggle show/hide password
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
@@ -29,7 +39,6 @@ const Page = () => {
     setLoading(true);
 
     try {
-        const slug = window.location.hostname;
 
       const response = await axios.post(`${API_URL}/admin/login?slug=${slug}`, formData);
 

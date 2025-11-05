@@ -23,8 +23,9 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
 
   const planFieldsMap = {
-    "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
+    "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace"],
     "Commercial Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
+    "Online Vastu Plan Consultation": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
     "Industrial Vastu Consultancy": ["vastuType", "googleLocation", "floorPlanFile"],
     "Numerology Consultancy": ["birthDate", "birthTime", "birthPlace"],
     "Kundali Consultancy ": ["birthDate", "birthTime", "birthPlace"], // ✅ Kundali
