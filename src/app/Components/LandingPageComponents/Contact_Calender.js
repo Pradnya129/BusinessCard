@@ -399,7 +399,7 @@ fetchCouponSetting();
 
   const verifyPayment = async (paymentResponse) => {
     try {
-      const response = await fetch(`https://appo.coinagesoft.com/api/customer-appointments/verify-payment`, {
+      const response = await fetch(`http://localhost:5000/api/customer-appointments/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -552,7 +552,7 @@ fetchCouponSetting();
             <div className="w-100 bg-white shadow-sm rounded  p-3 pb-5"
               style={{
                 minHeight: '35.25rem',   // optional: sets a minimum height
-                maxHeight: '60.25rem',   // maximum height
+                maxHeight: '100.25rem',   // maximum height
                 height: 'auto',          // dynamic height based on content
                 overflowY: 'auto',       // scroll if content exceeds maxHeight
               }}
