@@ -29,7 +29,9 @@ const Page = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/admin/login`, formData);
+        const slug = window.location.hostname;
+
+      const response = await axios.post(`${API_URL}/admin/login?slug=${slug}`, formData);
 
       // ✅ Save token securely
       if (response.data?.token) {
