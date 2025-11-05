@@ -244,6 +244,17 @@ useEffect(() => {
   const handleUserChange = (event) => {
     setSelectedUserId(event.target.value);
   };
+  
+  const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  setSelectedAppt((prevState) => ({
+    ...prevState,
+    floorPlanFile: file, // Store the selected file
+  }));
+};
+
 
   return (
     <>
