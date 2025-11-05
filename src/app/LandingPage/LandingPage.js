@@ -98,7 +98,7 @@ const LandingPage = ({ admin }) => {
           <div className="section-alt">
             <Plans scrollToSection={scrollToSection} ref={targetRefHeader} />
           </div>
-          <div className="section-light">
+          <div className="section-light" style={{ marginBottom: '14rem' }}>
             <Contact_Calender ref={targetRef} prefillData={selectedPlan} />
           </div>
           <div className="section-alt">
