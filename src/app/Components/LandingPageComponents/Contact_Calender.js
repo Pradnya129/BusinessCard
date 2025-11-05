@@ -552,7 +552,7 @@ fetchCouponSetting();
             <div className="w-100 bg-white shadow-sm rounded  p-3 pb-5"
               style={{
                 minHeight: '35.25rem',   // optional: sets a minimum height
-                maxHeight: '100.25rem',   // maximum height
+                maxHeight: '80.25rem',   // maximum height
                 height: 'auto',          // dynamic height based on content
                 overflowY: 'auto',       // scroll if content exceeds maxHeight
               }}
@@ -591,7 +591,7 @@ fetchCouponSetting();
             {/* <div className="mx-auto" style={{ maxWidth: '35rem' }}> */}
             <div >
               <div className="card" ref={ref}>
-                <div className="card-body contact" style={{ height: 'auto', minHeight: '35.25rem', maxHeight: '60.25rem' }}>                  <div className="text-center mb-3">
+                <div className="card-body contact" style={{ height: 'auto', minHeight: '35.25rem', maxHeight: '100.25rem' }}>                  <div className="text-center mb-3">
                   <h5 className="mb-1">Book Your Appointment</h5>
                   <p className="small mb-4">Please fill the details of exact person for whom consultation is needed.</p>
                   <hr className='bg-dark' />
