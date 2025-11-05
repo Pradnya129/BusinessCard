@@ -186,29 +186,47 @@ useEffect(() => {
 
 
 
-  const handleSaveChanges = () => {
-    const token = localStorage.getItem('token');
-    axios.patch(
-      `https://appo.coinagesoft.com/api/customer-appointments/update/${selectedAppt.id}`,
-      { ...selectedAppt },
-      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
-    )
-      .then((response) => {
-        const updatedAppointments = appointments.map((appt) =>
-          appt.id === selectedAppt.id
-            ? { ...appt, ...selectedAppt } // keep original keys, update changed values
-            : appt
-        );
-        setAppointments(updatedAppointments);
-        setShowModal(false);
-        setSelectedAppt(null);
+const handleSaveChanges = async () => {
+  const token = localStorage.getItem('token');
+  if (!selectedAppt) return;
 
-      })
-      .catch((error) => {
-        console.error('Error updating appointment:', error.response?.data || error.message);
-        alert('Failed to update appointment');
-      });
-  };
+  try {
+    // Create FormData to handle text + file uploads
+    const formData = new FormData();
+
+    for (const key in selectedAppt) {
+      if (selectedAppt[key] !== null && selectedAppt[key] !== undefined) {
+        formData.append(key, selectedAppt[key]);
+      }
+    }
+
+    const response = await axios.patch(
+      `https://appo.coinagesoft.com/api/customer-appointments/update/${selectedAppt.id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    // ✅ Update the UI after saving
+    const updatedAppointments = appointments.map((appt) =>
+      appt.id === selectedAppt.id ? { ...appt, ...selectedAppt } : appt
+    );
+
+    setAppointments(updatedAppointments);
+    setShowModal(false);
+    setSelectedAppt(null);
+
+    console.log('✅ Appointment updated successfully:', response.data);
+  } catch (error) {
+    console.error('❌ Error updating appointment:', error.response?.data || error.message);
+    alert('Failed to update appointment');
+  }
+};
+
 
   const handleViewInvoice = async (apptId) => {
     const token = localStorage.getItem('token');
@@ -244,7 +262,7 @@ useEffect(() => {
   const handleUserChange = (event) => {
     setSelectedUserId(event.target.value);
   };
-  
+
   const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (!file) return;
