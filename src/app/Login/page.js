@@ -24,9 +24,7 @@ const Page = () => {
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
       setSlug(hostname);
-
       // Store in localStorage for use in other pages
-      localStorage.setItem('tenantSlug', hostname);
     }
   }, []);
   // ✅ Toggle show/hide password
