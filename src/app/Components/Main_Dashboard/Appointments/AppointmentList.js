@@ -28,28 +28,25 @@ const AppointmentList = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [hostname, setHostname] = useState("");
-  
+
   useEffect(() => {
-  if (typeof window !== "undefined") {
-    setHostname(window.location.hostname);
-  }
-}, []);  
+    if (typeof window !== "undefined") {
+      setHostname(window.location.hostname);
+    }
+  }, []);
 
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    // Fetch plans with assigned users and admin user for dropdown
     const fetchUsersAndPlans = async () => {
       try {
-        // Fetch admin user
         const decoded = jwtDecode(token);
         const currentAdminUser = { id: decoded.id, name: decoded.name || decoded.email || 'Admin' };
 
-        // Fetch plans with users
         const plansResponse = await api.getPlansWithUsers();
-  console.log("plan with users",plansResponse)
+        console.log("plan with users", plansResponse)
         let assignedUsers = [];
         if (plansResponse && Array.isArray(plansResponse.data)) {
           plansResponse.data.forEach(plan => {
@@ -63,7 +60,6 @@ const AppointmentList = () => {
           });
         }
 
-        // Remove duplicates from assignedUsers by id
         const uniqueAssignedUsersMap = new Map();
         assignedUsers.forEach(user => {
           if (!uniqueAssignedUsersMap.has(user.id)) {
@@ -71,11 +67,15 @@ const AppointmentList = () => {
           }
         });
         const uniqueAssignedUsers = Array.from(uniqueAssignedUsersMap.values());
-
-        // Combine assigned users, exclude admin from list
         const combinedUsers = uniqueAssignedUsers.filter(u => u.id !== currentAdminUser.id);
 
         setUsers(combinedUsers);
+
+        // ✅ Automatically select first user once list is ready
+        if (combinedUsers.length > 0) {
+          setSelectedUserId(combinedUsers[0].id);
+        }
+
       } catch (error) {
         console.error("Error fetching plans or users:", error);
         setUsers([]);
@@ -85,48 +85,49 @@ const AppointmentList = () => {
     fetchUsersAndPlans();
   }, []);
 
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token || !selectedUserId) return; // ⬅️ add this check
 
-  const fetchAppointments = async () => {
-    try {
-      const decoded = jwtDecode(token);
-      const adminId = decoded.id;
-      const userId = selectedUserId;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || !selectedUserId) return; // ⬅️ add this check
 
-      const url = `https://appo.coinagesoft.com/api/customer-appointments/users/${userId}/appointments`;
+    const fetchAppointments = async () => {
+      try {
+        const decoded = jwtDecode(token);
+        const adminId = decoded.id;
+        const userId = selectedUserId;
 
-      const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+        const url = `https://appo.coinagesoft.com/api/customer-appointments/users/${userId}/appointments`;
 
-      console.log("📥 Appointments API Response:", response.data);
-
-      const data = response.data?.data;
-      if (Array.isArray(data)) {
-        const sortedAppointments = [...data].sort((a, b) => {
-          const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
-          const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
-          return dateA - dateB;
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         });
 
-        setAppointments(sortedAppointments);
-      } else {
-        setAppointments([]);
-        console.warn("⚠️ Unexpected appointments format:", response.data);
-      }
-    } catch (error) {
-      console.error("❌ Error fetching appointments:", error.response?.data || error);
-      setAppointments([]);
-    }
-  };
+        console.log("📥 Appointments API Response:", response.data);
 
-  fetchAppointments();
-}, [selectedUserId]);
+        const data = response.data?.data;
+        if (Array.isArray(data)) {
+          const sortedAppointments = [...data].sort((a, b) => {
+            const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+            const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+            return dateA - dateB;
+          });
+
+          setAppointments(sortedAppointments);
+        } else {
+          setAppointments([]);
+          console.warn("⚠️ Unexpected appointments format:", response.data);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching appointments:", error.response?.data || error);
+        setAppointments([]);
+      }
+    };
+
+    fetchAppointments();
+  }, [selectedUserId]);
 
 
 
@@ -143,11 +144,31 @@ useEffect(() => {
     link.download = `Appointment-Receipt.pdf`;
     link.click();
   }
-
   const handleEdit = (appt) => {
-    setSelectedAppt({ ...appt });
+    let customData = {};
+
+    // Parse JSON string if needed
+    if (appt.customFields) {
+      try {
+        customData = typeof appt.customFields === "string"
+          ? JSON.parse(appt.customFields)
+          : appt.customFields;
+      } catch (err) {
+        console.error("❌ Failed to parse customFields:", err);
+      }
+    }
+
+    // Merge and flatten
+    const flattened = {
+      ...appt,
+      ...customData,
+    };
+
+    setSelectedAppt(flattened);
     setShowModal(true);
   };
+
+
 
   const handleClose = () => {
     setShowModal(false);
@@ -186,14 +207,12 @@ useEffect(() => {
 
 
 
-const handleSaveChanges = async () => {
+ const handleSaveChanges = async () => {
   const token = localStorage.getItem('token');
   if (!selectedAppt) return;
 
   try {
-    // Create FormData to handle text + file uploads
     const formData = new FormData();
-
     for (const key in selectedAppt) {
       if (selectedAppt[key] !== null && selectedAppt[key] !== undefined) {
         formData.append(key, selectedAppt[key]);
@@ -211,12 +230,15 @@ const handleSaveChanges = async () => {
       }
     );
 
-    // ✅ Update the UI after saving
-    const updatedAppointments = appointments.map((appt) =>
-      appt.id === selectedAppt.id ? { ...appt, ...selectedAppt } : appt
+    // ✅ Merge updated backend data immediately into your state
+    setAppointments((prev) =>
+      prev.map((appt) =>
+        appt.id === selectedAppt.id
+          ? { ...appt, ...response.data.data } // use updated data from backend
+          : appt
+      )
     );
 
-    setAppointments(updatedAppointments);
     setShowModal(false);
     setSelectedAppt(null);
 
@@ -226,6 +248,7 @@ const handleSaveChanges = async () => {
     alert('Failed to update appointment');
   }
 };
+
 
 
   const handleViewInvoice = async (apptId) => {
@@ -264,14 +287,14 @@ const handleSaveChanges = async () => {
   };
 
   const handleFileChange = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+    const file = event.target.files[0];
+    if (!file) return;
 
-  setSelectedAppt((prevState) => ({
-    ...prevState,
-    floorPlanFile: file, // Store the selected file
-  }));
-};
+    setSelectedAppt((prevState) => ({
+      ...prevState,
+      floorPlanFile: file, // Store the selected file
+    }));
+  };
 
 
   return (
@@ -405,88 +428,88 @@ const handleSaveChanges = async () => {
                   {/* First Name */}
                   <div className="mb-3">
                     <label className="form-label">First Name</label>
-                    <input type="text" className="form-control" name="firstName" value={selectedAppt.firstName} onChange={handleInputChange} />
+                    <input type="text" className="form-control" name="firstName" value={selectedAppt.firstName || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Last Name */}
                   <div className="mb-3">
                     <label className="form-label">Last Name</label>
-                    <input type="text" className="form-control" name="lastName" value={selectedAppt.lastName} onChange={handleInputChange} />
+                    <input type="text" className="form-control" name="lastName" value={selectedAppt.lastName || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Email */}
                   <div className="mb-3">
                     <label className="form-label">Email</label>
-                    <input type="email" className="form-control" name="email" value={selectedAppt.email} onChange={handleInputChange} />
+                    <input type="email" className="form-control" name="email" value={selectedAppt.email || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Phone */}
                   <div className="mb-3">
                     <label className="form-label">Phone</label>
-                    <input type="text" className="form-control" name="phoneNumber" value={selectedAppt.phoneNumber} onChange={handleInputChange} />
+                    <input type="text" className="form-control" name="phoneNumber" value={selectedAppt.phoneNumber || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Duration */}
                   <div className="mb-3">
                     <label className="form-label">Duration</label>
-                    <input type="text" className="form-control" name="duration" value={selectedAppt.duration} onChange={handleInputChange} />
+                    <input type="text" className="form-control" name="duration" value={selectedAppt.duration || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Plan */}
                   <div className="mb-3">
                     <label className="form-label">Plan</label>
-                    <input type="text" className="form-control" name="plan" value={selectedAppt.plan} onChange={handleInputChange} />
+                    <input type="text" className="form-control" name="plan" value={selectedAppt.plan || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Amount */}
                   <div className="mb-3">
                     <label className="form-label">Amount</label>
-                    <input type="number" className="form-control" name="amount" value={selectedAppt.amount} onChange={handleInputChange} />
+                    <input type="number" className="form-control" name="amount" value={selectedAppt.amount || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Time */}
                   <div className="mb-3">
                     <label className="form-label">Time</label>
-                    <input type="text" className="form-control" name="appointmentTime" value={selectedAppt.appointmentTime} onChange={handleInputChange} />
+                    <input type="text" className="form-control" name="appointmentTime" value={selectedAppt.appointmentTime || ""} onChange={handleInputChange} />
                   </div>
 
                   {/* Date */}
                   <div className="mb-3">
                     <label className="form-label">Date</label>
-                    <input type="date" className="form-control" name="appointmentDate" value={selectedAppt.appointmentDate} onChange={handleInputChange} />
+                    <input type="date" className="form-control" name="appointmentDate" value={selectedAppt.appointmentDate || ""} onChange={handleInputChange} />
                   </div>
 
                   {(hostname === "booking.vedratnavastu.com") && (
                     <>
                       <div className="mb-3">
                         <label className="form-label">Birth Date</label>
-                        <input type="date" className="form-control" name="birthDate" value={selectedAppt.birthDate} onChange={handleInputChange} />
+                        <input type="date" className="form-control" name="birthDate" value={selectedAppt.birthDate || ""} onChange={handleInputChange} />
                       </div>
 
                       <div className="mb-3">
                         <label className="form-label">Birth Time</label>
-                        <input type="time" className="form-control" name="birthTime" value={selectedAppt.birthTime} onChange={handleInputChange} />
+                        <input type="time" className="form-control" name="birthTime" value={selectedAppt.birthTime || ""} onChange={handleInputChange} />
                       </div>
 
                       <div className="mb-3">
                         <label className="form-label">Birth Place</label>
-                        <input type="text" className="form-control" name="birthPlace" value={selectedAppt.birthPlace} onChange={handleInputChange} />
+                        <input type="text" className="form-control" name="birthPlace" value={selectedAppt.birthPlace || ""} onChange={handleInputChange} />
                       </div>
 
                       <div className="mb-3">
                         <label className="form-label">Vastu Type</label>
-                        <input type="text" className="form-control" name="vastuType" value={selectedAppt.vastuType} onChange={handleInputChange} />
+                        <input type="text" className="form-control" name="vastuType" value={selectedAppt.vastuType || ""} onChange={handleInputChange} />
                       </div>
 
                       <div className="mb-3">
                         <label className="form-label">Google Location</label>
-                        <input type="text" className="form-control" name="googleLocation" value={selectedAppt.googleLocation} onChange={handleInputChange} />
+                        <input type="text" className="form-control" name="googleLocation" value={selectedAppt.googleLocation || ""} onChange={handleInputChange} />
                       </div>
 
                       <div className="mb-3">
                         <label className="form-label">Floor Plan File</label>
                         {selectedAppt.floorPlanFile ? (
-                          <a href={`/${selectedAppt.floorPlanFile}`} target="_blank" rel="noreferrer">View</a>
+                          <a href={`/${selectedAppt.floorPlanFile }`} target="_blank" rel="noreferrer">View</a>
                         ) : "N/A"}
                         <input type="file" className="form-control mt-1" name="floorPlanFile" onChange={handleFileChange} />
                       </div>
@@ -507,7 +530,7 @@ const handleSaveChanges = async () => {
                   {/* Payment Status */}
                   <div className="mb-3">
                     <label className="form-label">Payment Status</label>
-                    <select className="form-select" name="paymentStatus" value={selectedAppt.paymentStatus} onChange={handleInputChange}>
+                    <select className="form-select" name="paymentStatus" value={selectedAppt.paymentStatus || ""} onChange={handleInputChange}>
                       <option value="Pending">Pending</option>
                       <option value="Paid">Paid</option>
                       <option value="Failed">Failed</option>
@@ -518,7 +541,7 @@ const handleSaveChanges = async () => {
                   {/* Appointment Status */}
                   <div className="mb-3">
                     <label className="form-label">Appointment Status</label>
-                    <select className="form-select" name="appointmentStatus" value={selectedAppt.appointmentStatus} onChange={handleInputChange}>
+                    <select className="form-select" name="appointmentStatus" value={selectedAppt.appointmentStatus || ""} onChange={handleInputChange}>
                       <option value="Scheduled">Scheduled</option>
                       <option value="Completed">Completed</option>
                       <option value="Cancelled">Cancelled</option>
@@ -535,9 +558,14 @@ const handleSaveChanges = async () => {
 
                   {/* Save Button */}
                   <div className="text-center mt-3">
-                    <button type="button" className="btn btn-primary" onClick={() => { handleSaveChanges(); handleClose(); }}>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={handleSaveChanges}
+                    >
                       Save Changes
                     </button>
+
                   </div>
                 </form>
               </div>

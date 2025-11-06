@@ -468,7 +468,7 @@ fetchCouponSetting();
   useEffect(() => {
     if (!formData.appointmentDate || !formData.plan) return;
 
-    // ✅ Get slug from hostname first, fallback to URL path (for localhost/testing)
+    
 
 
     if (!hostname) {
