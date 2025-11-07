@@ -527,7 +527,7 @@ const AppointmentList = () => {
                         <label className="form-label">Floor Plan File</label>
                         {selectedAppt.floorPlanFile ? (
                           <a
-                            href={`https://appo.coinagesoft.com/${appt.floorPlanFile}`}
+                            href={`https://appo.coinagesoft.com/${selectedAppt.floorPlanFile}`}
                             target="_blank"
                             rel="noreferrer"
                           >
