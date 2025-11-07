@@ -317,7 +317,7 @@ useEffect(() => {
                 href="/Dashboard/Renewal"
                 className="menu-link"
               >
-                <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
+                <i className="menu-icon tf-icons ri-repeat-line me-2"></i>
                 <div>Renewals</div>
               </Link>
             </li>
@@ -328,7 +328,7 @@ useEffect(() => {
                 href="/Dashboard/AdminFeedback"
                 className="menu-link"
               >
-                <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
+                <i className="menu-icon tf-icons ri-feedback-line me-2"></i>
                 <div>Feedback</div>
               </Link>
             </li>
@@ -457,7 +457,7 @@ useEffect(() => {
                     href="/Dashboard/Admin_Coupans"
                     className="menu-link"
                   >
-                    <div>Manage Coupans</div>
+                    <div>Manage Coupons</div>
                   </Link>
                 </li>
               </ul>
@@ -536,7 +536,7 @@ useEffect(() => {
                 href="/Dashboard/SuperAdminFeedback"
                 className="menu-link"
               >
-                <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
+                <i className="menu-icon tf-icons ri-feedback-line me-2"></i>
                 <div>Feedback</div>
               </Link>
             </li>

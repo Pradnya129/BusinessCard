@@ -39,108 +39,108 @@ const AppointmentList = () => {
 
 
 
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  const fetchUsersAndPlans = async () => {
-    try {
-      const decoded = jwtDecode(token);
-      const currentAdminUser = { id: decoded.id };
+    const fetchUsersAndPlans = async () => {
+      try {
+        const decoded = jwtDecode(token);
+        const currentAdminUser = { id: decoded.id };
 
-      const { data } = await axios.get(
-        `https://appo.coinagesoft.com/api/admin/plans/all_plans_with_users`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+        const { data } = await axios.get(
+          `https://appo.coinagesoft.com/api/admin/plans/all_plans_with_users`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      // Collect users and their plans
-      let assignedUsers = [];
-      let userPlansMap = {};
+        // Collect users and their plans
+        let assignedUsers = [];
+        let userPlansMap = {};
 
-      data.data.forEach(plan => {
-        plan.UserPlans?.forEach(up => {
-          if (up?.user) {
-            assignedUsers.push({ id: up.user.id, name: up.user.name || up.user.email });
+        data.data.forEach(plan => {
+          plan.UserPlans?.forEach(up => {
+            if (up?.user) {
+              assignedUsers.push({ id: up.user.id, name: up.user.name || up.user.email });
 
-            if (!userPlansMap[up.user.id]) userPlansMap[up.user.id] = [];
-            userPlansMap[up.user.id].push({
-              planId: plan.planId,
-              planName: plan.planName
-            });
-          }
+              if (!userPlansMap[up.user.id]) userPlansMap[up.user.id] = [];
+              userPlansMap[up.user.id].push({
+                planId: plan.planId,
+                planName: plan.planName
+              });
+            }
+          });
         });
-      });
 
-      // Remove duplicates
-      const uniqueUsers = Array.from(new Map(assignedUsers.map(u => [u.id, u])).values())
-        .filter(u => u.id !== currentAdminUser.id);
+        // Remove duplicates
+        const uniqueUsers = Array.from(new Map(assignedUsers.map(u => [u.id, u])).values())
+          .filter(u => u.id !== currentAdminUser.id);
 
-      setUsers(uniqueUsers);
+        setUsers(uniqueUsers);
 
-      // Auto-select first user
-      if (!selectedUserId && uniqueUsers.length > 0) {
-        const firstUser = uniqueUsers[0];
-        setSelectedUserId(firstUser.id);
-        setPlansForUser(userPlansMap[firstUser.id] || []);
-        setSelectedPlanId(userPlansMap[firstUser.id]?.[0]?.planId || '');
+        // Auto-select first user
+        if (!selectedUserId && uniqueUsers.length > 0) {
+          const firstUser = uniqueUsers[0];
+          setSelectedUserId(firstUser.id);
+          setPlansForUser(userPlansMap[firstUser.id] || []);
+          setSelectedPlanId(userPlansMap[firstUser.id]?.[0]?.planId || '');
+        }
+
+      } catch (error) {
+        console.error("Error fetching users/plans:", error);
+        setUsers([]);
+        setPlansForUser([]);
       }
+    };
 
-    } catch (error) {
-      console.error("Error fetching users/plans:", error);
-      setUsers([]);
-      setPlansForUser([]);
-    }
-  };
-
-  fetchUsersAndPlans();
-}, []);
+    fetchUsersAndPlans();
+  }, []);
 
 
-// Fetch appointments for selected user and plan
-useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token || !selectedUserId) return;
+  // Fetch appointments for selected user and plan
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || !selectedUserId) return;
 
-  const fetchAppointments = async () => {
-    try {
-      const response = await axios.get(
-        `https://appo.coinagesoft.com/api/customer-appointments/users/${selectedUserId}/appointments`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get(
+          `https://appo.coinagesoft.com/api/customer-appointments/users/${selectedUserId}/appointments`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-      let data = response.data?.data || [];
+        let data = response.data?.data || [];
 
-      // Filter by selected plan if any
-      if (selectedPlanId) {
-        data = data.filter(appt => appt.planId === selectedPlanId);
+        // Filter by selected plan if any
+        if (selectedPlanId) {
+          data = data.filter(appt => appt.planId === selectedPlanId);
+        }
+
+        // Sort by date & time
+        const sortedAppointments = [...data].sort((a, b) => {
+          const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+          const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+          return dateA - dateB;
+        });
+
+        setAppointments(sortedAppointments);
+
+      } catch (error) {
+        console.error("Error fetching appointments:", error.response?.data || error);
+        setAppointments([]);
       }
+    };
 
-      // Sort by date & time
-      const sortedAppointments = [...data].sort((a, b) => {
-        const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
-        const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
-        return dateA - dateB;
-      });
+    fetchAppointments();
+  }, [selectedUserId, selectedPlanId]);
 
-      setAppointments(sortedAppointments);
 
-    } catch (error) {
-      console.error("Error fetching appointments:", error.response?.data || error);
-      setAppointments([]);
-    }
+  // Handle user change
+
+
+  // Handle plan change
+  const handlePlanChange = (e) => {
+    setSelectedPlanId(e.target.value);
   };
-
-  fetchAppointments();
-}, [selectedUserId, selectedPlanId]);
-
-
-// Handle user change
-
-
-// Handle plan change
-const handlePlanChange = (e) => {
-  setSelectedPlanId(e.target.value);
-};
 
 
 
@@ -219,47 +219,47 @@ const handlePlanChange = (e) => {
 
 
 
- const handleSaveChanges = async () => {
-  const token = localStorage.getItem('token');
-  if (!selectedAppt) return;
+  const handleSaveChanges = async () => {
+    const token = localStorage.getItem('token');
+    if (!selectedAppt) return;
 
-  try {
-    const formData = new FormData();
-    for (const key in selectedAppt) {
-      if (selectedAppt[key] !== null && selectedAppt[key] !== undefined) {
-        formData.append(key, selectedAppt[key]);
+    try {
+      const formData = new FormData();
+      for (const key in selectedAppt) {
+        if (selectedAppt[key] !== null && selectedAppt[key] !== undefined) {
+          formData.append(key, selectedAppt[key]);
+        }
       }
+
+      const response = await axios.patch(
+        `https://appo.coinagesoft.com/api/customer-appointments/update/${selectedAppt.id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // ✅ Merge updated backend data immediately into your state
+      setAppointments((prev) =>
+        prev.map((appt) =>
+          appt.id === selectedAppt.id
+            ? { ...appt, ...response.data.data } // use updated data from backend
+            : appt
+        )
+      );
+
+      setShowModal(false);
+      setSelectedAppt(null);
+
+      console.log('✅ Appointment updated successfully:', response.data);
+    } catch (error) {
+      console.error('❌ Error updating appointment:', error.response?.data || error.message);
+      alert('Failed to update appointment');
     }
-
-    const response = await axios.patch(
-      `https://appo.coinagesoft.com/api/customer-appointments/update/${selectedAppt.id}`,
-      formData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-
-    // ✅ Merge updated backend data immediately into your state
-    setAppointments((prev) =>
-      prev.map((appt) =>
-        appt.id === selectedAppt.id
-          ? { ...appt, ...response.data.data } // use updated data from backend
-          : appt
-      )
-    );
-
-    setShowModal(false);
-    setSelectedAppt(null);
-
-    console.log('✅ Appointment updated successfully:', response.data);
-  } catch (error) {
-    console.error('❌ Error updating appointment:', error.response?.data || error.message);
-    alert('Failed to update appointment');
-  }
-};
+  };
 
 
 
@@ -294,15 +294,15 @@ const handlePlanChange = (e) => {
             status === "Pending" ? 'danger' : 'dark';
   };
 
- const handleUserChange = (e) => {
-  const userId = e.target.value;
-  setSelectedUserId(userId);
+  const handleUserChange = (e) => {
+    const userId = e.target.value;
+    setSelectedUserId(userId);
 
-  // Update plans dropdown for the new user
-  const userPlans = users.find(u => u.id === userId)?.plans || [];
-  setPlansForUser(userPlans);
-  setSelectedPlanId(userPlans?.[0]?.planId || '');
-};
+    // Update plans dropdown for the new user
+    const userPlans = users.find(u => u.id === userId)?.plans || [];
+    setPlansForUser(userPlans);
+    setSelectedPlanId(userPlans?.[0]?.planId || '');
+  };
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -324,9 +324,9 @@ const handlePlanChange = (e) => {
           </div>
           <div className="d-none d-md-block mb-3 d-flex justify-content-between align-items-center w-100">
             <h5 className="mb-0">Appointment</h5>
-          <select value={selectedUserId} onChange={handleUserChange} className="form-select w-auto me-2">
-  {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-</select>
+            <select value={selectedUserId} onChange={handleUserChange} className="form-select w-auto me-2">
+              {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+            </select>
 
 
 
@@ -391,7 +391,13 @@ const handlePlanChange = (e) => {
                         </td>
                         <td>
                           {appt.floorPlanFile ? (
-                            <a href={`/${appt.floorPlanFile}`} target="_blank" rel="noreferrer">View</a>
+                            <a
+                              href={`https://appo.coinagesoft.com/${appt.floorPlanFile}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View
+                            </a>
                           ) : "N/A"}
                         </td>
                       </>)}
@@ -520,7 +526,13 @@ const handlePlanChange = (e) => {
                       <div className="mb-3">
                         <label className="form-label">Floor Plan File</label>
                         {selectedAppt.floorPlanFile ? (
-                          <a href={`/${selectedAppt.floorPlanFile }`} target="_blank" rel="noreferrer">View</a>
+                          <a
+                            href={`https://appo.coinagesoft.com/${appt.floorPlanFile}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View
+                          </a>
                         ) : "N/A"}
                         <input type="file" className="form-control mt-1" name="floorPlanFile" onChange={handleFileChange} />
                       </div>
