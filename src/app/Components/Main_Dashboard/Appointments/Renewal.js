@@ -131,7 +131,7 @@ const Renewal = () => {
                         <div>{new Date(r.startDate).toLocaleDateString()}</div>
                         <div>to {new Date(r.endDate).toLocaleDateString()}</div>
                       </td>
-                      <td className="py-3 px-4"><span className="fw-bold text-success">${r.amount}</span></td>
+                      <td className="py-3 px-4"><span className="fw-bold text-success">Rs.{r.amount}</span></td>
                       <td className="py-3 px-4">
                         {r.couponCode ? (
                           <span className="badge bg-warning text-dark">{r.couponCode}</span>
