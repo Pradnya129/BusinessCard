@@ -5,7 +5,7 @@ import axios from 'axios';
 import Link from 'next/link';
 
 // ✅ Use NEXT_PUBLIC_ prefix (Next.js does not expose REACT_APP_ vars)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://appo.coinagesoft.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://appo.coinagesoft.com/api';
 
 const Page = () => {
   const router = useRouter();
