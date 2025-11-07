@@ -295,6 +295,7 @@ const finalSlots = slots.map(slot => {
   // ==================== Submit ====================
 const handleSubmit = async (e) => {
   e.preventDefault();
+
   const validationErrors = validate();
   if (Object.keys(validationErrors).length > 0) {
     setErrors(validationErrors);
@@ -310,15 +311,19 @@ const handleSubmit = async (e) => {
 
     const decoded = jwtDecode(token);
     const adminId = decoded.id;
-    const userId = formData.userId || decoded.userId || decoded.id;
     const planId = selectedPlanId || formData.planId;
 
-    if (!planId || !userId) {
-      console.error("❌ planId or userId missing");
+    if (!planId) {
+      console.error("❌ planId missing");
       return;
     }
 
-    const body = { ...formData, adminId, userId, planId };
+    // 🟢 userId removed (backend gets it internally)
+    const body = {
+      ...formData,
+      adminId,
+      planId,
+    };
 
     await axios.post(
       "https://appo.coinagesoft.com/api/customer-appointments/free",
@@ -348,16 +353,16 @@ const handleSubmit = async (e) => {
 
     const offcanvasEl = document.getElementById("addEventSidebar");
     alert("✅ Appointment booked successfully!");
-  if (offcanvasEl) {
-    const bsOffcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasEl);
-    if (bsOffcanvas) bsOffcanvas.hide();
-  }
-    // ✅ Toast-style success message
+    if (offcanvasEl) {
+      const bsOffcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasEl);
+      if (bsOffcanvas) bsOffcanvas.hide();
+    }
   } catch (err) {
     console.error("Booking failed", err);
     alert("❌ Failed to book appointment. Please try again.");
   }
 };
+
 
 
 
