@@ -28,6 +28,8 @@ const AppointmentList = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [hostname, setHostname] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [plansForUser, setPlansForUser] = useState([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -36,99 +38,109 @@ const AppointmentList = () => {
   }, []);
 
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
 
-    const fetchUsersAndPlans = async () => {
-      try {
-        const decoded = jwtDecode(token);
-        const currentAdminUser = { id: decoded.id, name: decoded.name || decoded.email || 'Admin' };
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-        const plansResponse = await api.getPlansWithUsers();
-        console.log("plan with users", plansResponse)
-        let assignedUsers = [];
-        if (plansResponse && Array.isArray(plansResponse.data)) {
-          plansResponse.data.forEach(plan => {
-            if (plan.UserPlans && Array.isArray(plan.UserPlans)) {
-              plan.UserPlans.forEach(up => {
-                if (up.User) {
-                  assignedUsers.push({ id: up.User.id, name: up.User.name || up.User.email });
-                }
-              });
-            }
-          });
-        }
+  const fetchUsersAndPlans = async () => {
+    try {
+      const decoded = jwtDecode(token);
+      const currentAdminUser = { id: decoded.id };
 
-        const uniqueAssignedUsersMap = new Map();
-        assignedUsers.forEach(user => {
-          if (!uniqueAssignedUsersMap.has(user.id)) {
-            uniqueAssignedUsersMap.set(user.id, user);
+      const { data } = await axios.get(
+        `https://appo.coinagesoft.com/api/admin/plans/all_plans_with_users`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Collect users and their plans
+      let assignedUsers = [];
+      let userPlansMap = {};
+
+      data.data.forEach(plan => {
+        plan.UserPlans?.forEach(up => {
+          if (up?.user) {
+            assignedUsers.push({ id: up.user.id, name: up.user.name || up.user.email });
+
+            if (!userPlansMap[up.user.id]) userPlansMap[up.user.id] = [];
+            userPlansMap[up.user.id].push({
+              planId: plan.planId,
+              planName: plan.planName
+            });
           }
         });
-        const uniqueAssignedUsers = Array.from(uniqueAssignedUsersMap.values());
-        const combinedUsers = uniqueAssignedUsers.filter(u => u.id !== currentAdminUser.id);
+      });
 
-        setUsers(combinedUsers);
+      // Remove duplicates
+      const uniqueUsers = Array.from(new Map(assignedUsers.map(u => [u.id, u])).values())
+        .filter(u => u.id !== currentAdminUser.id);
 
-        // ✅ Automatically select first user once list is ready
-        if (combinedUsers.length > 0) {
-          setSelectedUserId(combinedUsers[0].id);
-        }
+      setUsers(uniqueUsers);
 
-      } catch (error) {
-        console.error("Error fetching plans or users:", error);
-        setUsers([]);
+      // Auto-select first user
+      if (!selectedUserId && uniqueUsers.length > 0) {
+        const firstUser = uniqueUsers[0];
+        setSelectedUserId(firstUser.id);
+        setPlansForUser(userPlansMap[firstUser.id] || []);
+        setSelectedPlanId(userPlansMap[firstUser.id]?.[0]?.planId || '');
       }
-    };
 
-    fetchUsersAndPlans();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching users/plans:", error);
+      setUsers([]);
+      setPlansForUser([]);
+    }
+  };
+
+  fetchUsersAndPlans();
+}, []);
 
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token || !selectedUserId) return; // ⬅️ add this check
+// Fetch appointments for selected user and plan
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token || !selectedUserId) return;
 
-    const fetchAppointments = async () => {
-      try {
-        const decoded = jwtDecode(token);
-        const adminId = decoded.id;
-        const userId = selectedUserId;
+  const fetchAppointments = async () => {
+    try {
+      const response = await axios.get(
+        `https://appo.coinagesoft.com/api/customer-appointments/users/${selectedUserId}/appointments`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-        const url = `https://appo.coinagesoft.com/api/customer-appointments/users/${userId}/appointments`;
+      let data = response.data?.data || [];
 
-        const response = await axios.get(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        console.log("📥 Appointments API Response:", response.data);
-
-        const data = response.data?.data;
-        if (Array.isArray(data)) {
-          const sortedAppointments = [...data].sort((a, b) => {
-            const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
-            const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
-            return dateA - dateB;
-          });
-
-          setAppointments(sortedAppointments);
-        } else {
-          setAppointments([]);
-          console.warn("⚠️ Unexpected appointments format:", response.data);
-        }
-      } catch (error) {
-        console.error("❌ Error fetching appointments:", error.response?.data || error);
-        setAppointments([]);
+      // Filter by selected plan if any
+      if (selectedPlanId) {
+        data = data.filter(appt => appt.planId === selectedPlanId);
       }
-    };
 
-    fetchAppointments();
-  }, [selectedUserId]);
+      // Sort by date & time
+      const sortedAppointments = [...data].sort((a, b) => {
+        const dateA = new Date(`${a.appointmentDate}T${a.appointmentTime}`);
+        const dateB = new Date(`${b.appointmentDate}T${b.appointmentTime}`);
+        return dateA - dateB;
+      });
 
+      setAppointments(sortedAppointments);
+
+    } catch (error) {
+      console.error("Error fetching appointments:", error.response?.data || error);
+      setAppointments([]);
+    }
+  };
+
+  fetchAppointments();
+}, [selectedUserId, selectedPlanId]);
+
+
+// Handle user change
+
+
+// Handle plan change
+const handlePlanChange = (e) => {
+  setSelectedPlanId(e.target.value);
+};
 
 
 
@@ -282,9 +294,15 @@ const AppointmentList = () => {
             status === "Pending" ? 'danger' : 'dark';
   };
 
-  const handleUserChange = (event) => {
-    setSelectedUserId(event.target.value);
-  };
+ const handleUserChange = (e) => {
+  const userId = e.target.value;
+  setSelectedUserId(userId);
+
+  // Update plans dropdown for the new user
+  const userPlans = users.find(u => u.id === userId)?.plans || [];
+  setPlansForUser(userPlans);
+  setSelectedPlanId(userPlans?.[0]?.planId || '');
+};
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -306,19 +324,12 @@ const AppointmentList = () => {
           </div>
           <div className="d-none d-md-block mb-3 d-flex justify-content-between align-items-center w-100">
             <h5 className="mb-0">Appointment</h5>
-            <select
-              className="form-select w-auto"
-              style={{ minWidth: '200px' }}
-              value={selectedUserId}
-              onChange={handleUserChange}
-            >
-              {/* <option value="">Admin</option> */}
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
+          <select value={selectedUserId} onChange={handleUserChange} className="form-select w-auto me-2">
+  {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+</select>
+
+
+
           </div>
         </div>
 

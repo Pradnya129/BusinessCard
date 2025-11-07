@@ -321,6 +321,17 @@ useEffect(() => {
                 <div>Renewals</div>
               </Link>
             </li>
+               <li className={`menu-item ${
+                  pathname === "/Dashboard/AdminFeedback" ? "active" : ""
+                }`}>
+              <Link
+                href="/Dashboard/AdminFeedback"
+                className="menu-link"
+              >
+                <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
+                <div>Feedback</div>
+              </Link>
+            </li>
 
             <li className={`menu-item ${
                   pathname === "/Dashboard/SubscriptionAssigned" ? "active" : ""
@@ -375,6 +386,7 @@ useEffect(() => {
                 </li>
               </ul>
             </li>
+             
 
             {/* Account Settings */}
             <li className={`menu-item ${
@@ -515,6 +527,17 @@ useEffect(() => {
               >
                 <i className="menu-icon tf-icons ri-wallet-line me-2"></i>
                 <div>Subscription Renewals</div>
+              </Link>
+            </li>
+             <li className={`menu-item ${
+                  pathname === "/Dashboard/SuperAdminFeedback" ? "active" : ""
+                }`}>
+              <Link
+                href="/Dashboard/SuperAdminFeedback"
+                className="menu-link"
+              >
+                <i className="menu-icon tf-icons ri-calendar-check-line me-2"></i>
+                <div>Feedback</div>
               </Link>
             </li>
           </ul>
