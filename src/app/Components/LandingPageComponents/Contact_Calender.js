@@ -764,21 +764,22 @@ const Contact_Calender = React.forwardRef((props, ref) => {
                             </div>
                           )}
 
-                          {selectedPlanFields.includes("googleLocation") && (
+                        
+
+                          {selectedPlanFields.includes("floorPlanFile") && (
+                            <div className="col-sm-6 mb-2">
+                              <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
+                              <input type="file" className="form-control form-control-sm"
+                                name="floorPlanFile" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf"
+                                onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })} />
+                            </div>
+                          )}
+                            {selectedPlanFields.includes("googleLocation") && (
                             <div className="col-sm-12 mb-2">
                               <label className="form-label" htmlFor="googleLocation">Google Location (Optional)</label>
                               <input type="text" className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
                                 name="googleLocation" id="googleLocation" value={formData.googleLocation} onChange={handleChange} placeholder="Paste Google Maps link" />
                               {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
-                            </div>
-                          )}
-
-                          {selectedPlanFields.includes("floorPlanFile") && (
-                            <div className="col-sm-12 mb-2">
-                              <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
-                              <input type="file" className="form-control form-control-sm"
-                                name="floorPlanFile" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf"
-                                onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })} />
                             </div>
                           )}
 
