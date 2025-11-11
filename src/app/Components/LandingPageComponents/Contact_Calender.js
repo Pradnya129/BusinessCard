@@ -19,11 +19,11 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [couponCode, setCouponCode] = useState(''); // coupon as string
   const [appliedCouponId, setAppliedCouponId] = useState(null);
   const [couponMessage, setCouponMessage] = useState('');
- const [showCouponField, setShowCouponField] = useState(false);
+  const [showCouponField, setShowCouponField] = useState(false);
 
 
   const planFieldsMap = {
-    "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace","googleLocation", "floorPlanFile"],
+    "Residential Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "googleLocation", "floorPlanFile"],
     "Commercial Vastu Consultancy": ["birthDate", "birthTime", "birthPlace", "googleLocation", "floorPlanFile"],
     "Online Vastu Plan Consultation": ["birthDate", "birthTime", "birthPlace", "vastuType", "googleLocation", "floorPlanFile"],
     "Industrial Vastu Consultancy": ["vastuType", "googleLocation", "floorPlanFile"],
@@ -40,20 +40,20 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   }, []);
 
 
-const fetchCouponSetting = async () => {
-  try {
-    const slug = window.location.hostname;
-    const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/coupon-visibility?slug=${slug}`);
-    if (!res.ok) throw new Error("Failed to fetch coupon setting");
-    const data = await res.json();
-    setShowCouponField(data?.showCouponField);
-    console.log("res",data?.showCouponField)
-  } catch (err) {
-    console.error("Error fetching coupon setting:", err);
-  }
-};
+  const fetchCouponSetting = async () => {
+    try {
+      const slug = window.location.hostname;
+      const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/coupon-visibility?slug=${slug}`);
+      if (!res.ok) throw new Error("Failed to fetch coupon setting");
+      const data = await res.json();
+      setShowCouponField(data?.showCouponField);
+      console.log("res", data?.showCouponField)
+    } catch (err) {
+      console.error("Error fetching coupon setting:", err);
+    }
+  };
 
-fetchCouponSetting();
+  fetchCouponSetting();
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -233,11 +233,11 @@ fetchCouponSetting();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-      // Check if a slot from MiniCalendar is selected
-  if (!formData.appointmentTime) {
-    alert("Please select a time slot from the calendar before booking!");
-    return; // Stop form submission
-  }
+    // Check if a slot from MiniCalendar is selected
+    if (!formData.appointmentTime) {
+      alert("Please select a time slot from the calendar before booking!");
+      return; // Stop form submission
+    }
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -468,7 +468,7 @@ fetchCouponSetting();
   useEffect(() => {
     if (!formData.appointmentDate || !formData.plan) return;
 
-    
+
 
 
     if (!hostname) {
@@ -487,10 +487,10 @@ fetchCouponSetting();
         const rules = rulesRes.data?.rules || [];
         const shifts = shiftsRes.data?.data || [];
         // find selected plan
-        console.log("rules",rules);
-        console.log("shifts",shifts)
+        console.log("rules", rules);
+        console.log("shifts", shifts)
         const selectedPlan = availablePlans.find((p) => p.planName === formData.plan);
-        console.log("selected plan",selectedPlan)
+        console.log("selected plan", selectedPlan)
         if (!selectedPlan) return;
 
         // find buffer + shiftId for plan
@@ -506,8 +506,8 @@ fetchCouponSetting();
           .map((a) => a.appointmentTime);
 
         setBookedTimeSlots(booked);
-  console.log("shift start time",shift.startTime);
-    console.log("shift end time",shift.endTime)
+        console.log("shift start time", shift.startTime);
+        console.log("shift end time", shift.endTime)
         // generate available slots
         const slots = generateSlots(
           shift.startTime,                    // e.g., "10:00:00"
@@ -518,7 +518,7 @@ fetchCouponSetting();
         );
 
         setAvailableSlots(slots);
-        console.log("slots",slots)
+        console.log("slots", slots)
       })
       .catch((err) => console.error("Error fetching slots:", err));
   }, [formData.appointmentDate, formData.plan, availablePlans]);
@@ -723,7 +723,7 @@ fetchCouponSetting();
 
                           {selectedPlanFields.includes("birthDate") && (
                             <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="birthDate">Birth Date</label>
+                              <label className="form-label" htmlFor="birthDate">Birth Date (Optional)</label>
                               <input type="date" className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
                                 name="birthDate" id="birthDate" value={formData.birthDate} onChange={handleChange} />
                               {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
@@ -732,7 +732,7 @@ fetchCouponSetting();
 
                           {selectedPlanFields.includes("birthTime") && (
                             <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="birthTime">Birth Time</label>
+                              <label className="form-label" htmlFor="birthTime">Birth Time (Optional)</label>
                               <input type="time" className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
                                 name="birthTime" id="birthTime" value={formData.birthTime} onChange={handleChange} />
                               {formErrors.birthTime && <div className="text-danger small">{formErrors.birthTime}</div>}
@@ -741,7 +741,7 @@ fetchCouponSetting();
 
                           {selectedPlanFields.includes("birthPlace") && (
                             <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="birthPlace">Birth Place</label>
+                              <label className="form-label" htmlFor="birthPlace">Birth Place (Optional)</label>
                               <input type="text" className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
                                 name="birthPlace" id="birthPlace" value={formData.birthPlace} onChange={handleChange} />
                               {formErrors.birthPlace && <div className="text-danger small">{formErrors.birthPlace}</div>}
@@ -766,7 +766,7 @@ fetchCouponSetting();
 
                           {selectedPlanFields.includes("googleLocation") && (
                             <div className="col-sm-12 mb-2">
-                              <label className="form-label" htmlFor="googleLocation">Google Location</label>
+                              <label className="form-label" htmlFor="googleLocation">Google Location (Optional)</label>
                               <input type="text" className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
                                 name="googleLocation" id="googleLocation" value={formData.googleLocation} onChange={handleChange} placeholder="Paste Google Maps link" />
                               {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
@@ -784,32 +784,32 @@ fetchCouponSetting();
 
                         </>
                       )}
-                   {showCouponField && (
-  <div className="col-sm-6">
-    <div className="mb-2">
-      <label className="form-label" htmlFor="couponCode">Coupon Code (Optional)</label>
-      <div className="input-group input-group-sm">
-        <input
-          type="text"
-          id="couponCode"
-          placeholder="Enter coupon code"
-          className="form-control"
-          value={couponCode}
-          onChange={handleCouponChange}
-        />
-        <button className="btn btn-primary" type="button" onClick={applyCoupon}>
-          Apply
-        </button>
-      </div>
-      {formErrors.couponCode && (
-        <div className="text-danger small">{formErrors.couponCode}</div>
-      )}
-      {couponMessage && (
-        <div className="text-success small">{couponMessage}</div>
-      )}
-    </div>
-  </div>
-)}
+                      {showCouponField && (
+                        <div className="col-sm-6">
+                          <div className="mb-2">
+                            <label className="form-label" htmlFor="couponCode">Coupon Code (Optional)</label>
+                            <div className="input-group input-group-sm">
+                              <input
+                                type="text"
+                                id="couponCode"
+                                placeholder="Enter coupon code"
+                                className="form-control"
+                                value={couponCode}
+                                onChange={handleCouponChange}
+                              />
+                              <button className="btn btn-primary" type="button" onClick={applyCoupon}>
+                                Apply
+                              </button>
+                            </div>
+                            {formErrors.couponCode && (
+                              <div className="text-danger small">{formErrors.couponCode}</div>
+                            )}
+                            {couponMessage && (
+                              <div className="text-success small">{couponMessage}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
 
                       {/* Fields visible for all tenants */}
