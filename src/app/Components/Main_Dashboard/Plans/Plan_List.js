@@ -289,45 +289,63 @@ const handleSave = async () => {
                   <h4 className="fw-bold text-success mb-3">₹{plan.planPrice}</h4>
 
                   <h6 className="fw-semibold mb-2">Features:</h6>
-                  <ul className="list-unstyled small text-start mx-auto" style={{ maxWidth: "250px" }}>
-                    {(Array.isArray(plan.planFeatures)
-                      ? plan.planFeatures
-                      : JSON.parse(plan.planFeatures || "[]")
-                    ).map((f, i) => (
-                      <li key={i}>
-                        <i className="fas fa-check-circle text-success me-2"></i>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                {/* Assigned Users */}
-                {plan.UserPlans && plan.UserPlans.length > 0 && (
-                  <div className="card-body text-center pt-2">
-                    <h6 className="fw-semibold mb-1">Assigned Users:</h6>
-                    <ul className="list-unstyled small text-start mx-auto" style={{ maxWidth: "250px" }}>
-                      {plan.UserPlans.map((up) => (
-                        <li key={up.user.id}>
-                          <i className="fas fa-user text-primary me-2"></i>
-                          {up.user.name} ({up.user.email})
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+               <ul className="list-unstyled small text-start mx-auto" style={{ maxWidth: "260px" }}>
+  {(() => {
+    let features = [];
 
+    try {
+      if (Array.isArray(plan.planFeatures)) {
+        features = plan.planFeatures;
+      } else if (typeof plan.planFeatures === "string" && plan.planFeatures.trim()) {
+        const parsed = JSON.parse(plan.planFeatures);
+        features = Array.isArray(parsed) ? parsed : [];
+      }
+    } catch (err) {
+      console.warn("⚠️ Invalid planFeatures format for plan:", plan.planId, plan.planFeatures);
+      features = [];
+    }
 
-                {/* Shift & Buffer */}
-                <div className="card-body text-center pt-0">
-                  <p className="mb-1">
-                    <i className="fas fa-calendar-day me-2 text-primary"></i>
-                    {shiftList.find((s) => String(s.id) === String(plan.shiftBufferRule?.shiftId))?.name || "None"}
-                  </p>
-                  <p className="mb-0">
-                    <i className="fas fa-hourglass-half me-2 text-warning"></i>
-                    Buffer: {bufferRules[plan.planId] ?? "—"} min
-                  </p>
+    return features.map((f, i) => (
+      <li key={i}>
+        <i className="fas fa-check-circle text-success me-2 my-2"></i>
+        {f}
+      </li>
+    ));
+  })()}
+</ul>
+
                 </div>
+              {/* Buffer → Shift → Assigned Users (Compact layout) */}
+<div className="card-body text-center d-flex flex-column justify-content-end flex-grow-1 pb-2" style={{ marginTop: "auto" }}>
+  
+  {/* Buffer */}
+  <p className="mb-1">
+    <i className="fas fa-hourglass-half me-2 text-warning"></i>
+    Buffer: {bufferRules[plan.planId] ?? "—"} min
+  </p>
+
+  {/* Shift */}
+  <p className="mb-2">
+    <i className="fas fa-calendar-day me-2 text-primary"></i>
+    {shiftList.find((s) => String(s.id) === String(plan.shiftBufferRule?.shiftId))?.name || "None"}
+  </p>
+
+  {/* Assigned Users */}
+  {plan.UserPlans && plan.UserPlans.length > 0 && (
+    <div className="text-start mx-auto mt-2" style={{ maxWidth: "260px" }}>
+      <h6 className="fw-semibold mb-1 text-center">Assigned Users:</h6>
+      <ul className="list-unstyled small mb-0">
+        {plan.UserPlans.map((up) => (
+          <li key={up.user.id} className="text-truncate">
+            <i className="fas fa-user text-primary me-2"></i>
+            {up.user.name} 
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+</div>
+
 
                 {/* Footer Actions */}
                 <div className="card-footer rounded-bottom-4 d-flex justify-content-between flex-wrap mt-3 gap-2">
