@@ -24,3 +24,17 @@ html, body {
   overflow-x: hidden; /* prevent horizontal scrollbar */
   overflow-y: auto;   /* only show scrollbar if needed */
 }
+.page-fade-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: white;
+  z-index: 9999;
+  opacity: 1;
+  transition: opacity 0.8s ease-in-out;
+  pointer-events: none;
+}
+
+.page-fade-overlay.fade-out {
+  opacity: 0;
+}
+
