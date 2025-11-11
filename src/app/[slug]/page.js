@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from "react";
-import LandingPage from "./LandingPage/LandingPage";
+import LandingPage from "../LandingPage/LandingPage";
 import { notFound } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 
