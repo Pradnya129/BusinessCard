@@ -273,7 +273,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
       formDataToSend.append("planId", selectedPlan.planId);
 
-      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
+      const response = await fetch(`http://localhost:5000/api/public-landing/paid?slug=${hostname}`, {
         method: "POST",
         body: formDataToSend,
       });
@@ -400,7 +400,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
   const verifyPayment = async (paymentResponse) => {
     try {
-      const response = await fetch(`https://appo.coinagesoft.com/api/customer-appointments/verify-payment`, {
+      const response = await fetch(`http://localhost:5000/api/customer-appointments/verify-payment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -418,7 +418,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         if (data.success && data.receipt) {
           openReceiptPdf(data.receipt);
         } else {
-          alert(data.message || 'Payment verified but no receipt.');
+          // alert(data.message || 'Payment verified but no receipt.');
           setIsVerifyingPayment(false);
         }
 
@@ -453,7 +453,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
       }
     } catch (error) {
       console.error('Error verifying payment:', error);
-      alert('An error occurred while verifying the payment.');
+      // alert('An error occurred while verifying the payment.');
     }
 
     setTimeout(() => {
