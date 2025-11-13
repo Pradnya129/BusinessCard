@@ -91,28 +91,36 @@ const handleAssignSubmit = async () => {
   const token = localStorage.getItem("token");
 
   try {
-    if (selectedUsers.length > 0) {
-      // Assign selected users
+    const previouslyAssigned = assigningPlan.UserPlans.map(up => up.user.id);
+
+    // Users to unassign
+    const toUnassign = previouslyAssigned.filter(id => !selectedUsers.includes(id));
+
+    // Users to assign
+    const toAssign = selectedUsers.filter(id => !previouslyAssigned.includes(id));
+
+    // Unassign removed users
+    await Promise.all(
+      assigningPlan.UserPlans
+        .filter(up => toUnassign.includes(up.user.id))
+        .map(up =>
+          axios.delete(`${API_BASE}/admin/plans/unassign/${up.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        )
+    );
+
+    // Assign new users
+    if (toAssign.length > 0) {
       await axios.post(
         `${API_BASE}/admin/plans/assign-plan-to-user`,
         {
           planId: assigningPlan.planId,
           planShiftBufferRuleId: assigningPlan.shiftBufferRule?.id,
-          userIds: selectedUsers,
+          userIds: toAssign,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-    } else {
-      // No users selected => unassign all
-      if (assigningPlan.UserPlans && assigningPlan.UserPlans.length > 0) {
-        await Promise.all(
-          assigningPlan.UserPlans.map((up) =>
-            axios.delete(`${API_BASE}/admin/plans/unassign/${up.id}`, {
-              headers: { Authorization: `Bearer ${token}` },
-            })
-          )
-        );
-      }
     }
 
     alert("Plan assignments updated successfully!");
@@ -125,6 +133,7 @@ const handleAssignSubmit = async () => {
     alert("Failed to update plan assignments.");
   }
 };
+
 
 
 
@@ -385,28 +394,22 @@ const handleSave = async () => {
             </div>
             <div className="modal-body">
               <h6>Select Users:</h6>
-              {allUsers.map((user) => (
-                <div className="form-check" key={user.id}>
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    value={user.id}
-                    checked={selectedUsers.includes(user.id)}
-                  onChange={(e) => {
-  const checked = e.target.checked;
-  setSelectedUsers(prev =>
-    checked
-      ? [...prev, user.id]       // add if checked
-      : prev.filter(id => id !== user.id) // remove if unchecked
-  );
-}}
+         {allUsers.map((user) => (
+  <div className="form-check" key={user.id}>
+    <input
+      className="form-check-input"
+      type="checkbox"
+      value={user.id}
+      checked={selectedUsers.includes(user.id)}
+      onChange={(e) => {
+        const checked = e.target.checked;
+        setSelectedUsers(checked ? [user.id] : []);
+      }}
+    />
+    <label className="form-check-label">{user.name}</label>
+  </div>
+))}
 
-
-
-                  />
-                  <label className="form-check-label">{user.name}</label>
-                </div>
-              ))}
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
