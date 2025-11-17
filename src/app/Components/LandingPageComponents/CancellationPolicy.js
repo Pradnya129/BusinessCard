@@ -5,7 +5,8 @@ import axios from "axios";
 import DOMPurify from "dompurify";
 
 const API_URL = "https://appo.coinagesoft.com/api/admin/policy"; // ✅ change to your API base
-const tenantId = 8; // hardcoded for now, make dynamic late
+const tenantId = 8; // hardcoded for now, make dynamic later
+
 
 const CancellationPolicy = () => {
   const [policy, setPolicy] = useState(null);
