@@ -273,7 +273,7 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
       formDataToSend.append("planId", selectedPlan.planId);
 
-      const response = await fetch(`https://appo.coinagesoft.comn/api/public-landing/paid?slug=${hostname}`, {
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
         method: "POST",
         body: formDataToSend,
       });
