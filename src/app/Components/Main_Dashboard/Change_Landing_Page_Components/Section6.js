@@ -22,29 +22,49 @@ const ConsultantSection6 = () => {
   };
 
   // Load FAQs from API on mount
-  useEffect(() => {
-    const fetchFaqs = async () => {
-          const token = localStorage.getItem("token");
+useEffect(() => {
+  const fetchFaqs = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("No token found. Please log in.");
+      return;
+    }
 
-      try {
-        const headers = getAuthHeaders();
-        if (!headers.Authorization) {
-          toast.error('No token found. Please log in.');
-          return;
+    try {
+      const res = await axios.get(
+        "https://appo.coinagesoft.com/api/admin/faq",
+        {
+          validateStatus: () => true, // ← Prevent axios from throwing automatically
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        const res = await axios.get(`https://appo.coinagesoft.com/api/admin/faq`, {  headers: {
-    "Authorization": `Bearer ${token}` // <-- Add this line
-  }, });
-        setFaqs(res.data.data);
-      } catch (err) {
-        console.error("Error fetching FAQs:", err);
-        toast.error('Error fetching FAQs');
+      // -------- GRACEFUL 404 HANDLING --------
+      if (res.status === 404) {
+        console.warn("No FAQ records found → loading empty list.");
+        setFaqs([]);
+        return;
       }
-    };
+      // ---------------------------------------
 
-    fetchFaqs();
-  }, []);
+      if (res.status !== 200) {
+        toast.error("Failed to fetch FAQs.");
+        return;
+      }
+
+      setFaqs(res.data.data || []);
+
+    } catch (err) {
+      console.error("Error fetching FAQs:", err);
+      toast.error("Error fetching FAQs.");
+    }
+  };
+
+  fetchFaqs();
+}, []);
+
 
   const handleAddFAQ = async () => {
     if (!question.trim() || !answer.trim()) return;

@@ -40,55 +40,71 @@ const Section1 = () => {
   });
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setLoading(false);
-          return;
-        }
 
-        const decoded = jwtDecode(token);
-        const adminId = decoded.id;
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
+      const decoded = jwtDecode(token);
+      const adminId = decoded.id;
 
-        const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
-          headers: {
-            "Authorization": `Bearer ${token}` // <-- Add this line
-          },
-        });
+      const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+      });
 
-        // const data = await response.json();
-        // console.log(data);
-        if (!response.ok) throw new Error("Failed to fetch consultant data");
-
-        const result = await response.json();
-        console.log("section1", result.data);
-
-        if (result && result.data) {
-          setData(result.data);
-          setEditableData(result.data);
-          setLandingId(result.data.id); // ✅ save landing id for later PATCH
-        } else {
-          setData(emptySectionData);
-          setEditableData(emptySectionData);
-          setLandingId(null);
-        }
-
-      } catch (error) {
-        console.error("Error fetching consultant data:", error);
-        toast.error("Failed to save section.");
+      // ⭐ If 404 → no entry in DB → load empty form
+      if (response.status === 404) {
+        console.warn("Landing data not found — using empty form.");
         setData(emptySectionData);
         setEditableData(emptySectionData);
         setLandingId(null);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchData();
-  }, []);
+      // ⭐ Any other non-OK response → treat as fallback but not error
+      if (!response.ok) {
+        console.warn("Unexpected server response. Loading empty form.");
+        setData(emptySectionData);
+        setEditableData(emptySectionData);
+        setLandingId(null);
+        return;
+      }
+
+      const result = await response.json();
+      const payload = result?.data;
+
+      if (!payload) {
+        setData(emptySectionData);
+        setEditableData(emptySectionData);
+        setLandingId(null);
+      } else {
+        setData(payload);
+        setEditableData(payload);
+        setLandingId(payload.id);
+      }
+
+    } catch (error) {
+      console.warn("Error fetching, loading empty form.");
+      setData(emptySectionData);
+      setEditableData(emptySectionData);
+      setLandingId(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
+
 
 
   const handleInputChange = (field, value) => {
@@ -131,62 +147,80 @@ const Section1 = () => {
     return Object.keys(formErrors).length === 0;
   };
 
-  const handleSave = async () => {
-    if (!validateForm()) return;
+const handleSave = async () => {
+  if (!validateForm()) return;
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-      const formData = new FormData();
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;   // <-- GET ADMIN ID FROM TOKEN
 
-      // ✅ Always send all fields, including empty social ones
-      Object.entries(editableData).forEach(([key, value]) => {
-        // For social links, send null if empty
-        const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
+    const formData = new FormData();
 
-        if (socialFields.includes(key)) {
-          formData.append(key, (value == '' || value == " ") ? null : value);
-          console.log("k", key, value)
-        } else if (value !== undefined && value !== null && value !== '' && value !== " ") {
-          formData.append(key, value);
-          console.log("key", key, value)
-        }
-      });
+    // Add adminId because backend requires it
+    formData.append("adminId", adminId);
 
-
-      // ✅ Profile image
-      if (profileImageFile) {
-        formData.append("profileImage", profileImageFile);
+    Object.entries(editableData).forEach(([key, value]) => {
+      const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
+      if (socialFields.includes(key)) {
+        formData.append(key, value?.trim() === "" ? "" : value);
+      } else {
+        if (value) formData.append(key, value);
       }
+    });
 
-      // ✅ Banners
-      if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
-      if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
-      if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
+    // Images
+    if (profileImageFile) formData.append("profileImage", profileImageFile);
+    if (bannerFiles.banner1) formData.append("banner1_Image", bannerFiles.banner1);
+    if (bannerFiles.banner2) formData.append("banner2_Image", bannerFiles.banner2);
+    if (bannerFiles.banner3) formData.append("banner3_Image", bannerFiles.banner3);
 
-      const response = await axios.patch(
+    let response;
+
+    // CREATE NEW LANDING PAGE
+    if (!landingId) {
+      response = await axios.post(
+        `https://appo.coinagesoft.com/api/landing`,
+        formData,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    } 
+    // UPDATE EXISTING LANDING PAGE
+    else {
+      response = await axios.patch(
         `https://appo.coinagesoft.com/api/landing/${landingId}`,
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
-
-      if (response.data.success) {
-        toast.success("Section 1 updated successfully!");
-        setIsEdited(false);
-      } else {
-        toast.error("Error updating section 1!");
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Error updating section 1");
     }
-  };
+
+    if (response.data.success) {
+      toast.success("Section saved successfully!");
+      setIsEdited(false);
+
+      // save ID after CREATE
+      if (!landingId) setLandingId(response.data.data.id);
+    }
+
+  } catch (err) {
+    console.error("Error saving landing:", err);
+    toast.error("Failed to save section");
+  }
+};
+
+
 
 
 

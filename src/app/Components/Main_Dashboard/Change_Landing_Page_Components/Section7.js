@@ -19,23 +19,47 @@ const fetchIframeUrl = async () => {
     if (!token) return;
 
     const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+    const adminId = decoded?.id;
+    if (!adminId) return;
 
-    const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}` ,{
-   headers: {
-    "Authorization": `Bearer ${token}` // <-- Add this line
-  },
-});
-    const data = res.data.data;
+    const res = await axios.get(
+      `https://appo.coinagesoft.com/api/landing/${adminId}`,
+      {
+        validateStatus: () => true, // ← Prevent axios from auto-throwing
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-    setLandingId(data.id); // ✅ store landing page ID
-    setSavedUrl(data.locationIframeURL || '');
-    setIframeUrl(data.locationIframeURL || '');
+    // -------- GRACEFUL 404 HANDLING --------
+    if (res.status === 404) {
+      console.warn("No landing data found → using empty iframe fields.");
+
+      setLandingId(null);
+      setSavedUrl("");
+      setIframeUrl("");
+      return;
+    }
+    // ---------------------------------------
+
+    if (res.status !== 200) {
+      toast.error("Failed to fetch map URL.");
+      return;
+    }
+
+    const data = res.data?.data || {};
+
+    setLandingId(data.id || null);
+    setSavedUrl(data.locationIframeURL || "");
+    setIframeUrl(data.locationIframeURL || "");
+
   } catch (err) {
-    console.error('Error fetching iframe URL:', err);
-     toast.error('Failed to fetch map URL.');
+    console.error("Error fetching iframe URL:", err);
+    toast.error("Failed to fetch map URL.");
   }
 };
+
 
 
   useEffect(() => {

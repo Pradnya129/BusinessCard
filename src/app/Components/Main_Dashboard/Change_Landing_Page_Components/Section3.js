@@ -19,31 +19,57 @@ const Section3 = () => {
 
   
   // 🟢 FETCH EXISTING DATA
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-        const decoded = jwtDecode(token);
-        const adminId = decoded.id;
+      const decoded = jwtDecode(token);
+      const adminId = decoded?.id;
+      if (!adminId) return;
 
-        const response = await fetch(`${API_URL}/api/landing/${adminId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const result = await response.json();
-        const data = result?.data || {};
+      const response = await fetch(`${API_URL}/api/landing/${adminId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setLandingId(data.id || data._id);
-        setTagline(data.section3_Tagline || '');
-        if (editorRef.current) editorRef.current.innerHTML = data.section3_Description || '';
-        setPreviewUrl(data.section3_Image ? `${API_URL}${data.section3_Image}` : '/assets/img/stethoscope.jpg');
-      } catch (err) {
-        console.error("Error fetching data:", err);
+      if (!response.ok) {
+        console.error("Failed to fetch landing data");
+        return;
       }
-    };
-    fetchData();
-  }, []);
+
+      const result = await response.json();
+      const data = result?.data || {};
+
+      // Set Landing ID
+      setLandingId(data.id || data._id || "");
+
+      // Set Tagline
+      setTagline(data.section3_Tagline || "");
+
+      // Set Description (Editor)
+      if (editorRef.current) {
+        editorRef.current.innerHTML = data.section3_Description || "";
+      }
+
+      // Set Preview Image
+      const imageUrl = data.section3_Image
+        ? (data.section3_Image.startsWith("http")
+            ? data.section3_Image
+            : `${API_URL}${data.section3_Image}`
+          )
+        : "/assets/img/stethoscope.jpg";
+
+      setPreviewUrl(imageUrl);
+
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   // 🟢 HANDLE IMAGE UPLOAD
   const handleImageChange = (e) => {
@@ -62,38 +88,75 @@ const Section3 = () => {
   };
 
   // 🟢 SAVE SECTION DATA
-  const handleSave = async () => {
+const handleSave = async () => {
+  if (!tagline.trim()) return toast.error("Tagline is required");
+
+  setLoading(true);
+  try {
     const token = localStorage.getItem("token");
     if (!token) return toast.error("Token not found");
 
-    const content = editorRef.current?.innerHTML.trim() || '';
-    if (!tagline.trim() || !content) return toast.error("All fields are required");
+    const content = editorRef.current?.innerHTML.trim() || "";
+    if (!content) return toast.error("Description is required");
 
-    try {
-      const formData = new FormData();
-      formData.append('section3_Tagline', tagline);
-      formData.append('section3_Description', content);
-      if (relatedImage) formData.append('section3_Image', relatedImage);
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
 
-      setLoading(true);
-      const response = await axios.patch(`${API_URL}/api/landing/${landingId}`, formData, {
+    const updatedFormData = new FormData();
+    updatedFormData.append("adminId", adminId);
+    updatedFormData.append("section3_Tagline", tagline);
+    updatedFormData.append("section3_Description", content);
+
+    if (relatedImage) {
+      updatedFormData.append("section3_Image", relatedImage);
+    }
+
+    let response;
+
+    // ---------- CREATE (POST) ----------
+    if (!landingId) {
+      response = await axios.post(`${API_URL}/api/landing`, updatedFormData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
-console.log("formdata",formData)
-      if (response.status === 200) {
-        toast.success("Section 3 updated successfully!");
-        setIsEdited(false);
-      }
-    } catch (err) {
-      console.error("Error saving section:", err);
-      toast.error("Failed to save section.");
-    } finally {
-      setLoading(false);
+    } 
+    // ---------- UPDATE (PATCH) ----------
+    else {
+      response = await axios.patch(`${API_URL}/api/landing/${landingId}`, updatedFormData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
     }
-  };
+
+    // ---------- SUCCESS ----------
+    if (response.status === 200 || response.status === 201) {
+      toast.success(
+        landingId ? "Section 3 updated successfully!" : "Section 3 created successfully!"
+      );
+
+      setIsEdited(false);
+      setRelatedImage(null);
+
+      if (!landingId) {
+        setLandingId(response.data.data.id); // Save newly created ID
+      }
+
+      await fetchProfile();
+    } else {
+      toast.error("Failed to save section 3.");
+    }
+  } catch (error) {
+    console.error("Error saving section3:", error);
+    toast.error("Error saving section 3");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div>

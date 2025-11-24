@@ -9,48 +9,77 @@ const ConsultantSection4 = () => {
   const [stats, setStats] = useState([]);
 
   // 🔽 Fetch stats on component mount
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-                  toast.error("No token found. Please log in.");
-          
-          return;
-        }
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast.error("No token found. Please log in.");
+        return;
+      }
 
-        const response = await axios.get(`${API_URL}/api/admin/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-console.log(response)
-        const apiStats = response.data.data.map(stat => ({
-          ...stat,
-          editedValue: stat.value.replace("%", ""),
-          editedDescription: stat.description || "",
-        }));
+      const response = await axios.get(`${API_URL}/api/admin/stats`, {
+        validateStatus: () => true,   // ← prevents axios from auto-throwing
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (apiStats.length === 0) {
-          // No stats found → show a blank stat card for creation
-          setStats([{
+      console.log(response);
+
+      // -------- HANDLE 404 (NO STATS FOUND) SAFELY ----------
+      if (response.status === 404) {
+        console.warn("No stats exist for this admin → loading empty card.");
+
+        setStats([
+          {
             id: null,
             value: "",
             description: "",
             icon: "up",
             editedValue: "",
             editedDescription: ""
-          }]);
-        } else {
-          setStats(apiStats);
-        }
+          }
+        ]);
 
-      } catch (error) {
-        console.error("Error fetching stats:", error);
-         toast.error("Error fetching stats.");
+        return;
       }
-    };
+      // -------------------------------------------------------
 
-    fetchStats();
-  }, []);
+      // If some other non-200 error occurs → show toast
+      if (response.status !== 200) {
+        toast.error("Failed to fetch stats.");
+        return;
+      }
+
+      // Process stats normally
+      const apiStats = response.data.data.map(stat => ({
+        ...stat,
+        editedValue: stat.value.replace("%", ""),
+        editedDescription: stat.description || "",
+      }));
+
+      if (apiStats.length === 0) {
+        // Backend returned empty array
+        setStats([{
+          id: null,
+          value: "",
+          description: "",
+          icon: "up",
+          editedValue: "",
+          editedDescription: ""
+        }]);
+      } else {
+        setStats(apiStats);
+      }
+
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      toast.error("Something went wrong while loading stats.");
+    }
+  };
+
+  fetchStats();
+}, []);
+
 
   // 🔽 Handlers
   const handleStatChange = (index, newValue) => {

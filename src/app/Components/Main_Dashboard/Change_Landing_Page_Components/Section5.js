@@ -19,41 +19,74 @@ const Section5 = () => {
   const [isDescriptionValid, setIsDescriptionValid] = useState(true);
 
   // Fetch Section 5 data on mount
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
-  headers: {
-    "Authorization": `Bearer ${token}` // <-- Add this line
-  },
-});
-        const data = res.data.data;
+  const decoded = jwtDecode(token);
+  const adminId = decoded.id;
 
-        const mappedData = {
-          id: data.id, // add landing page ID here
-          section5_Tagline: data.section5_Tagline || '',
-          section5_MainDescription: data.section5_MainDescription || '',
-          section5_MainHeading: data.section5_MainHeading || '',
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axios.get(
+        `https://appo.coinagesoft.com/api/landing/${adminId}`,
+        {
+          validateStatus: () => true, // ← prevents axios from auto-throwing errors
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // -------- HANDLE 404 WITHOUT ERROR --------
+      if (res.status === 404) {
+        console.warn("No landing entry for this admin → loading empty form.");
+
+        const emptyData = {
+          id: null,
+          section5_Tagline: "",
+          section5_MainDescription: "",
+          section5_MainHeading: "",
         };
 
-        setFormData(mappedData);
-        setEditedData(mappedData);
-      } catch (err) {
-         toast.error('Failed to fetch section content.');
-      } finally {
-        setLoading(false);
+        setFormData(emptyData);
+        setEditedData(emptyData);
+        return;
       }
-    };
+      // -----------------------------------------
 
-    fetchData();
-  }, []);
-;
+      // All other non-200 errors → show toast
+      if (res.status !== 200) {
+        toast.error("Failed to fetch section content.");
+        return;
+      }
+
+      const data = res.data.data || {};
+
+      const mappedData = {
+        id: data.id || null,
+        section5_Tagline: data.section5_Tagline || "",
+        section5_MainDescription: data.section5_MainDescription || "",
+        section5_MainHeading: data.section5_MainHeading || "",
+      };
+
+      setFormData(mappedData);
+      setEditedData(mappedData);
+
+    } catch (err) {
+      console.error("Error fetching section:", err);
+      toast.error("Error fetching section content.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
 
   // Detect form changes
 useEffect(() => {
@@ -90,38 +123,70 @@ useEffect(() => {
 const handleSave = async () => {
   if (!validateFields()) return;
 
+  setLoading(true);
   try {
     const token = localStorage.getItem("token");
-    if (!token) return;
+    if (!token) return toast.error("Token not found");
 
-    setLoading(true);
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
 
-    const landingPageId = editedData.id; // Use landing page ID here
+    const landingPageId = editedData.id;
 
     // Create FormData
     const formDataPayload = new FormData();
+    formDataPayload.append("adminId", adminId);
     formDataPayload.append("section5_Tagline", editedData.section5_Tagline);
     formDataPayload.append("section5_MainDescription", editedData.section5_MainDescription);
     formDataPayload.append("section5_MainHeading", editedData.section5_MainHeading);
 
-    await axios.patch(`https://appo.coinagesoft.com/api/landing/${landingPageId}`, formDataPayload, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    let response;
 
-    // Update local state
-    setFormData({ ...editedData });
-    setIsEdited(false);
-    toast.success('Section 5 updated successfully!');
+    // ---------- CREATE (POST) ----------
+    if (!landingPageId) {
+      response = await axios.post(`https://appo.coinagesoft.com/api/landing`, formDataPayload, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } 
+    // ---------- UPDATE (PATCH) ----------
+    else {
+      response = await axios.patch(`https://appo.coinagesoft.com/api/landing/${landingPageId}`, formDataPayload, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
+
+    // ---------- SUCCESS ----------
+    if (response.status === 200 || response.status === 201) {
+      toast.success(
+        landingPageId ? "Section 5 updated successfully!" : "Section 5 created successfully!"
+      );
+
+      setFormData({ ...editedData });
+      setIsEdited(false);
+
+      // If it’s newly created, save new ID
+      if (!landingPageId) {
+        setFormData(prev => ({ ...prev, id: response.data.data.id }));
+      }
+
+      await fetchProfile();
+    } else {
+      toast.error("Failed to save section 5.");
+    }
   } catch (err) {
-    console.error(err);
-     toast.error('Failed to update section.');
+    console.error("Error saving section5:", err);
+    toast.error("Error saving section 5");
   } finally {
     setLoading(false);
   }
 };
+
 
 
 

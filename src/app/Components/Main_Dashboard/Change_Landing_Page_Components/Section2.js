@@ -29,53 +29,84 @@ const Section2 = () => {
   const [landingId, setLandingId] = useState(null);
   const editorRef = useRef(null);
 
-  const fetchProfile = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+const fetchProfile = async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    setLoading(false);
+    return;
+  }
 
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+  const decoded = jwtDecode(token);
+  const adminId = decoded.id;
 
-    try {
-      const response = await fetch(`https://appo.coinagesoft.com/api/landing/${adminId}`, {
-        headers: {
-          "Authorization": `Bearer ${token}` // <-- Add this line
-        }
-      });
-      if (!response.ok) throw new Error("Failed to fetch consultant data");
-
-      const result = await response.json();
-      const profile = result.data || {};
-      setLandingId(profile.id);
-
-      console.log("profile", profile);
-
-      // Fix certificates null handling
-      const certificates = profile.certificates === "null" ? "" : profile.certificates;
-
-      setFormData(prev => ({
-        ...prev,
-        fullName: profile.fullName || "",
-        role: profile.role || "",
-        experience: profile.experience || "",
-        certificates: certificates,
-        description: profile.description || "",
-        section2_Tagline: profile.section2_Tagline || "",
-        section2_Image:
-          profile.section2_Image && profile.section2_Image !== "null"
-            ? profile.section2_Image
-            : "/assets/img/160x160/img8.jpg",
-      }));
-      if (editorRef.current) {
-        editorRef.current.innerHTML = profile.section2_Description || "";
+  try {
+    const response = await fetch(
+      `https://appo.coinagesoft.com/api/landing/${adminId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
       }
-    } catch (error) {
-      console.error("Error fetching consultant data:", error);
-      toast.error("Error updating the section 2");
-    } finally {
-      setLoading(false);
+    );
+
+    // 🔥 If new admin (no data) → do NOT show error
+    if (!response.ok) {
+      console.warn("No profile data found for this admin.");
+      setFormData({
+        fullName: "",
+        role: "",
+        experience: "",
+        certificates: "",
+        description: "",
+        section2_Tagline: "",
+        section2_Image: "/assets/img/160x160/img8.jpg",
+      });
+      setLandingId(null);
+      if (editorRef.current) {
+        editorRef.current.innerHTML = "";
+      }
+      return;
     }
-  };
+
+    const result = await response.json();
+    const profile = result?.data || {};
+
+    console.log("profile", profile);
+
+    setLandingId(profile.id || null);
+
+    // Handle certificates safely
+    const certificates =
+      profile.certificates && profile.certificates !== "null"
+        ? profile.certificates
+        : "";
+
+    setFormData(prev => ({
+      ...prev,
+      fullName: profile.fullName || "",
+      role: profile.role || "",
+      experience: profile.experience || "",
+      certificates: certificates,
+      description: profile.description || "",
+      section2_Tagline: profile.section2_Tagline || "",
+      section2_Image:
+        profile.section2_Image &&
+        profile.section2_Image !== "null"
+          ? profile.section2_Image
+          : "/assets/img/160x160/img8.jpg",
+    }));
+
+    // Load description into editor
+    if (editorRef.current) {
+      editorRef.current.innerHTML = profile.section2_Description || "";
+    }
+
+  } catch (error) {
+    console.error("Error fetching consultant data:", error);
+    toast.error("Failed to load section 2");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchProfile();
@@ -124,63 +155,95 @@ const Section2 = () => {
   };
 
 
-  const handleSave = async () => {
-    if (!handleValidation()) return;
+const handleSave = async () => {
+  if (!handleValidation()) return;
 
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
-      const content = editorRef.current?.innerHTML.trim() || '';
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-      const decoded = jwtDecode(token);
-      const adminId = decoded.id;
+    const content = editorRef.current?.innerHTML.trim() || "";
 
-      const updatedFormData = new FormData();
-      updatedFormData.append('section2_Description', content);
-      for (const key in formData) {
-        if (key !== "section2_Image") {
-          updatedFormData.append(
-            key,
-            key === "certificates" && formData[key] === "" ? null : formData[key]
-          );
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
+
+    const updatedFormData = new FormData();
+
+    // Required for both POST & PATCH
+    updatedFormData.append("adminId", adminId);
+    updatedFormData.append("section2_Description", content);
+
+    // Append text fields
+    for (const key in formData) {
+      if (key !== "section2_Image") {
+        updatedFormData.append(
+          key,
+          key === "certificates" && formData[key] === "" ? "" : formData[key]
+        );
+      }
+    }
+
+    // Append image if selected
+    if (imageFile) {
+      updatedFormData.append("section2_Image", imageFile);
+    }
+
+    let response;
+
+    // ---------- CREATE (POST) ----------
+    if (!landingId) {
+      response = await axios.post(
+        `https://appo.coinagesoft.com/api/landing`,
+        updatedFormData,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-      }
+      );
+    }
 
-      if (imageFile) {
-        updatedFormData.append("section2_Image", imageFile);
-      }
-
-      const response = await axios.patch(
+    // ---------- UPDATE (PATCH) ----------
+    else {
+      response = await axios.patch(
         `https://appo.coinagesoft.com/api/landing/${landingId}`,
         updatedFormData,
         {
           headers: {
+            "Authorization": `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${token}`
-
-          }
+          },
         }
       );
-
-      if (response.status === 200) {
-        setIsEditing(false);
-        setImageFile(null);
-        setLandingId(response.data.data.id);
-        await fetchProfile();
-        toast.success("Section 2 updated successfully!");
-      } else {
-        setLandingId(null);
-        toast.error("Error updating the section 2");
-      }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Error updating the section 2");
-
-    } finally {
-      setLoading(false);
     }
-  };
+
+    // ---------- SUCCESS ----------
+    if (response.status === 200 || response.status === 201) {
+      toast.success(
+        landingId ? "Section 2 updated successfully!" : "Section 2 created successfully!"
+      );
+
+      setIsEditing(false);
+      setImageFile(null);
+
+      if (!landingId) {
+        setLandingId(response.data.data.id); // Save newly created ID
+      }
+
+      await fetchProfile();
+    } else {
+      toast.error("Failed to save section 2.");
+    }
+  } catch (error) {
+    console.error("Error saving section2:", error);
+    toast.error("Error saving section 2");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>
