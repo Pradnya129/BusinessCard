@@ -136,7 +136,7 @@ const Hero = ({ scrollToSectionHeader }) => {
                       </div>
                       <div className="flex-grow-1 ms-3">
                         <a className="text-white" href="#">
-                          {consultantData.fullName} – {consultantData.experience}
+                          {consultantData.fullName}{" - "+consultantData.experience}
                         </a>
                       </div>
                     </div>
