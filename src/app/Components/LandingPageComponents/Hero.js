@@ -11,50 +11,50 @@ const dummyData = {
   images: ['img32', 'img33', 'img34'],
 };
 
-  const DEFAULT_BANNERS = [
-    '/assets/img/1920x1080/img32.jpg',
-    '/assets/img/1920x1080/img33.jpg',
-    '/assets/img/1920x1080/img34.jpg',
-  ];
+const DEFAULT_BANNERS = [
+  '/assets/img/1920x1080/img32.jpg',
+  '/assets/img/1920x1080/img33.jpg',
+  '/assets/img/1920x1080/img34.jpg',
+];
 const BASE_URL = 'https://appo.coinagesoft.com';
 const Hero = ({ scrollToSectionHeader }) => {
   const [consultantData, setConsultantData] = useState({});
   const [taglines, setTaglines] = useState([]);
-   const [bannerImages, setBannerImages] = useState([]);
+  const [bannerImages, setBannerImages] = useState([]);
   Swiper.use([Pagination, Thumbs, EffectFade, Autoplay]);
 
- useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // ✅ Get slug from hostname (production)
-      let slug = window.location.hostname;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // ✅ Get slug from hostname (production)
+        let slug = window.location.hostname;
 
-   
 
-      if (!slug) throw new Error("Slug not found in hostname or URL path");
 
-      // ✅ Fetch data using slug query param
-      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
-      if (!response.ok) throw new Error("Failed to fetch consultant data");
+        if (!slug) throw new Error("Slug not found in hostname or URL path");
 
-      const result = await response.json();
-      const data = result.data;
+        // ✅ Fetch data using slug query param
+        const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
+        if (!response.ok) throw new Error("Failed to fetch consultant data");
 
-      setConsultantData(data);
-      setTaglines([data.tagline1, data.tagline2, data.tagline3]);
-      setBannerImages([
-        data?.banner1_Image ? `${BASE_URL}${data.banner1_Image}` : DEFAULT_BANNERS[0],
-        data?.banner2_Image ? `${BASE_URL}${data.banner2_Image}` : DEFAULT_BANNERS[1],
-        data?.banner3_Image ? `${BASE_URL}${data.banner3_Image}` : DEFAULT_BANNERS[2],
-      ]);
-    } catch (error) {
-      console.error("Error fetching consultant data:", error);
-      setBannerImages(DEFAULT_BANNERS);
-    }
-  };
+        const result = await response.json();
+        const data = result.data;
 
-  fetchData();
-}, []);
+        setConsultantData(data);
+        setTaglines([data.tagline1, data.tagline2, data.tagline3]);
+        setBannerImages([
+          data?.banner1_Image ? `${BASE_URL}${data.banner1_Image}` : DEFAULT_BANNERS[0],
+          data?.banner2_Image ? `${BASE_URL}${data.banner2_Image}` : DEFAULT_BANNERS[1],
+          data?.banner3_Image ? `${BASE_URL}${data.banner3_Image}` : DEFAULT_BANNERS[2],
+        ]);
+      } catch (error) {
+        console.error("Error fetching consultant data:", error);
+        setBannerImages(DEFAULT_BANNERS);
+      }
+    };
+
+    fetchData();
+  }, []);
 
 
   useEffect(() => {
@@ -105,9 +105,9 @@ const Hero = ({ scrollToSectionHeader }) => {
     });
   }, [bannerImages, taglines]);
 
-  if( consultantData.length === 0){
-  return null
-}
+  if (consultantData.length === 0) {
+    return null
+  }
   return (
     <main id="content" role="main">
       <div className="position-relative">
@@ -117,9 +117,9 @@ const Hero = ({ scrollToSectionHeader }) => {
               <div
                 key={index}
                 className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-                
+
                 style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
-                // , minHeight: '40rem'
+              // , minHeight: '40rem'
               >
                 <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
                   <div className="w-lg-50 me-3">
@@ -129,15 +129,17 @@ const Hero = ({ scrollToSectionHeader }) => {
                           <img
                             className="avatar-img rounded-pill"
                             src={
-                                  `https://appo.coinagesoft.com/${consultantData.profileImage}`
+                              `https://appo.coinagesoft.com/${consultantData.profileImage}`
                             }
                           />
                         </div>
                       </div>
                       <div className="flex-grow-1 ms-3">
                         <a className="text-white" href="#">
-                          {consultantData.fullName}{" - "+consultantData.experience}
+                          {consultantData.fullName}
+                          {consultantData.experience ? ` - ${consultantData.experience}` : ""}
                         </a>
+
                       </div>
                     </div>
                     <div className="mb-5">
@@ -145,7 +147,7 @@ const Hero = ({ scrollToSectionHeader }) => {
                         {taglines[index]}
                       </h2>
                     </div>
-                    <button className="btn btn-primary btn-transition scrollBtn" type="button" onClick={()=>{scrollToSectionHeader()}}>
+                    <button className="btn btn-primary btn-transition scrollBtn" type="button" onClick={() => { scrollToSectionHeader() }}>
                       Book Appointment <i className="bi-chevron-right small ms-1"></i>
                     </button>
                   </div>
