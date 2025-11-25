@@ -56,7 +56,6 @@ const fetchIframeUrl = async () => {
 
   } catch (err) {
     console.error("Error fetching iframe URL:", err);
-    toast.error("Failed to fetch map URL.");
   }
 };
 

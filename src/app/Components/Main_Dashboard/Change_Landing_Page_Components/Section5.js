@@ -181,7 +181,6 @@ const handleSave = async () => {
     }
   } catch (err) {
     console.error("Error saving section5:", err);
-    toast.error("Error saving section 5");
   } finally {
     setLoading(false);
   }

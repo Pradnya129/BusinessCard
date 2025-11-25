@@ -58,7 +58,6 @@ useEffect(() => {
 
     } catch (err) {
       console.error("Error fetching FAQs:", err);
-      toast.error("Error fetching FAQs.");
     }
   };
 

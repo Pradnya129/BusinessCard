@@ -193,7 +193,9 @@ const handleSave = async () => {
       );
     } 
     // UPDATE EXISTING LANDING PAGE
+    
     else {
+      console.log('PATCH payload:', formData);
       response = await axios.patch(
         `https://appo.coinagesoft.com/api/landing/${landingId}`,
         formData,
@@ -206,6 +208,7 @@ const handleSave = async () => {
       );
     }
 
+    console.log("section1",response.data)
     if (response.data.success) {
       toast.success("Section saved successfully!");
       setIsEdited(false);

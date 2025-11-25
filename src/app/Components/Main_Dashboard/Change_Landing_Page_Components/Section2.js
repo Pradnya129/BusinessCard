@@ -29,83 +29,83 @@ const Section2 = () => {
   const [landingId, setLandingId] = useState(null);
   const editorRef = useRef(null);
 
-const fetchProfile = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    setLoading(false);
-    return;
-  }
-
-  const decoded = jwtDecode(token);
-  const adminId = decoded.id;
-
-  try {
-    const response = await fetch(
-      `https://appo.coinagesoft.com/api/landing/${adminId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    );
-
-    // 🔥 If new admin (no data) → do NOT show error
-    if (!response.ok) {
-      console.warn("No profile data found for this admin.");
-      setFormData({
-        fullName: "",
-        role: "",
-        experience: "",
-        certificates: "",
-        description: "",
-        section2_Tagline: "",
-        section2_Image: "/assets/img/160x160/img8.jpg",
-      });
-      setLandingId(null);
-      if (editorRef.current) {
-        editorRef.current.innerHTML = "";
-      }
+  const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
       return;
     }
 
-    const result = await response.json();
-    const profile = result?.data || {};
+    const decoded = jwtDecode(token);
+    const adminId = decoded.id;
 
-    console.log("profile", profile);
+    try {
+      const response = await fetch(
+        `https://appo.coinagesoft.com/api/landing/${adminId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
 
-    setLandingId(profile.id || null);
+      // 🔥 If new admin (no data) → do NOT show error
+      if (!response.ok) {
+        console.warn("No profile data found for this admin.");
+        setFormData({
+          fullName: "",
+          role: "",
+          experience: "",
+          certificates: "",
+          description: "",
+          section2_Tagline: "",
+          section2_Image: "/assets/img/160x160/img8.jpg",
+        });
+        setLandingId(null);
+        if (editorRef.current) {
+          editorRef.current.innerHTML = "";
+        }
+        return;
+      }
 
-    // Handle certificates safely
-    const certificates =
-      profile.certificates && profile.certificates !== "null"
-        ? profile.certificates
-        : "";
+      const result = await response.json();
+      const profile = result?.data || {};
 
-    setFormData(prev => ({
-      ...prev,
-      fullName: profile.fullName || "",
-      role: profile.role || "",
-      experience: profile.experience || "",
-      certificates: certificates,
-      description: profile.description || "",
-      section2_Tagline: profile.section2_Tagline || "",
-      section2_Image:
-        profile.section2_Image &&
-        profile.section2_Image !== "null"
-          ? profile.section2_Image
-          : "/assets/img/160x160/img8.jpg",
-    }));
+      console.log("profile", profile);
 
-    // Load description into editor
-    if (editorRef.current) {
-      editorRef.current.innerHTML = profile.section2_Description || "";
+      setLandingId(profile.id || null);
+
+      // Handle certificates safely
+      const certificates =
+        profile.certificates && profile.certificates !== "null"
+          ? profile.certificates
+          : "";
+
+      setFormData(prev => ({
+        ...prev,
+        fullName: profile.fullName || "",
+        role: profile.role || "",
+        experience: profile.experience || "",
+        certificates: certificates,
+        description: profile.description || "",
+        section2_Tagline: profile.section2_Tagline || "",
+        section2_Image:
+          profile.section2_Image &&
+            profile.section2_Image !== "null"
+            ? profile.section2_Image
+            : "/assets/img/160x160/img8.jpg",
+      }));
+
+      // Load description into editor
+      if (editorRef.current) {
+        editorRef.current.innerHTML = profile.description || "";
+      }
+
+    } catch (error) {
+      console.error("Error fetching consultant data:", error);
+      toast.error("Failed to load section 2");
+    } finally {
+      setLoading(false);
     }
-
-  } catch (error) {
-    console.error("Error fetching consultant data:", error);
-    toast.error("Failed to load section 2");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   useEffect(() => {
@@ -134,10 +134,10 @@ const fetchProfile = async () => {
   };
 
   useEffect(() => {
-  if (editorRef.current) {
-    editorRef.current.innerHTML = formData.description || "";
-  }
-}, [formData.description]);
+    if (editorRef.current) {
+      editorRef.current.innerHTML = formData.description || "";
+    }
+  }, [formData.description]);
 
   const handleValidation = () => {
     const newErrors = {};
@@ -155,94 +155,62 @@ const fetchProfile = async () => {
   };
 
 
-const handleSave = async () => {
-  if (!handleValidation()) return;
 
-  setLoading(true);
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+  const handleSave = async () => {
+    if (!handleValidation()) return;
 
-    const content = editorRef.current?.innerHTML.trim() || "";
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-    const decoded = jwtDecode(token);
-    const adminId = decoded.id;
+      const decoded = jwtDecode(token);
+      const adminId = decoded.id;
 
-    const updatedFormData = new FormData();
+      const updatedFormData = new FormData();
+      updatedFormData.append("adminId", adminId);
+      updatedFormData.append("description", formData.description || "");
 
-    // Required for both POST & PATCH
-    updatedFormData.append("adminId", adminId);
-    updatedFormData.append("section2_Description", content);
-
-    // Append text fields
-    for (const key in formData) {
-      if (key !== "section2_Image") {
-        updatedFormData.append(
-          key,
-          key === "certificates" && formData[key] === "" ? "" : formData[key]
-        );
+      // Append other fields except description & image
+      for (const key in formData) {
+        if (key !== "section2_Image" && key !== "description") {
+          updatedFormData.append(key, formData[key] || "");
+        }
       }
-    }
 
-    // Append image if selected
-    if (imageFile) {
-      updatedFormData.append("section2_Image", imageFile);
-    }
+      // Append image if selected
+      if (imageFile) updatedFormData.append("section2_Image", imageFile);
 
-    let response;
+      // Debug log
+      for (let [key, value] of updatedFormData.entries()) {
+        console.log(key, value);
+      }
 
-    // ---------- CREATE (POST) ----------
-    if (!landingId) {
-      response = await axios.post(
-        `https://appo.coinagesoft.com/api/landing`,
-        updatedFormData,
-        {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-    }
-
-    // ---------- UPDATE (PATCH) ----------
-    else {
-      response = await axios.patch(
-        `https://appo.coinagesoft.com/api/landing/${landingId}`,
-        updatedFormData,
-        {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-    }
-
-    // ---------- SUCCESS ----------
-    if (response.status === 200 || response.status === 201) {
-      toast.success(
-        landingId ? "Section 2 updated successfully!" : "Section 2 created successfully!"
-      );
-
-      setIsEditing(false);
-      setImageFile(null);
-
+      let response;
       if (!landingId) {
-        setLandingId(response.data.data.id); // Save newly created ID
+        response = await axios.post(`https://appo.coinagesoft.com/api/landing`, updatedFormData, {
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        response = await axios.patch(`https://appo.coinagesoft.com/api/landing/${landingId}`, updatedFormData, {
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+        });
       }
 
-      await fetchProfile();
-    } else {
-      toast.error("Failed to save section 2.");
+      if (response.data.success) {
+        toast.success("Section 2 saved successfully!");
+        setIsEditing(false);
+        setImageFile(null);
+        if (!landingId) setLandingId(response.data.data.id);
+        await fetchProfile();
+      }
+    } catch (error) {
+      console.error("Error saving section2:", error);
+      toast.error("Error saving section 2");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error saving section2:", error);
-    toast.error("Error saving section 2");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   return (
@@ -337,14 +305,14 @@ const handleSave = async () => {
                 ref={editorRef}
                 contentEditable
                 className={`form-control ${errors.description ? "is-invalid" : ""}`}
-                onInput={() => setIsEditing(true)}
-                style={{
-                  minHeight: "150px",
-                  backgroundColor: "#fff",
-                  outline: "none",
-                  whiteSpace: "pre-wrap",
+                onInput={(e) => {
+                  setFormData(prev => ({ ...prev, description: e.currentTarget.innerHTML }));
+                  setIsEditing(true);
                 }}
+                style={{ minHeight: "150px", backgroundColor: "#fff", outline: "none", whiteSpace: "pre-wrap" }}
               />
+
+
               {errors.description && (
                 <div className="invalid-feedback">{errors.description}</div>
               )}

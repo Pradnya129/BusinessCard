@@ -153,7 +153,6 @@ useEffect(() => {
       }
     } catch (error) {
       console.error('Error saving stat:', error);
-       toast.error('Error saving stat' );
     }
   };
 
