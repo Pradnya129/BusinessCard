@@ -1,8 +1,20 @@
 @media (max-width: 768px) {
   .hero-slide {
-    background-size: contain !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
     height: 100vh !important;
+    padding: 0 !important;
+    background-size: cover !important;
+    background-position: center !important;
+    padding-top: 80px; 
+  }
+
+  .hero-content {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
   }
 }
+/* Fix hero hidden behind navbar */
+.hero-slide {
+  padding-top: 70px;  /* adjust based on actual navbar height */
+}
+
+

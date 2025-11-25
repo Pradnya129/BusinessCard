@@ -115,26 +115,17 @@ const Hero = ({ scrollToSectionHeader }) => {
         <div className="js-swiper-blog-journal-hero swiper">
           <div className="swiper-wrapper">
             {bannerImages.map((image, index) => (
-              // <div
-              //   key={index}
-              //   className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-
-              //   style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
-              // // , minHeight: '40rem'
-              // >
               <div
                 key={index}
-                className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start hero-slide"
-                style={{
-                  backgroundImage: `url(${image})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  height: "100vh"
-                }}
-              >
+                className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
 
-                <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
+                style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
+              // , minHeight: '40rem'
+              >
+             
+
+
+                <div className="container d-flex align-items-center hero-content" style={{ minHeight: '40rem' }}>
                   <div className="w-lg-50 me-3">
                     <div className="d-flex align-items-center mb-3">
                       <div className="flex-shrink-0">
