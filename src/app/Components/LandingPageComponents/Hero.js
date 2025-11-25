@@ -115,15 +115,15 @@ const Hero = ({ scrollToSectionHeader }) => {
         <div className="js-swiper-blog-journal-hero swiper">
           <div className="swiper-wrapper">
             {bannerImages.map((image, index) => (
-             <div
-  key={index}
-  className="js-swiper-slide-preload swiper-slide hero-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-  style={{
-    backgroundImage: `url(${image})`,
-    backgroundPosition: "center center"
-  }}
->
-             
+              <div
+                key={index}
+                className="js-swiper-slide-preload swiper-slide hero-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
+                style={{
+                  backgroundImage: `url(${image})`,
+                  backgroundPosition: "center center"
+                }}
+              >
+
 
 
                 <div className="container d-flex align-items-center hero-slide hero-content">
