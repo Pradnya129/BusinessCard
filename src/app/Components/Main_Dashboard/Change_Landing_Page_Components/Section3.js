@@ -70,6 +70,10 @@ const Section3 = () => {
   fetchData();
 }, []);
 
+const cleanHTML = (html) => {
+  // Remove unwanted data-* attributes
+  return html.replace(/data-[a-zA-Z0-9-]+="[^"]*"/g, "");
+};
 
   // 🟢 HANDLE IMAGE UPLOAD
   const handleImageChange = (e) => {
@@ -96,7 +100,8 @@ const handleSave = async () => {
     const token = localStorage.getItem("token");
     if (!token) return toast.error("Token not found");
 
-    const content = editorRef.current?.innerHTML.trim() || "";
+let rawContent = editorRef.current?.innerHTML.trim() || "";
+let content = cleanHTML(rawContent); // sanitize before storing
     if (!content) return toast.error("Description is required");
 
     const decoded = jwtDecode(token);
