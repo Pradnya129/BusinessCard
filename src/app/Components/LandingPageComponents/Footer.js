@@ -31,7 +31,7 @@ const Footer = () => {
       <div className="container position-relative">
 
         {/* Back to Home - Left */}
-        <div className="position-absolute start-2 mt-3 translate-middle-y">
+        <div className="position-absolute d-none d-lg-block start-2 mt-3 translate-middle-y">
           <span
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="text-light fw-bold text-decoration-underline cursor-pointer"

@@ -99,7 +99,7 @@ const LandingPage = ({ admin }) => {
 
           <LeafletMap />
         </div>
-
+ 
         <Footer />
 
         {/* Scripts at end */}
