@@ -20,7 +20,7 @@
 /* Mobile fixed height */
 @media (max-width: 768px) {
   .hero-content {
-    min-height: 420px;   /* 👈 Choose your mobile height */
+    min-height: 490px;   /* 👈 Choose your mobile height */
     padding-top: 20px;
   }
 }
