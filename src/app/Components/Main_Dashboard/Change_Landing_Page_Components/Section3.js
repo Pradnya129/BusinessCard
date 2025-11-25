@@ -111,6 +111,9 @@ let content = cleanHTML(rawContent); // sanitize before storing
     updatedFormData.append("adminId", adminId);
     updatedFormData.append("section3_Tagline", tagline);
     updatedFormData.append("section3_Description", content);
+ 
+
+
 
     if (relatedImage) {
       updatedFormData.append("section3_Image", relatedImage);

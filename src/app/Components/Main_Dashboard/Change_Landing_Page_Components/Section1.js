@@ -161,16 +161,34 @@ const handleSave = async () => {
 
     // Add adminId because backend requires it
     formData.append("adminId", adminId);
+    
 
- Object.entries(editableData).forEach(([key, value]) => {
-  const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
+//  Object.entries(editableData).forEach(([key, value]) => {
+//   const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
   
-  if (socialFields.includes(key)) {
-    formData.append(key, value?.trim() === "" ? "" : value);
-  } else {
-    formData.append(key, value ?? "");
+//   if (socialFields.includes(key)) {
+//     formData.append(key, value?.trim() === "" ? "" : value);
+//   } else {
+//     formData.append(key, value ?? "");
+//   }
+// });
+Object.entries(editableData).forEach(([key, value]) => {
+  // Normalize null, undefined, "null" to empty string
+  let safeValue = value;
+
+  if (value === null || value === undefined || value === "null") {
+    safeValue = "";
   }
+
+  // Convert spaces-only input to empty
+  if (typeof safeValue === "string" && safeValue.trim() === "") {
+    safeValue = "";
+  }
+
+  formData.append(key, safeValue);
 });
+
+
 
 
     // Images

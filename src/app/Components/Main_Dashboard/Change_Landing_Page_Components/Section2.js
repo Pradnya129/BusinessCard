@@ -170,6 +170,8 @@ const Section2 = () => {
       const updatedFormData = new FormData();
       updatedFormData.append("adminId", adminId);
       updatedFormData.append("description", formData.description || "");
+         updatedFormData.append("role", formData.role || "");
+updatedFormData.append("experience", formData.experience || "");
 
       // Append other fields except description & image
     // Append other fields except description & image
