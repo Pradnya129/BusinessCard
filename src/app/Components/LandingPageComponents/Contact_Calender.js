@@ -548,8 +548,8 @@ const Contact_Calender = React.forwardRef((props, ref) => {
         )}
 
 
-        <div className="container row content-space-2 content-space-lg-3 mx-auto" id="target-form">
-          <div className="col-lg-5 col-12 my-auto d-flex align-items-stretch mb-8  mb-lg-0">
+        <div className="container row  mx-auto" id="target-form">
+          <div className="col-lg-5 col-12  d-flex align-items-stretch mb-8  mb-lg-0">
             <div className="w-100 bg-white shadow-sm rounded  p-3 pb-5"
               style={{
                 minHeight: '35.25rem',   // optional: sets a minimum height
