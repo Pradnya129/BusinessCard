@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Swiper from 'swiper';
+import './Hero.css'
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
@@ -114,13 +115,25 @@ const Hero = ({ scrollToSectionHeader }) => {
         <div className="js-swiper-blog-journal-hero swiper">
           <div className="swiper-wrapper">
             {bannerImages.map((image, index) => (
+              // <div
+              //   key={index}
+              //   className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
+
+              //   style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
+              // // , minHeight: '40rem'
+              // >
               <div
                 key={index}
-                className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-
-                style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
-              // , minHeight: '40rem'
+                className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start hero-slide"
+                style={{
+                  backgroundImage: `url(${image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  height: "100vh"
+                }}
               >
+
                 <div className="container d-flex align-items-center" style={{ minHeight: '40rem' }}>
                   <div className="w-lg-50 me-3">
                     <div className="d-flex align-items-center mb-3">

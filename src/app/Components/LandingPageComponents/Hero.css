@@ -1,0 +1,8 @@
+@media (max-width: 768px) {
+  .hero-slide {
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    height: 100vh !important;
+  }
+}
