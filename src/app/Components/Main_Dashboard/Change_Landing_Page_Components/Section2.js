@@ -84,7 +84,7 @@ const Section2 = () => {
         fullName: profile.fullName || "",
         role: profile.role || "",
         experience: profile.experience || "",
-        certificates: certificates,
+        certificates: certificates|| "",
         description: profile.description || "",
         section2_Tagline: profile.section2_Tagline || "",
         section2_Image:
