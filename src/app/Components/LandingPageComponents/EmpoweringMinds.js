@@ -49,7 +49,7 @@ const EmpoweringMinds = () => {
           <div dangerouslySetInnerHTML={{ __html: section3_Description }} />
         </div>
 
-        <div className="col-lg-4 mb-5 mb-lg-0 text-center">
+        <div className="col-lg-4 mb-5 mb-lg-0 mt-3 mt-lg-0 text-center">
           {section3_Image && (
             <img
               src={`https://appo.coinagesoft.com/${section3_Image}`}
