@@ -123,8 +123,8 @@ useEffect(() => {
   const validateForm = () => {
     let formErrors = {};
     if (!editableData.fullName) formErrors.fullName = "Full Name is required";
-    if (!editableData.role) formErrors.role = "Designation is required";
-    if (!editableData.experience) formErrors.experience = "Experience is required";
+    // if (!editableData.role) formErrors.role = "Designation is required";
+    // if (!editableData.experience) formErrors.experience = "Experience is required";
     if (!editableData.email || !/\S+@\S+\.\S+/.test(editableData.email)) formErrors.email = "Valid Email is required";
     if (!editableData.hospitalClinicAddress) formErrors.hospitalClinicAddress = "Clinic Address is required";
     if (!editableData.locationURL || !/^(ftp|http|https):\/\/[^ "]+$/.test(editableData.locationURL)) {
