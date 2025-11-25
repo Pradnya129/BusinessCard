@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Swiper from 'swiper';
-import './Hero.css'
+// import './Hero.css'
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
