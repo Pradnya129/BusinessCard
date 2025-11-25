@@ -69,7 +69,7 @@ const Section2 = () => {
       const result = await response.json();
       const profile = result?.data || {};
 
-      console.log("profile", profile);
+      console.log("profilefetch", profile);
 
       setLandingId(profile.id || null);
 
@@ -167,23 +167,24 @@ const Section2 = () => {
       const decoded = jwtDecode(token);
       const adminId = decoded.id;
 
-      const updatedFormData = new FormData();
-      updatedFormData.append("adminId", adminId);
-      updatedFormData.append("description", formData.description || "");
-         updatedFormData.append("role", formData.role || "");
-updatedFormData.append("experience", formData.experience || "");
+     const updatedFormData = new FormData();
 
-      // Append other fields except description & image
-    // Append other fields except description & image
+// Append all text fields EXCEPT the image preview URL
 for (const key in formData) {
-  if (key !== "section2_Image" && key !== "description") {
-    updatedFormData.append(key, formData[key] ?? "");
-  }
+  if (key === "section2_Image") continue; // skip preview blob URL
+  updatedFormData.append(key, formData[key] || "");
 }
 
+// Append description manually from editor
+updatedFormData.set("description", formData.description || "");
 
-      // Append image if selected
-      if (imageFile) updatedFormData.append("section2_Image", imageFile);
+// Append adminId
+updatedFormData.set("adminId", adminId);
+
+// Append image file correctly
+if (imageFile) {
+  updatedFormData.append("section2_Image", imageFile);
+}
 
       // Debug log
       for (let [key, value] of updatedFormData.entries()) {
@@ -196,9 +197,12 @@ for (const key in formData) {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         });
       } else {
+        console.log("updatedformdata",updatedFormData)
         response = await axios.patch(`https://appo.coinagesoft.com/api/landing/${landingId}`, updatedFormData, {
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
         });
+            console.log("response patch",response)
+
       }
 
       if (response.data.success) {

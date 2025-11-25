@@ -23,6 +23,10 @@ const emptySectionData = {
   tagline2: "",
   tagline3: "",
   profileImage: "",
+  banner1_Image: "",
+banner2_Image: "",
+banner3_Image: "",
+
 };
 
 const Section1 = () => {
@@ -58,8 +62,8 @@ useEffect(() => {
           "Authorization": `Bearer ${token}`
         },
       });
-
       // ⭐ If 404 → no entry in DB → load empty form
+
       if (response.status === 404) {
         console.warn("Landing data not found — using empty form.");
         setData(emptySectionData);
@@ -79,6 +83,7 @@ useEffect(() => {
 
       const result = await response.json();
       const payload = result?.data;
+      console.log("section 1get",payload)
 
       if (!payload) {
         setData(emptySectionData);
@@ -163,30 +168,22 @@ const handleSave = async () => {
     formData.append("adminId", adminId);
     
 
-//  Object.entries(editableData).forEach(([key, value]) => {
-//   const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
-  
-//   if (socialFields.includes(key)) {
-//     formData.append(key, value?.trim() === "" ? "" : value);
-//   } else {
-//     formData.append(key, value ?? "");
-//   }
-// });
+
 Object.entries(editableData).forEach(([key, value]) => {
-  // Normalize null, undefined, "null" to empty string
-  let safeValue = value;
+  // Normalize null, undefined, "null" → empty string
+  let safeValue =
+    value === null || value === undefined || value === "null"
+      ? ""
+      : value;
 
-  if (value === null || value === undefined || value === "null") {
-    safeValue = "";
-  }
-
-  // Convert spaces-only input to empty
+  // Normalize spaces-only → empty string
   if (typeof safeValue === "string" && safeValue.trim() === "") {
     safeValue = "";
   }
 
   formData.append(key, safeValue);
 });
+
 
 
 
