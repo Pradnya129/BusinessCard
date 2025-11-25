@@ -150,7 +150,7 @@ let content = cleanHTML(rawContent); // sanitize before storing
         setLandingId(response.data.data.id); // Save newly created ID
       }
 
-      await fetchProfile();
+      await fetchData();
     } else {
       toast.error("Failed to save section 3.");
     }
