@@ -1,20 +1,40 @@
-@media (max-width: 768px) {
+/* Desktop */
+@media (min-width: 769px) {
   .hero-slide {
-    height: 100vh !important;
-    padding: 0 !important;
-    background-size: cover !important;
-    background-position: center !important;
-    padding-top: 80px; 
+    height: 100vh;
   }
+}
 
+/* Mobile (fixed height) */
+@media (max-width: 425px) {
+  .hero-slide {
+    height: 160px;      /* 👈 your fixed height */
+    background-size: cover;
+  }
+}
+/* Desktop size */
+.hero-content {
+  min-height: 40rem; /* same as your current 640px */
+}
+
+/* Mobile fixed height */
+@media (max-width: 768px) {
   .hero-content {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+    min-height: 420px;   /* 👈 Choose your mobile height */
+    padding-top: 20px;
   }
 }
-/* Fix hero hidden behind navbar */
-.hero-slide {
-  padding-top: 70px;  /* adjust based on actual navbar height */
+/* Mobile only */
+@media (max-width: 576px) {
+  /* Increase the size of dots */
+  .swiper-pagination-vertical .swiper-pagination-bullet {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 10px 0 !important; /* space between dots */
+  }
+
+  /* Move dots inward from right border */
+  .swiper-pagination-vertical {
+    right: 5px !important;
+  }
 }
-
-

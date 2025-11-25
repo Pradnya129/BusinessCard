@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Swiper from 'swiper';
-// import './Hero.css'
+import './Hero.css'
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/thumbs';
@@ -115,17 +115,18 @@ const Hero = ({ scrollToSectionHeader }) => {
         <div className="js-swiper-blog-journal-hero swiper">
           <div className="swiper-wrapper">
             {bannerImages.map((image, index) => (
-              <div
-                key={index}
-                className="js-swiper-slide-preload swiper-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
-
-                style={{ backgroundImage: `url(${image})`, height: '100vh', backgroundPosition: 'center center' }}
-              // , minHeight: '40rem'
-              >
+             <div
+  key={index}
+  className="js-swiper-slide-preload swiper-slide hero-slide d-flex gradient-x-overlay-sm-dark bg-img-start"
+  style={{
+    backgroundImage: `url(${image})`,
+    backgroundPosition: "center center"
+  }}
+>
              
 
 
-                <div className="container d-flex align-items-center hero-content" style={{ minHeight: '40rem' }}>
+                <div className="container d-flex align-items-center hero-slide hero-content">
                   <div className="w-lg-50 me-3">
                     <div className="d-flex align-items-center mb-3">
                       <div className="flex-shrink-0">
