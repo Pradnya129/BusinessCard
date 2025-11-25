@@ -142,8 +142,8 @@ const Section2 = () => {
   const handleValidation = () => {
     const newErrors = {};
     if (!formData.fullName) newErrors.fullName = 'Full name is required.';
-    if (!formData.role) newErrors.role = 'Role is required.';
-    if (!formData.experience) newErrors.experience = 'Experience is required.';
+    // if (!formData.role) newErrors.role = 'Role is required.';
+    // if (!formData.experience) newErrors.experience = 'Experience is required.';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -172,11 +172,13 @@ const Section2 = () => {
       updatedFormData.append("description", formData.description || "");
 
       // Append other fields except description & image
-      for (const key in formData) {
-        if (key !== "section2_Image" && key !== "description") {
-          updatedFormData.append(key, formData[key] || "");
-        }
-      }
+    // Append other fields except description & image
+for (const key in formData) {
+  if (key !== "section2_Image" && key !== "description") {
+    updatedFormData.append(key, formData[key] ?? "");
+  }
+}
+
 
       // Append image if selected
       if (imageFile) updatedFormData.append("section2_Image", imageFile);

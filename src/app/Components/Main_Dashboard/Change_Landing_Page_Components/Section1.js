@@ -162,14 +162,16 @@ const handleSave = async () => {
     // Add adminId because backend requires it
     formData.append("adminId", adminId);
 
-    Object.entries(editableData).forEach(([key, value]) => {
-      const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
-      if (socialFields.includes(key)) {
-        formData.append(key, value?.trim() === "" ? "" : value);
-      } else {
-        if (value) formData.append(key, value);
-      }
-    });
+ Object.entries(editableData).forEach(([key, value]) => {
+  const socialFields = ['facebookId', 'instagramId', 'twitterId', 'youtubeId'];
+  
+  if (socialFields.includes(key)) {
+    formData.append(key, value?.trim() === "" ? "" : value);
+  } else {
+    formData.append(key, value ?? "");
+  }
+});
+
 
     // Images
     if (profileImageFile) formData.append("profileImage", profileImageFile);
