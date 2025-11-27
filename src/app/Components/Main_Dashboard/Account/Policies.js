@@ -1,44 +1,71 @@
-'use client';
+"use client";
+
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBold, faItalic, faUnderline, faListOl, faListUl, faEraser } from '@fortawesome/free-solid-svg-icons';
+import {jwtDecode} from "jwt-decode"; // fixed import
 
-const API_URL = "https://appo.coinagesoft.com/api/admin/policy"; // your API
+const API_URL = "https://appo.coinagesoft.com/api/admin/policy";
 
 const Policies = () => {
-  const [tenantId] = useState(8); // fixed tenantId
+  const [tenantId, setTenantId] = useState(null); // dynamic tenantId
   const [policyType, setPolicyType] = useState("terms");
   const [policy, setPolicy] = useState(null);
   const [newPolicy, setNewPolicy] = useState({ title: '', content: '' });
   const editorRef = useRef(null);
 
+  // Decode tenantId from token
   useEffect(() => {
-    const fetchPolicy = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
+    try {
+      const decoded = jwtDecode(token);
+      setTenantId(decoded.tenantId); // assumes token has tenantId
+    } catch (err) {
+      console.error("Invalid token", err);
+      toast.error("Invalid token");
+    }
+  }, []);
+
+  // Fetch policy whenever tenantId or policyType changes
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const fetchPolicy = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
         const res = await axios.get(`${API_URL}/${tenantId}/${policyType}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const data = res.data.data;
-        setPolicy(data || null);
-        setNewPolicy({ title: data?.title || '', content: data?.content || '' });
+        const data = res.data?.data || null;
 
-        if (editorRef.current) {
-          editorRef.current.innerHTML = data?.content || '';
+        if (!data) {
+          // Handle gracefully if no policy exists
+          setPolicy(null);
+          setNewPolicy({ title: '', content: '' });
+          if (editorRef.current) editorRef.current.innerHTML = '';
+          return;
         }
+
+        setPolicy(data);
+        setNewPolicy({ title: data.title || '', content: data.content || '' });
+        if (editorRef.current) editorRef.current.innerHTML = data.content || '';
       } catch (err) {
         console.error(err);
+        // Don't show error if no policy exists
         setPolicy(null);
         setNewPolicy({ title: '', content: '' });
         if (editorRef.current) editorRef.current.innerHTML = '';
       }
     };
+
     fetchPolicy();
   }, [tenantId, policyType]);
 
@@ -53,25 +80,18 @@ const Policies = () => {
 
     try {
       if (policy) {
-        // update existing policy
-        await axios.put(`${API_URL}/${policy.id}`, {
-          title: newPolicy.title,
-          content
-        }, {
+        // Update existing policy
+        await axios.put(`${API_URL}/${policy.id}`, { title: newPolicy.title, content }, {
           headers: { Authorization: `Bearer ${token}` }
         });
       } else {
-        // create new policy
-        await axios.post(API_URL, {
-          tenantId,
-          type: policyType,
-          title: newPolicy.title,
-          content
-        }, {
+        // Create new policy if none exists
+        await axios.post(API_URL, { tenantId, type: policyType, title: newPolicy.title, content }, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
       toast.success("Policy saved successfully!");
+      setPolicy({ ...newPolicy }); // update local state
     } catch (err) {
       console.error(err);
       toast.error("Error saving policy");
@@ -89,11 +109,7 @@ const Policies = () => {
       {/* Policy Type Selector */}
       <div className="mb-3">
         <label className="fw-bold mb-1">Select Policy Type</label>
-        <select
-          className="form-select rounded-3"
-          value={policyType}
-          onChange={(e) => setPolicyType(e.target.value)}
-        >
+        <select className="form-select rounded-3" value={policyType} onChange={(e) => setPolicyType(e.target.value)}>
           <option value="terms">Terms & Conditions</option>
           <option value="privacy">Privacy Policy</option>
           <option value="shipping">Shipping Policy</option>
@@ -112,26 +128,14 @@ const Policies = () => {
           placeholder="Policy Title"
         />
 
-        {/* Text Formatting Toolbar */}
+        {/* Formatting Toolbar */}
         <div className="d-flex gap-2 flex-wrap mb-2">
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('bold')}>
-            <FontAwesomeIcon icon={faBold} />
-          </button>
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('italic')}>
-            <FontAwesomeIcon icon={faItalic} />
-          </button>
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('underline')}>
-            <FontAwesomeIcon icon={faUnderline} />
-          </button>
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('insertOrderedList')}>
-            <FontAwesomeIcon icon={faListOl} />
-          </button>
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('insertUnorderedList')}>
-            <FontAwesomeIcon icon={faListUl} />
-          </button>
-          <button type="button" className="btn btn-outline-secondary btn-sm ms-2" onClick={() => editorRef.current.innerHTML = ''}>
-            <FontAwesomeIcon icon={faEraser} />
-          </button>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('bold')}><FontAwesomeIcon icon={faBold} /></button>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('italic')}><FontAwesomeIcon icon={faItalic} /></button>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('underline')}><FontAwesomeIcon icon={faUnderline} /></button>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('insertOrderedList')}><FontAwesomeIcon icon={faListOl} /></button>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => formatText('insertUnorderedList')}><FontAwesomeIcon icon={faListUl} /></button>
+          <button type="button" className="btn btn-outline-secondary btn-sm ms-2" onClick={() => editorRef.current.innerHTML = ''}><FontAwesomeIcon icon={faEraser} /></button>
         </div>
 
         {/* Editor */}
@@ -143,7 +147,7 @@ const Policies = () => {
         />
       </div>
 
-      {/* Preview */}
+      {/* Preview if policy exists */}
       {policy && (
         <div className="card">
           <div className="card-header">Existing Policy Preview</div>

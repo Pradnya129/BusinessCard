@@ -3,44 +3,50 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DOMPurify from "dompurify";
+import { useSearchParams } from "next/navigation";
 
-const API_URL = "https://appo.coinagesoft.com/api/admin/policy"; // ✅ your API
-const tenantId = 8; // hardcoded for now, or make dynamic if needed
+const API_URL = "https://appo.coinagesoft.com/api/public-landing/policy"; // slug-based API
 
 const ShippingPolicy = () => {
+  const searchParams = useSearchParams(); // ✅ add this
+  const slug = searchParams.get("slug");   // ✅ get slug from URL
+
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchPolicy = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/${tenantId}/shipping`); // ✅ type = "shipping"
-      setPolicy(res.data.data);
-    } catch (err) {
-      console.error("Error fetching Shipping Policy:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPolicy = async () => {
+      if (!slug) return; // wait until slug is available
+
+      try {
+        const res = await axios.get(`${API_URL}/shipping?slug=${slug}`); // fetch by slug
+        setPolicy(res.data.data);
+      } catch (err) {
+        console.error("Error fetching Shipping Policy:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPolicy();
-  }, []);
-
-  if (loading) return <p>Loading Shipping Policy...</p>;
-
-  if (!policy) return <p>No Shipping Policy found.</p>;
+  }, [slug]);
 
   return (
     <section id="shipping" className="mb-5 px-3 py-4">
       <div className="container">
-        {/* ✅ Bold Title */}
-        <h2 className="mb-3 fw-bold">{policy.title}</h2>
-
-        {/* ✅ Render content as-is with formatting */}
-        <div
-          style={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(policy.content) }}
-        />
+        {loading ? (
+          <p className="text-center text-muted">Loading Shipping Policy...</p>
+        ) : !policy ? (
+          <p className="text-center text-danger">No Shipping Policy found.</p>
+        ) : (
+          <>
+            <h2 className="mb-3 fw-bold">{policy.title}</h2>
+            <div
+              style={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(policy.content) }}
+            />
+          </>
+        )}
       </div>
     </section>
   );

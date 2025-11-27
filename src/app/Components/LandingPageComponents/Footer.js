@@ -4,15 +4,18 @@ import Link from 'next/link';
 import axios from 'axios';
 
 const Footer = () => {
- const [plans, setPlans] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [slug, setSlug] = useState(''); // store tenant slug
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        let slug = window.location.hostname;
-       
+        const currentSlug = window.location.hostname; // e.g., "localhost" or real domain
+        setSlug(currentSlug); // save it for Links
 
-        const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`);
+        const res = await axios.get(
+          `https://appo.coinagesoft.com/api/public-landing/all?slug=${currentSlug}`
+        );
         setPlans(res.data.data || []);
       } catch (error) {
         console.error("Error fetching plans:", error);
@@ -23,9 +26,10 @@ const Footer = () => {
     fetchPlans();
   }, []);
 
-  if( plans.length === 0){
-  return null
-}
+  if (plans.length === 0) {
+    return null;
+  }
+
   return (
     <footer className="bg-black text-light py-4 position-relative">
       <div className="container position-relative">
@@ -43,7 +47,7 @@ const Footer = () => {
         {/* Copyright - Center */}
         <div className="text-center">
           <p className="mb-0">
-            &copy; 2025{" "}
+            &copy; 2025{' '}
             <a
               href="https://www.coinagesoft.com/"
               className="underline text-blue-300 hover:text-blue-500"
@@ -51,19 +55,49 @@ const Footer = () => {
               rel="noopener noreferrer"
             >
               Coinage Inc.
-            </a>{" "}
+            </a>{' '}
             All rights reserved.
           </p>
         </div>
 
         {/* Links below - optional */}
-        <div className="mt-2 text-center">
-          <Link href="/Terms" className="text-light small me-2">Terms and Conditions</Link>
-          <Link href="/Cancellation" className="text-light small me-2">Cancellation & Refund Policy</Link>
-          <Link href="/Shipping" className="text-light small me-2">Shipping & Delivery Policy</Link>
-          <Link href="/PrivacyPolicy" className="text-light small me-2">Privacy Policy</Link>
-          <Link href="/Contact" className="text-light small">Contact Us</Link>
-        </div>
+       <div className="mt-2 text-center">
+  <Link
+    href={{ pathname: "/Terms", query: { slug } }}
+    className="text-light small me-2"
+  >
+    Terms and Conditions
+  </Link>
+
+  <Link
+    href={{ pathname: "/Cancellation", query: { slug } }}
+    className="text-light small me-2"
+  >
+    Cancellation & Refund Policy
+  </Link>
+
+  <Link
+    href={{ pathname: "/Shipping", query: { slug } }}
+    className="text-light small me-2"
+  >
+    Shipping & Delivery Policy
+  </Link>
+
+  <Link
+    href={{ pathname: "/PrivacyPolicy", query: { slug } }}
+    className="text-light small me-2"
+  >
+    Privacy Policy
+  </Link>
+
+  <Link
+    href={{ pathname: "/Contact", query: { slug } }}
+    className="text-light small"
+  >
+    Contact Us
+  </Link>
+</div>
+
 
       </div>
     </footer>

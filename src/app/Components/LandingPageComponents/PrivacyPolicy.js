@@ -3,43 +3,49 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DOMPurify from "dompurify";
+import { useSearchParams } from "next/navigation"; // ✅ app router hook
 
-const API_URL = "https://appo.coinagesoft.com/api/admin/policy"; // ✅ change to your API base
-const tenantId = 8; // hardcoded for now, can make dynamic later
+const API_URL = "https://appo.coinagesoft.com/api/public-landing/policy";
 
 const PrivacyPolicy = () => {
+  const searchParams = useSearchParams();
+  const slug = searchParams.get("slug"); // ✅ get slug from URL query
+
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchPolicy = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/${tenantId}/privacy`); // ✅ type = "privacy"
-      setPolicy(res.data.data);
-    } catch (err) {
-      console.error("Error fetching Privacy Policy:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchPolicy = async () => {
+      if (!slug) return; // wait until slug is available
+
+      try {
+        const res = await axios.get(`${API_URL}/privacy?slug=${slug}`);
+        setPolicy(res.data.data);
+      } catch (err) {
+        console.error("Policy fetch error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchPolicy();
-  }, []);
-
-  if (loading) return <p>Loading Privacy Policy...</p>;
-
-  if (!policy) return <p>No Privacy Policy found.</p>;
+  }, [slug]);
 
   return (
-    <section id="privacy-policy" className="container my-5">
-      {/* ✅ Bold Title */}
-      <h2 className="mb-3 fw-bold">{policy.title}</h2>
-
-      {/* ✅ Render saved HTML safely */}
-      <div
-        style={{ whiteSpace: "pre-wrap", fontFamily: "inherit" }}
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(policy.content) }}
-      />
+    <section className="container my-5">
+      {loading ? (
+        <p className="text-center text-muted fs-5">Loading Privacy Policy...</p>
+      ) : !policy ? (
+        <p className="text-center text-danger fs-5">No Privacy Policy found.</p>
+      ) : (
+        <>
+          <h2 className="mb-3 fw-bold">{policy.title}</h2>
+          <div
+            style={{ whiteSpace: "pre-wrap" }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(policy.content) }}
+          />
+        </>
+      )}
     </section>
   );
 };
