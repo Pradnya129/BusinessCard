@@ -10,7 +10,7 @@ const API_URL = "https://appo.coinagesoft.com/api/public-landing/policy";
 const PrivacyPolicy = () => {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug"); // ✅ get slug from URL query
-
+console.log("slug params",slug)
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
 
