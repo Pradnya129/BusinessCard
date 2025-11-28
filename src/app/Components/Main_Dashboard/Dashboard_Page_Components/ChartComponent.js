@@ -127,6 +127,7 @@ const ChartComponent = () => {
     const thisYear = now.getFullYear();
 
     appointments.forEach(appt => {
+        if (appt.paymentStatus !== "Paid") return;
       if (!appt.createdAt) return;
       const d = new Date(appt.appointmentDate);
       if (d.getMonth() === thisMonth && d.getFullYear() === thisYear) {

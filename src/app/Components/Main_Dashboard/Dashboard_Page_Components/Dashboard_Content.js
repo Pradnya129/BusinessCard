@@ -29,193 +29,194 @@ const Dashboard_Content = () => {
     return `${hrs}h ${mins}m`;
   };
 
- useEffect(() => {
-  const storedToken = localStorage.getItem("token");
-  if (!storedToken) return;
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) return;
 
-  setToken(storedToken);
-  const decoded = jwtDecode(storedToken); // decode JWT
-  const adminId = decoded.id; // current admin ID
-  setAdminId(adminId);
+    setToken(storedToken);
+    const decoded = jwtDecode(storedToken); // decode JWT
+    const adminId = decoded.id; // current admin ID
+    setAdminId(adminId);
 
-  // --- FETCH ADMIN SLUG ---
- // Example: fetch admin data using slug from query param
-axios.get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
-})
-.then((res) => {
-  // res.data contains the admin info for this slug
-  if (res.data?.data) {
-    setUser(res.data.data);
-    setSlug(res.data.data.slug); // set slug from response
-  }
-})
-.catch((err) => console.error("Failed to fetch slug:", err));
-
-  // --- FETCH CUSTOMER APPOINTMENTS ---
-  axios
-    .get(`https://appo.coinagesoft.com/api/customer-appointments/`, {
-      headers: { Authorization: `Bearer ${storedToken}` },
+    // --- FETCH ADMIN SLUG ---
+    // Example: fetch admin data using slug from query param
+    axios.get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
     })
-    .then((res) => {
-      const appointments = res.data?.data || [];
-      if (appointments.length === 0) return;
+      .then((res) => {
+        // res.data contains the admin info for this slug
+        if (res.data?.data) {
+          setUser(res.data.data);
+          setSlug(res.data.data.slug); // set slug from response
+        }
+      })
+      .catch((err) => console.error("Failed to fetch slug:", err));
 
-      const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December",
-      ];
+    // --- FETCH CUSTOMER APPOINTMENTS ---
+    axios
+      .get(`https://appo.coinagesoft.com/api/customer-appointments/`, {
+        headers: { Authorization: `Bearer ${storedToken}` },
+      })
+      .then((res) => {
+        const appointments = res.data?.data || [];
+        if (appointments.length === 0) return;
 
-      const sorted = [...appointments].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
+        const monthNames = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December",
+        ];
 
-      const startDate = new Date(sorted[0].createdAt);
-      const endDate = new Date();
+        const sorted = [...appointments].sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
 
-      const monthYearMap = new Map();
-      const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        const startDate = new Date(sorted[0].createdAt);
+        const endDate = new Date();
 
-      while (
-        cursor.getFullYear() < endDate.getFullYear() ||
-        (cursor.getFullYear() === endDate.getFullYear() && cursor.getMonth() <= endDate.getMonth())
-      ) {
-        const key = `${monthNames[cursor.getMonth()]}-${cursor.getFullYear()}`;
-        monthYearMap.set(key, {
-          totalAppointments: 0,
-          pending: 0,
-          completed: [],
-          canceled: 0,
-          rescheduled: 0,
-          paid: [],
-        });
-        cursor.setMonth(cursor.getMonth() + 1);
-      }
+        const monthYearMap = new Map();
+        const cursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
 
-      // Populate monthYearMap
-      appointments.forEach((item) => {
-        const date = new Date(item.createdAt);
-        const key = `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
-        const group = monthYearMap.get(key);
-        if (!group) return;
-
-        group.totalAppointments += 1;
-
-        switch (item.appointmentStatus) {
-          case "Pending":
-            group.pending += 1;
-            break;
-          case "Completed":
-            group.completed.push(item);
-            break;
-          case "Canceled":
-            group.canceled += 1;
-            break;
-          case "Rescheduled":
-            group.rescheduled += 1;
-            break;
-          default:
-            break;
+        while (
+          cursor.getFullYear() < endDate.getFullYear() ||
+          (cursor.getFullYear() === endDate.getFullYear() && cursor.getMonth() <= endDate.getMonth())
+        ) {
+          const key = `${monthNames[cursor.getMonth()]}-${cursor.getFullYear()}`;
+          monthYearMap.set(key, {
+            totalAppointments: 0,
+            pending: 0,
+            completed: [],
+            canceled: 0,
+            rescheduled: 0,
+            paid: [],
+          });
+          cursor.setMonth(cursor.getMonth() + 1);
         }
 
-        if (item.paymentStatus === "Paid") group.paid.push(item);
-      });
+        // Populate monthYearMap
+        appointments.forEach((item) => {
+          const date = new Date(item.createdAt);
+          const key = `${monthNames[date.getMonth()]}-${date.getFullYear()}`;
+          const group = monthYearMap.get(key);
+          if (!group) return;
 
-      // Prepare monthly table data
-      const monthlyData = [];
-      monthYearMap.forEach((group, key) => {
-        const paidCount = group.paid.length;
-        const revenue = group.paid.reduce(
+          group.totalAppointments += 1;
+
+          switch (item.appointmentStatus) {
+            case "Pending":
+              group.pending += 1;
+              break;
+            case "Completed":
+              group.completed.push(item);
+              break;
+            case "Canceled":
+              group.canceled += 1;
+              break;
+            case "Rescheduled":
+              group.rescheduled += 1;
+              break;
+            default:
+              break;
+          }
+
+          if (item.paymentStatus === "Paid") group.paid.push(item);
+        });
+
+        // Prepare monthly table data
+        const monthlyData = [];
+        monthYearMap.forEach((group, key) => {
+          const paidCount = group.paid.length;
+          const revenue = group.paid.reduce(
+            (sum, item) => sum + parseFloat(item.amount || 0),
+            0
+          );
+
+          const totalDuration = group.paid.reduce((sum, item) => {
+            const duration = parseFloat(item.duration);
+            return Number.isFinite(duration) && duration > 0 && duration < 10000
+              ? sum + duration
+              : sum;
+          }, 0);
+
+          const avgDuration = paidCount > 0
+            ? formatMinutesToHHMM(Math.round(totalDuration / paidCount))
+            : "0h 0m";
+
+          monthlyData.push({
+            month: key,
+            revenue: `₹${revenue.toLocaleString("en-IN")}`,
+            totalAppointments: group.totalAppointments,
+            pending: group.pending,
+              paid: group.paid.length,     // ✅ Added
+            completed: group.completed.length,
+            canceled: group.canceled,
+            avgTime: avgDuration,
+          });
+        });
+
+        // Stats for dashboard widgets
+        const paidAppointments = appointments.filter(
+          (item) => item.paymentStatus === "Paid"
+        );
+        const totalRevenue = paidAppointments.reduce(
           (sum, item) => sum + parseFloat(item.amount || 0),
           0
         );
 
-        const totalDuration = group.paid.reduce((sum, item) => {
-          const duration = parseFloat(item.duration);
-          return Number.isFinite(duration) && duration > 0 && duration < 10000
-            ? sum + duration
-            : sum;
-        }, 0);
+        const totalDuration = paidAppointments.reduce(
+          (sum, item) => sum + parseFloat(item.duration || 0),
+          0
+        );
 
-        const avgDuration = paidCount > 0
-          ? formatMinutesToHHMM(Math.round(totalDuration / paidCount))
+        const avgDuration = paidAppointments.length > 0
+          ? formatMinutesToHHMM(Math.round(totalDuration / paidAppointments.length))
           : "0h 0m";
 
-        monthlyData.push({
-          month: key,
-          revenue: `₹${revenue.toLocaleString("en-IN")}`,
-          totalAppointments: group.totalAppointments,
-          pending: group.pending,
-          completed: group.completed.length,
-          canceled: group.canceled,
-          avgTime: avgDuration,
+        setStats({
+          totalAppointments: appointments.length,
+          scheduled_rescheduledAppointment: appointments.filter((item) =>
+            ["Scheduled", "Rescheduled"].includes(item.appointmentStatus)
+          ).length,
+          completedSessions: appointments.filter(
+            (item) => item.appointmentStatus === "Completed"
+          ).length,
+          paymentReceived: totalRevenue,
+          totalRevenue,
+          avgDuration,
         });
+
+        setAppointmentData(monthlyData);
+      })
+      .catch((error) => {
+        console.error("Failed to fetch dashboard data:", error);
       });
+  }, []);
 
-      // Stats for dashboard widgets
-      const paidAppointments = appointments.filter(
-        (item) => item.paymentStatus === "Paid"
+
+  const handleSaveSlug = async () => {
+    if (!adminId || !token) return;
+    setIsSaving(true);
+
+    try {
+      // Use edit-slug endpoint for updating
+      const response = await axios.put(
+        "https://appo.coinagesoft.com/api/admin/edit-slug",
+        {
+          adminId,
+          slug, // new slug value
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
-      const totalRevenue = paidAppointments.reduce(
-        (sum, item) => sum + parseFloat(item.amount || 0),
-        0
-      );
 
-      const totalDuration = paidAppointments.reduce(
-        (sum, item) => sum + parseFloat(item.duration || 0),
-        0
-      );
-
-      const avgDuration = paidAppointments.length > 0
-        ? formatMinutesToHHMM(Math.round(totalDuration / paidAppointments.length))
-        : "0h 0m";
-
-      setStats({
-        totalAppointments: appointments.length,
-        scheduled_rescheduledAppointment: appointments.filter((item) =>
-          ["Scheduled", "Rescheduled"].includes(item.appointmentStatus)
-        ).length,
-        completedSessions: appointments.filter(
-          (item) => item.appointmentStatus === "Completed"
-        ).length,
-        paymentReceived: totalRevenue,
-        totalRevenue,
-        avgDuration,
-      });
-
-      setAppointmentData(monthlyData);
-    })
-    .catch((error) => {
-      console.error("Failed to fetch dashboard data:", error);
-    });
-}, []);
-
-
-const handleSaveSlug = async () => {
-  if (!adminId || !token) return;
-  setIsSaving(true);
-
-  try {
-    // Use edit-slug endpoint for updating
-    const response = await axios.put(
-      "https://appo.coinagesoft.com/api/admin/edit-slug",
-      {
-        adminId,
-        slug, // new slug value
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-
-    alert("Slug updated successfully!");
-    setSlug(slug); // update local state
-    window.history.pushState({}, "", `/${slug}`); // update URL
-  } catch (err) {
-    alert(err.response?.data?.message || "Failed to update slug");
-  } finally {
-    setIsSaving(false);
-  }
-};
+      alert("Slug updated successfully!");
+      setSlug(slug); // update local state
+      window.history.pushState({}, "", `/${slug}`); // update URL
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update slug");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="content-wrapper">
@@ -247,11 +248,11 @@ const handleSaveSlug = async () => {
             { title: 'Total Appointments', icon: 'ri-calendar-check-line', color: 'primary', value: stats.totalAppointments },
             { title: 'Scheduled/Rescheduled Appointments', icon: 'ri-time-line', color: 'warning', value: stats.scheduled_rescheduledAppointment },
             { title: 'Completed Sessions', icon: 'ri-check-double-line', color: 'danger', value: stats.completedSessions },
-            { 
-              title: 'Payment Received', 
-              icon: 'ri-refresh-line', 
-              color: 'info', 
-              value: `₹${Number(stats.paymentReceived).toLocaleString('en-IN')}` 
+            {
+              title: 'Payment Received',
+              icon: 'ri-refresh-line',
+              color: 'info',
+              value: `₹${Number(stats.paymentReceived).toLocaleString('en-IN')}`
             }
           ].map((item, idx) => (
             <div key={idx} className="col-sm-6 col-lg-3">
@@ -297,6 +298,7 @@ const handleSaveSlug = async () => {
                         <th>Revenue</th>
                         <th>Total Appointments</th>
                         <th>Pending</th>
+                        <th>Paid</th>        
                         <th>Completed</th>
                         <th>Canceled</th>
                         <th>Avg. Time</th>
@@ -309,6 +311,7 @@ const handleSaveSlug = async () => {
                           <td>{data.revenue}</td>
                           <td>{data.totalAppointments}</td>
                           <td>{data.pending}</td>
+                          <td>{data.paid}</td> 
                           <td>{data.completed}</td>
                           <td>{data.canceled}</td>
                           <td>{data.avgTime}</td>
