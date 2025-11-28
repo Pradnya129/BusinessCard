@@ -36,12 +36,38 @@ const Footer = () => {
 
         {/* Back to Home - Left */}
         <div className="position-absolute d-none d-lg-block start-2 mt-3 translate-middle-y">
-          <span
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="text-light fw-bold text-decoration-underline cursor-pointer"
-          >
-            ← Back to Home
-          </span>
+       <span
+  onClick={() => {
+    const path = window.location.pathname;
+
+    // Detect if user is on any policy page
+    const isPolicyPage =
+      path.includes("Terms") ||
+      path.includes("Privacy") ||
+      path.includes("Shipping") ||
+      path.includes("Cancellation") ||
+      path.includes("Contact");
+
+    if (isPolicyPage) {
+      const hostname = window.location.hostname;
+
+      // If localhost → redirect to root
+      if (hostname === "localhost" || hostname === "127.0.0.1") {
+        window.location.href = "/";
+      } else {
+        // Production domain → redirect to home
+        window.location.href = `https://${hostname}`;
+      }
+    } else {
+      // Landing page → old behavior → scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }}
+  className="text-light fw-bold text-decoration-underline cursor-pointer"
+>
+  ← Back to Home
+</span>
+
         </div>
 
         {/* Copyright - Center */}
