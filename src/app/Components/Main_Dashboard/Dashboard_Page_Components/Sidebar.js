@@ -460,6 +460,16 @@ useEffect(() => {
                     <div>Manage Coupons</div>
                   </Link>
                 </li>
+                  <li className={`menu-item ${
+                      pathname === "/Dashboard/Domain" ? "active" : ""
+                    }`}>
+                  <Link
+                    href="/Dashboard/Domain"
+                    className="menu-link"
+                  >
+                    <div>Manage Domain</div>
+                  </Link>
+                </li>
               </ul>
             </li>
           </ul>
