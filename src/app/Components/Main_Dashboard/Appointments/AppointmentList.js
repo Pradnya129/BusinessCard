@@ -107,13 +107,10 @@ const AppointmentList = () => {
           `https://appo.coinagesoft.com/api/customer-appointments/users/${selectedUserId}/appointments`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
         let data = response.data?.data || [];
+        console.log("selected user",data)
 
-        // Filter by selected plan if any
-        if (selectedPlanId) {
-          data = data.filter(appt => appt.planId === selectedPlanId);
-        }
+      
 
         // Sort by date & time
         const sortedAppointments = [...data].sort((a, b) => {
