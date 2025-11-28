@@ -14,7 +14,7 @@ const emptySectionData = {
   experience: "",
   email: "",
   hospitalClinicAddress: "",
-  locationURL: "",
+  locationIframeURL: "",
   facebookId: "",
   instagramId: "",
   twitterId: "",
@@ -132,8 +132,8 @@ useEffect(() => {
     // if (!editableData.experience) formErrors.experience = "Experience is required";
     if (!editableData.email || !/\S+@\S+\.\S+/.test(editableData.email)) formErrors.email = "Valid Email is required";
     if (!editableData.hospitalClinicAddress) formErrors.hospitalClinicAddress = "Clinic Address is required";
-    if (!editableData.locationURL || !/^(ftp|http|https):\/\/[^ "]+$/.test(editableData.locationURL)) {
-      formErrors.locationURL = "Valid Clinic Address URL is required";
+    if (!editableData.locationIframeURL || !/^(ftp|http|https):\/\/[^ "]+$/.test(editableData.locationIframeURL)) {
+      formErrors.locationIframeURL = "Valid Clinic Address URL is required";
     }
   ['facebookId', 'instagramId', 'twitterId', 'youtubeId'].forEach(platform => {
   const value = editableData[platform] ?? ''; // normalize null/undefined to ''
@@ -170,19 +170,16 @@ const handleSave = async () => {
 
 
 Object.entries(editableData).forEach(([key, value]) => {
-  // Normalize null, undefined, "null" → empty string
-  let safeValue =
-    value === null || value === undefined || value === "null"
-      ? ""
-      : value;
+  let safeValue = value;
 
-  // Normalize spaces-only → empty string
-  if (typeof safeValue === "string" && safeValue.trim() === "") {
+  // convert actual null / undefined but NOT overwrite user input
+  if (value === null || value === undefined || value === "null") {
     safeValue = "";
   }
 
   formData.append(key, safeValue);
 });
+
 
 
 
@@ -340,11 +337,11 @@ Object.entries(editableData).forEach(([key, value]) => {
               <label className="form-label fw-semibold">Clinic Address URL</label>
               <input
                 type="text"
-                className={`form-control ${errors.locationURL ? 'is-invalid' : ''}`}
-                value={editableData.locationURL}
+                className={`form-control ${errors.locationIframeURL ? 'is-invalid' : ''}`}
+                value={editableData.locationIframeURL}
                 onChange={(e) => handleInputChange("locationURL", e.target.value)}
               />
-              {errors.locationURL && <div className="invalid-feedback">{errors.locationURL}</div>}
+              {errors.locationIframeURL && <div className="invalid-feedback">{errors.locationIframeURL}</div>}
             </div>
           </div>
         </div>
