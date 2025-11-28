@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBold, faItalic, faUnderline, faListOl, faListUl, faEraser } from '@fortawesome/free-solid-svg-icons';
 import {jwtDecode} from "jwt-decode"; // fixed import
 
-const API_URL = "https://appo.coinagesoft.com/api/admin/policy";
+const API_URL = "`https://appo.coinagesoft.com/api/admin/policy";
 
 const Policies = () => {
   const [tenantId, setTenantId] = useState(null); // dynamic tenantId
@@ -40,7 +40,7 @@ const Policies = () => {
       if (!token) return;
 
       try {
-        const res = await axios.get(`${API_URL}/${tenantId}/${policyType}`, {
+        const res = await axios.get(`${API_URL}/tenant/${tenantId}/${policyType}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
