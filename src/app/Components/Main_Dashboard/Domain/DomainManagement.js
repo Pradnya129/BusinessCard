@@ -16,7 +16,7 @@ export default function DomainManagement({ slug }) {
   const fetchDomains = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/domain/list", {
+      const res = await axios.get("https://appo.coinagesoft.com/api/domain/list", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -51,7 +51,7 @@ export default function DomainManagement({ slug }) {
       if (editingDomain) {
         // Save edit
         const res = await axios.put(
-          "http://localhost:5000/api/domain/edit-domain",
+          "https://appo.coinagesoft.com/api/domain/edit-domain",
           { oldDomain: editingDomain, newDomain },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -61,7 +61,7 @@ export default function DomainManagement({ slug }) {
       } else {
         // Add new
         const res = await axios.post(
-          "http://localhost:5000/api/domain/add-domain",
+          "https://appo.coinagesoft.com/api/domain/add-domain",
           { domain: newDomain },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -83,7 +83,7 @@ export default function DomainManagement({ slug }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/domain/verify",
+        "https://appo.coinagesoft.com/api/domain/verify",
         { domain },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -101,7 +101,7 @@ export default function DomainManagement({ slug }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.delete("http://localhost:5000/api/domain/delete-domain", {
+      await axios.delete("https://appo.coinagesoft.com/api/domain/delete-domain", {
         headers: { Authorization: `Bearer ${token}` },
         data: { domain },
       });
