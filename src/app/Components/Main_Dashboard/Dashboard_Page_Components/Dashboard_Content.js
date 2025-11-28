@@ -172,7 +172,7 @@ axios.get(`https://appo.coinagesoft.com/api/admin/slugbyAdminId/${adminId}`, {
       setStats({
         totalAppointments: appointments.length,
         scheduled_rescheduledAppointment: appointments.filter((item) =>
-          ["Pending", "Rescheduled"].includes(item.appointmentStatus)
+          ["Scheduled", "Rescheduled"].includes(item.appointmentStatus)
         ).length,
         completedSessions: appointments.filter(
           (item) => item.appointmentStatus === "Completed"
