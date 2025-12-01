@@ -45,7 +45,7 @@ if (hostname.includes("appointify.me")) {
 
 
         if (!slug) throw new Error("Slug not found in hostname or URL path");
-
+console.log("slug",slug)
         // ✅ Fetch data using slug query param
         const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
         if (!response.ok) throw new Error("Failed to fetch consultant data");

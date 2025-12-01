@@ -22,8 +22,20 @@ const Page = () => {
  // ✅ Get slug when page loads
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      setSlug(hostname);
+const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}// e.g., "localhost" or real domain
+        setSlug(slug);  
       // Store in localStorage for use in other pages
     }
   }, []);

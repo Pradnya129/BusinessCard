@@ -80,8 +80,21 @@ const [loading, setLoading] = useState(false);
     
 
         const baseDate = new Date(selected);
-        const slug = window.location.hostname;
-  console.log("slug by mini",slug)
+const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}// e.g., "localhost" or real domain
+        
+          console.log("slug by mini",slug)
         // 1️⃣ Get plan-shift-buffer
         const bufferRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
