@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import ClipLoader from "react-spinners/ClipLoader";
 
 async function getAdmin(slug) {
+  console.log("slug",slug)
   const res = await fetch(
     `https://appo.coinagesoft.com/api/public-landing/slug?slug=${slug}`,
     { cache: "no-store" }
