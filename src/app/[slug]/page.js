@@ -33,17 +33,20 @@ export default function Home() {
       try {
             const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
 const pathname = window.location.pathname; // "/aura-enterprises" or "/"
-
+console.log("hostname",hostname)
+console.log("pathname",pathname)
 // Determine slug
 let slug = "";
 
 // If main domain
-if (hostname.includes("appointify.me")) {
+if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
   slug = pathname.split("/")[1]; // get slug from URL path
+  console.log("slug/",slug)
 } else {
   // Custom domain → send hostname as slug
   slug = hostname;
 }
+// console.log("slug",slug)
         const adminData = await getAdmin(slug);
         setAdmin(adminData);
       } catch (err) {

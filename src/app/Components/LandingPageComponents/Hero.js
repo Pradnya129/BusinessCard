@@ -28,15 +28,16 @@ const Hero = ({ scrollToSectionHeader }) => {
     const fetchData = async () => {
       try {
         // ✅ Get slug from hostname (production)
-           const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+             const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
 const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
 // Determine slug
 let slug = "";
 
 // If main domain
-if (hostname.includes("appointify.me")) {
+if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
   slug = pathname.split("/")[1]; // get slug from URL path
+  console.log("slug/",slug)
 } else {
   // Custom domain → send hostname as slug
   slug = hostname;
