@@ -13,33 +13,34 @@ const Page = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-    const [slug, setSlug] = useState('');
+  const [slug, setSlug] = useState('');
 
   // ✅ Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
- // ✅ Get slug when page loads
+  // ✅ Get slug when page loads
   useEffect(() => {
     if (typeof window !== 'undefined') {
-const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+      const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+      const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
-// Determine slug
-let slug = "";
+      // Determine slug
+      let slug = "";
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}// e.g., "localhost" or real domain
-        setSlug(slug);  
+      // If main domain
+      if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+        slug = pathname.split("/")[1]; // get slug from URL path
+        console.log("slug/", slug)
+      } else {
+        // Custom domain → send hostname as slug
+        slug = hostname;
+      }// e.g., "localhost" or real domain
+      setSlug(slug);
       // Store in localStorage for use in other pages
     }
   }, []);
+  
   // ✅ Toggle show/hide password
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
@@ -167,6 +168,17 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
                 >
                   {loading ? 'Logging in...' : 'Log In'}
                 </button>
+                {/* Sign Up Button */}
+                <div className="text-center mt-3">
+                  Don't have an account?
+                  <Link
+                    href="/SignUp"
+                    className=" w-100 text-decoration-underline"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+
               </form>
             </div>
           </div>

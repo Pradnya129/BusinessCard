@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 const API_URL = process.env.REACT_APP_API_URL;
 const Page = () => {
-    const router = useRouter();
-      const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -38,19 +38,19 @@ const Page = () => {
         },
         body: JSON.stringify(formData),
       });
-    
+
       let result;
-      const contentType = response.headers.get("content-type");
-    
-      if (contentType && contentType.includes("application/json")) {
+      // const contentType = response.headers.get("content-type");
+
+      // if (contentType && contentType.includes("application/json")) {
         result = await response.json();
-      } else {
-        const text = await response.text();
-        throw new Error(text); // 👈 fallback to readable error
-      }
-    
+      // } else {
+      //   const text = await response.text();
+      //   throw new Error(text); // 👈 fallback to readable error
+      // }
+
       console.log("Server response:", result);
-    
+
       if (response.ok) {
         alert("✅ Registered successfully!");
         router.push('/Login');
@@ -146,11 +146,11 @@ const Page = () => {
               className="form-control"
               id="expertise"
               name="expertise"
-              placeholder="Expertise"
+              placeholder="Business Name"
               value={formData.expertise}
               onChange={handleChange}
             />
-            <label htmlFor="expertise">Expertise</label>
+            <label htmlFor="expertise">Business Name</label>
           </div>
 
           <div className="mb-5">
@@ -171,7 +171,7 @@ const Page = () => {
                   <label htmlFor="password">Password</label>
                 </div>
                 <span className="input-group-text cursor-pointer" onClick={handleTogglePassword}>
-            <i className={showPassword ? 'ri-eye-line' : 'ri-eye-off-line'}></i>
+                  <i className={showPassword ? 'ri-eye-line' : 'ri-eye-off-line'}></i>
                 </span>
               </div>
             </div>
@@ -185,15 +185,15 @@ const Page = () => {
           </div>
         </form>
 
-       <p className="text-center mt-4">
-  <Link
-    href="/Login"
-    className="text-decoration-none ms-1 fw-bold"
-    style={{ color: "rgb(38, 43, 67)" }}
-  >
-    Log in
-  </Link>
-</p>
+        <p className="text-center mt-4">
+          <Link
+            href="/Login"
+            className="text-decoration-none ms-1 fw-bold"
+            style={{ color: "rgb(38, 43, 67)" }}
+          >
+            Log in
+          </Link>
+        </p>
 
 
         <div className="divider text-center my-4 position-relative">

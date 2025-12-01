@@ -19,20 +19,20 @@ const Plans = React.forwardRef((props, ref) => {
     const fetchData = async () => {
       try {
         // ✅ Get slug from hostname first (production)
-       const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+        const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+        const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
-// Determine slug
-let slug = "";
+        // Determine slug
+        let slug = "";
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}
+        // If main domain
+        if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+          slug = pathname.split("/")[1]; // get slug from URL path
+          console.log("slug/", slug)
+        } else {
+          // Custom domain → send hostname as slug
+          slug = hostname;
+        }
 
 
         // Fetch landing page data for this slug
@@ -52,21 +52,21 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     const fetchPlans = async () => {
       try {
         // ✅ Get slug from hostname/pathname
-                // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
-     const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+        // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
+        const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+        const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
-// Determine slug
-let slug = "";
+        // Determine slug
+        let slug = "";
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-} 
+        // If main domain
+        if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+          slug = pathname.split("/")[1]; // get slug from URL path
+          // console.log("slug/",slug)
+        } else {
+          // Custom domain → send hostname as slug
+          slug = hostname;
+        }
 
 
         // Fetch plans and shifts with slug
