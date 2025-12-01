@@ -9,7 +9,19 @@ const Consultant_Info = () => {
     const fetchData = async () => {
       try {
         // Get slug from URL path
-        const slug = window.location.hostname; // e.g., "/pradnya"
+     const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}
         if (!slug) throw new Error("Slug not found in URL");
         const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
         if (!response.ok) throw new Error("Failed to fetch landing page data");

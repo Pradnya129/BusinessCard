@@ -19,7 +19,19 @@ const Plans = React.forwardRef((props, ref) => {
     const fetchData = async () => {
       try {
         // ✅ Get slug from hostname first (production)
-        let slug = window.location.hostname;
+       const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}
 
 
         // Fetch landing page data for this slug

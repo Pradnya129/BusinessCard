@@ -42,7 +42,19 @@ const Contact_Calender = React.forwardRef((props, ref) => {
 
   const fetchCouponSetting = async () => {
     try {
-      const slug = window.location.hostname;
+     const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}
       const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/coupon-visibility?slug=${slug}`);
       if (!res.ok) throw new Error("Failed to fetch coupon setting");
       const data = await res.json();

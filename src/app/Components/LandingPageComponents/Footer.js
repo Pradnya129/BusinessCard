@@ -10,11 +10,23 @@ const Footer = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const currentSlug = window.location.hostname; // e.g., "localhost" or real domain
-        setSlug(currentSlug); // save it for Links
+        const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}// e.g., "localhost" or real domain
+        setSlug(slug); // save it for Links
 
         const res = await axios.get(
-          `https://appo.coinagesoft.com/api/public-landing/all?slug=${currentSlug}`
+          `https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`
         );
         setPlans(res.data.data || []);
       } catch (error) {

@@ -15,9 +15,13 @@ import Footer from '../Components/LandingPageComponents/Footer';
 import LeafletMap from '../Components/LandingPageComponents/LeafletMap';
 import FAQSection from '../Components/LandingPageComponents/FAQSection';
 
+// Import skeleton
+import SkeletonLoader from '../../app/LandingPage/SkeltonLoader.js';
+
 const LandingPage = ({ admin }) => {
   const targetRef = useRef(null);
   const targetRefHeader = useRef(null);
+
   const [selectedPlan, setSelectedPlan] = useState({
     planName: '',
     planPrice: '',
@@ -35,12 +39,11 @@ const LandingPage = ({ admin }) => {
     targetRefHeader.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Scroll to top when loaded
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, []);
 
-  // Trigger fade-out after short delay
+  // Set loading time
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 700);
     return () => clearTimeout(timer);
@@ -60,51 +63,70 @@ const LandingPage = ({ admin }) => {
       </Head>
 
       <div className="bg-white">
-        {/* Smooth fade overlay */}
+        {/* Fade overlay */}
         <div className={`page-fade-overlay ${isLoaded ? 'fade-out' : ''}`}></div>
 
-        {/* Always render Hero first */}
+        {/* Hero always shown */}
         <Hero scrollToSectionHeader={scrollToSectionHeader} />
 
         <div className="landing-page-container">
-          <Header admin={admin} />
+          {/* Header */}
+          {isLoaded ? <Header admin={admin} /> : <SkeletonLoader height={70} />}
 
+          {/* Consultant Info */}
           <div className="section-light">
-            <Consultant_Info />
+            {isLoaded ? <Consultant_Info /> : <SkeletonLoader height={300} />}
           </div>
 
+          {/* Empowering Minds */}
           <div className="section-alt">
-            <EmpoweringMinds />
+            {isLoaded ? <EmpoweringMinds /> : <SkeletonLoader height={280} />}
           </div>
 
+          {/* Stats */}
           <div className="section-light">
-            <Stats />
+            {isLoaded ? <Stats /> : <SkeletonLoader height={220} />}
           </div>
 
+          {/* Plans */}
           <div className="section-alt" ref={targetRefHeader}>
-            <Plans scrollToSection={scrollToSection} />
+            {isLoaded ? (
+              <Plans scrollToSection={scrollToSection} />
+            ) : (
+              <SkeletonLoader height={300} />
+            )}
           </div>
 
+          {/* Contact Calendar */}
           <div
             className="section-light"
             ref={targetRef}
             style={{ marginBottom: '14rem' }}
           >
-            <Contact_Calender prefillData={selectedPlan} />
+            {isLoaded ? (
+              <Contact_Calender prefillData={selectedPlan} />
+            ) : (
+              <SkeletonLoader height={350} />
+            )}
           </div>
 
+          {/* FAQ */}
           <div className="section-alt">
-            <FAQSection />
+            {isLoaded ? <FAQSection /> : <SkeletonLoader height={250} />}
           </div>
 
-          <LeafletMap />
+          {/* Map (optional skeleton) */}
+          {isLoaded ? <LeafletMap /> : <SkeletonLoader height={350} />}
         </div>
- 
+
         <Footer />
 
-        {/* Scripts at end */}
+        {/* Scripts */}
         <script src="/dist/assets/js/theme.min.js" defer></script>
-        <script src="/dist/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js" defer></script>
+        <script
+          src="/dist/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min.js"
+          defer
+        ></script>
       </div>
     </>
   );

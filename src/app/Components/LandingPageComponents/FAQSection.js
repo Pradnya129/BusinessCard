@@ -15,7 +15,19 @@ const FAQSection = () => {
     const fetchFAQs = async () => {
       try {
         setLoading(true);
-        let slug = window.location.hostname;
+      const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}
         if (!slug) throw new Error("Slug not found in URL or hostname");
 
         const response = await axios.get(`https://appo.coinagesoft.com/api/public-landing/all-faqs?slug=${slug}`);
