@@ -35,7 +35,21 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   };
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setHostname(window.location.hostname);
+           const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+  console.log("slug/",slug)
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}
+      setHostname(slug);
     }
   }, []);
 
@@ -72,8 +86,20 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     const fetchPlans = async () => {
       try {
         // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
-        const slug = window.location.hostname;
-        // Send hostname as query param to backend
+     const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+  console.log("slug/",slug)
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}        // Send hostname as query param to backend
         const res = await fetch(
           `https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`
         );
@@ -485,6 +511,7 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
 
 
     if (!hostname) {
+      console.log("hostname")
       console.error("Slug not found in URL or hostname");
       return;
     }
