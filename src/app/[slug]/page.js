@@ -31,8 +31,20 @@ export default function Home() {
   useEffect(() => {
     async function fetchAdmin() {
       try {
-        const hostname = window.location.hostname;
-        const adminData = await getAdmin(hostname);
+            const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+
+// Determine slug
+let slug = "";
+
+// If main domain
+if (hostname.includes("appointify.me")) {
+  slug = pathname.split("/")[1]; // get slug from URL path
+} else {
+  // Custom domain → send hostname as slug
+  slug = hostname;
+}
+        const adminData = await getAdmin(slug);
         setAdmin(adminData);
       } catch (err) {
         console.error("Error fetching admin:", err);
