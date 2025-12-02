@@ -40,7 +40,7 @@ const Page = () => {
       // Store in localStorage for use in other pages
     }
   }, []);
-  
+
   // ✅ Toggle show/hide password
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
 
@@ -170,14 +170,12 @@ const Page = () => {
                 </button>
                 {/* Sign Up Button */}
                 <div className="text-center mt-3">
-                  Don't have an account?
-                  <Link
-                    href="/SignUp"
-                    className=" w-100 text-decoration-underline"
-                  >
+                  Don&apos;t have an account?
+                  <Link href="/SignUp" className=" w-100 text-decoration-underline">
                     Sign Up
                   </Link>
                 </div>
+
 
               </form>
             </div>
