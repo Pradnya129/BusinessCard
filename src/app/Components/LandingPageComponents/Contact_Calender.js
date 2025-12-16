@@ -5,6 +5,8 @@ import MiniCalendar from './MiniCalendar';
 import dynamic from 'next/dynamic';
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
+import { FaArrowLeft } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 
 const TimePicker = dynamic(() => import('react-time-picker'), { ssr: false });
@@ -20,6 +22,9 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   const [appliedCouponId, setAppliedCouponId] = useState(null);
   const [couponMessage, setCouponMessage] = useState('');
   const [showCouponField, setShowCouponField] = useState(false);
+  const [plansLoaded, setPlansLoaded] = useState(false);
+  const router = useRouter();
+  const [hover, setHover] = useState(false);
 
 
   const planFieldsMap = {
@@ -35,41 +40,56 @@ const Contact_Calender = React.forwardRef((props, ref) => {
   };
   useEffect(() => {
     if (typeof window !== "undefined") {
-           const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+      const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+      const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
-// Determine slug
-let slug = "";
+      // Determine slug
+      let slug = "";
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}
+      // If main domain
+      if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+        slug = pathname.split("/")[1]; // get slug from URL path
+        console.log("slug/", slug)
+      } else {
+        // Custom domain → send hostname as slug
+        slug = hostname;
+      }
       setHostname(slug);
     }
   }, []);
+  useEffect(() => {
+    console.log("prefillData", props.prefillData)
+    if (!props.prefillData) return;
+
+    const { planId, planName, planPrice, planDuration, selectedDate, selectedSlot } = props.prefillData;
+
+    setFormData(prev => ({
+      ...prev,
+      plan: planName || prev.plan,
+      amount: planPrice || prev.amount,
+      duration: planDuration || prev.duration,
+      appointmentDate: selectedDate || prev.appointmentDate,
+      appointmentTime: selectedSlot || prev.appointmentTime,
+    }));
+  }, [props.prefillData]);
 
 
   const fetchCouponSetting = async () => {
     try {
-     const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+      const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+      const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
-// Determine slug
-let slug = "";
+      // Determine slug
+      let slug = "";
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}
+      // If main domain
+      if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+        slug = pathname.split("/")[1]; // get slug from URL path
+        console.log("slug/", slug)
+      } else {
+        // Custom domain → send hostname as slug
+        slug = hostname;
+      }
       const res = await fetch(`https://appo.coinagesoft.com/api/public-landing/coupon-visibility?slug=${slug}`);
       if (!res.ok) throw new Error("Failed to fetch coupon setting");
       const data = await res.json();
@@ -86,20 +106,20 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     const fetchPlans = async () => {
       try {
         // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
-     const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+        const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
+        const pathname = window.location.pathname; // "/aura-enterprises" or "/"
 
-// Determine slug
-let slug = "";
+        // Determine slug
+        let slug = "";
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}        // Send hostname as query param to backend
+        // If main domain
+        if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+          slug = pathname.split("/")[1]; // get slug from URL path
+          console.log("slug/", slug)
+        } else {
+          // Custom domain → send hostname as slug
+          slug = hostname;
+        }        // Send hostname as query param to backend
         const res = await fetch(
           `https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`
         );
@@ -114,15 +134,7 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
         if (Array.isArray(data) && data.length > 0) {
           setAvailablePlans(data);
 
-          // Auto-select the first plan
-          const firstPlan = data[0];
-          setFormData(prev => ({
-            ...prev,
-            plan: firstPlan.planName,
-            amount: firstPlan.planPrice,
-            duration: firstPlan.planDuration,
-            appointmentTime: ''
-          }));
+
         }
       } catch (err) {
         console.error("Error fetching plans", err);
@@ -185,7 +197,7 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     return errors;
   };
   console.log("hostname", hostname)
-  // Prefill plan, amount, and duration if provided via props
+
   useEffect(() => {
     if (props.prefillData) {
       setFormData((prev) => ({
@@ -237,9 +249,7 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     return slots;
   }
 
-  // Use a native date input so user can select any date
-  // We'll keep the date in "yyyy-mm-dd" format from the input,
-  // then format it when needed for display.
+
   const handleDateSelect = (e) => {
     const selectedDate = e.target.value; // this is in yyyy-mm-dd format
     // Optional: block past dates
@@ -269,100 +279,6 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Check if a slot from MiniCalendar is selected
-    if (!formData.appointmentTime) {
-      alert("Please select a time slot from the calendar before booking!");
-      return; // Stop form submission
-    }
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-
-
-    setFormErrors({});
-
-    try {
-      // ✅ Get tenant slug from hostname (domain) or fallback to URL path
-
-      // ✅ Find selected plan
-      const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
-      if (!selectedPlan) {
-        alert("Please select a valid plan.");
-        return;
-      }
-
-      const formDataToSend = new FormData();
-
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === "floorPlanFile" && value instanceof File) {
-          formDataToSend.append("floorPlanFile", value); // File input handle
-        } else {
-          formDataToSend.append(key, value);
-        }
-      });
-      if (appliedCouponId) {
-        formDataToSend.append("couponId", appliedCouponId);
-      }
-
-
-      formDataToSend.append("planId", selectedPlan.planId);
-
-      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
-        method: "POST",
-        body: formDataToSend,
-      });
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
-      }
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText);
-      }
-
-      const appointment = await response.json();
-      console.log("✅ Appointment created:", appointment);
-
-      // 🛠️ Razorpay integration
-      const razorpayOptions = {
-        key: appointment.data.razorpayKey,
-        amount: appointment.data.amount,
-        currency: "INR",
-        name: appointment.data.name,
-        description: "Book your appointment",
-        order_id: appointment.data.orderId,
-        handler: function (response) {
-          console.log("💰 Payment success:", response);
-          setPaymentCompleted(true);
-          setIsVerifyingPayment(true);
-          verifyPayment(response);
-        },
-        prefill: {
-          name: appointment.data.name,
-          email: appointment.data.email,
-          contact: appointment.data.phoneNumber,
-        },
-      };
-
-      const rzp1 = new window.Razorpay(razorpayOptions);
-      rzp1.on("payment.failed", function () {
-        setPaymentCompleted(true);
-        setIsVerifyingPayment(false);
-        showModal("failureModal");
-      });
-      rzp1.open();
-
-    } catch (error) {
-      console.error("❌ Error creating appointment:", error);
-      alert("An error occurred while booking the appointment.");
-      showModal("failureModal");
-    }
-  };
 
 
   const applyCoupon = async () => {
@@ -408,6 +324,109 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check if a slot from MiniCalendar is selected
+    if (!formData.appointmentTime) {
+      alert("Please select a time slot from the calendar before booking!");
+      return; // Stop form submission
+    }
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+
+    setFormErrors({});
+
+    try {
+      // ✅ Get tenant slug from hostname (domain) or fallback to URL path
+
+      // ✅ Find selected plan
+      const selectedPlan = availablePlans.find(p => p.planName === formData.plan);
+      if (!selectedPlan) {
+        alert("Please select a valid plan.");
+        return;
+      }
+
+      const formDataToSend = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "floorPlanFile" && value instanceof File) {
+          formDataToSend.append("floorPlanFile", value); // File input handle
+        } else {
+          formDataToSend.append(key, value);
+        }
+      });
+      if (appliedCouponId) {
+        formDataToSend.append("couponId", appliedCouponId);
+      }
+
+
+      formDataToSend.append("planId", selectedPlan.planId);
+      const slugInfo = await fetch(
+        `https://appo.coinagesoft.com/api/public-landing/slug?slug=${hostname}`
+      );
+      const slugData = await slugInfo.json();
+
+      // Extract business name
+      const businessName = slugData?.admin?.businessName || "Business";
+
+
+      console.log("Business Name:", businessName);
+      const response = await fetch(`https://appo.coinagesoft.com/api/public-landing/paid?slug=${hostname}`, {
+        method: "POST",
+        body: formDataToSend,
+      });
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText);
+      }
+
+      const appointment = await response.json();
+      console.log("✅ Appointment created:", appointment);
+
+      // 🛠️ Razorpay integration
+      const razorpayOptions = {
+        key: appointment.data.razorpayKey,
+        amount: appointment.data.amount,
+        currency: "INR",
+        name: businessName,
+        description: "Book your appointment",
+        order_id: appointment.data.orderId,
+        handler: function (response) {
+          console.log("💰 Payment success:", response);
+          setPaymentCompleted(true);
+          setIsVerifyingPayment(true);
+          verifyPayment(response);
+        },
+        prefill: {
+          name: appointment.data.name,
+          email: appointment.data.email,
+          contact: appointment.data.phoneNumber,
+        },
+      };
+
+      const rzp1 = new window.Razorpay(razorpayOptions);
+      rzp1.on("payment.failed", function () {
+        setPaymentCompleted(true);
+        setIsVerifyingPayment(false);
+        showModal("failureModal");
+      });
+      rzp1.open();
+
+    } catch (error) {
+      console.error("❌ Error creating appointment:", error);
+      alert("An error occurred while booking the appointment.");
+      showModal("failureModal");
+    }
+  };
 
 
   function openReceiptPdf(base64Pdf) {
@@ -568,7 +587,7 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
   return (
     <>
 
-      <div className="bg-light mt-8">
+      <div className="bg-light pt-8">
         {isVerifyingPayment && (
           <div
             className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
@@ -587,300 +606,191 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
           </div>
         )}
 
+        <div className="container mb-5 ">
+          <div className="col-lg-12 col-12 d-flex justify-content-center mb-3 ">
+            <div className="card shadow-sm" style={{ width: "800px" }}>
 
-        <div className="container row  mx-auto" id="target-form">
-          <div className="col-lg-5 col-12  d-flex align-items-stretch mb-8  mb-lg-0">
-            <div className="w-100 bg-white shadow-sm rounded  p-3 pb-5"
-              style={{
-                minHeight: '35.25rem',   // optional: sets a minimum height
-                maxHeight: '80.25rem',   // maximum height
-                height: 'auto',          // dynamic height based on content
-                overflowY: 'auto',       // scroll if content exceeds maxHeight
-              }}
-            >
-              <div className="text-center mb-3">
-                <h5 className="mb-1">Choose Your Slot</h5>
-                <p className="small mb-3">Select a date and time</p>
-                <hr className="bg-dark" />
-              </div>
+              <div className="card-body contact px-4">
+                <div className="d-flex align-items-center " >
+                  <button
+                    type="button"
+                    onClick={() => router.back()}
+                    onMouseEnter={() => setHover(true)}
+                    onMouseLeave={() => setHover(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 40, // similar circular size
+                      height: 40, // height same as width
+                      fontSize: 20,
+                      fontWeight: 800,
+                      borderRadius: "50%",
+                      border: "1px solid #d0d0d0",
+                      backgroundColor: hover ? "#e6f0ff" : "#f8f9fa",
+                      color: hover ? "#0c6cd3" : "#0f65c7",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease-in-out",
+                    }}
+                  >
+                    <FaArrowLeft />
 
-              <MiniCalendar
-                selected={formData.appointmentDate}
-                duration={formData.duration}
-                bookedTimeSlots={bookedTimeSlots}
-                availableSlots={availableSlots}
-                onDateChange={(date) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    appointmentDate: date,
-                    appointmentTime: ''
-                  }));
-                }}
-                onSlotSelect={(slot) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    appointmentTime: slot
-                  }));
-                }}
-                selectedSlot={formData.appointmentTime}
-                planId={availablePlans.find(p => p.planName === formData.plan)?.planId}
-              />
-            </div>
-          </div>
-
-          <div className="col-lg-7 col-12 order-2 order-lg-1 ">
-            {/* <div className="mx-auto" style={{ maxWidth: '35rem' }}> */}
-            <div >
-              <div className="card" ref={ref}>
-                <div className="card-body contact" style={{ height: 'auto', minHeight: '35.25rem', maxHeight: '90.25rem' }}>                  <div className="text-center mb-3">
-                  <h5 className="mb-1">Book Your Appointment</h5>
-                  <p className="small mb-4">Please fill the details of exact person for whom consultation is needed.</p>
-                  <hr className='bg-dark' />
+                  </button>
                 </div>
-                  <form onSubmit={handleSubmit}>
-                    {/* First and Last Name */}
-                    <div className="row gx-2">
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="firstName">First name</label>
-                          <input type="text" className={`form-control form-control-sm ${formErrors.firstName ? 'border border-danger' : ''}`}
-                            name="firstName" id="firstName" value={formData.firstName} onChange={handleChange} placeholder="Enter your first name" />
-                          {formErrors.firstName && <div className="text-danger small">{formErrors.firstName}</div>}
-                        </div>
-                      </div>
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="lastName">Last name</label>
-                          <input type="text" className={`form-control form-control-sm ${formErrors.lastName ? 'border border-danger' : ''}`}
-                            name="lastName" id="lastName" value={formData.lastName} onChange={handleChange} placeholder="Enter your last name" />
-                          {formErrors.lastName && <div className="text-danger small">{formErrors.lastName}</div>}
-                        </div>
-                      </div>
-                    </div>
-                    {/* Email and Phone */}
-                    <div className="row gx-2">
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="email">Email</label>
-                          <input type="email" className={`form-control form-control-sm ${formErrors.email ? 'border border-danger' : ''}`}
-                            name="email" id="email" value={formData.email} onChange={handleChange} placeholder="Enter your email address" />
-                          {formErrors.email && <div className="text-danger small">{formErrors.email}</div>}
-                        </div>
-                      </div>
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="phoneNumber">Phone</label>
-                          <input type="text" className={`form-control form-control-sm ${formErrors.phoneNumber ? 'border border-danger' : ''}`}
-                            name="phoneNumber" id="phoneNumber" value={formData.phoneNumber} onChange={handleChange} placeholder="Enter your phone number" />
-                          {formErrors.phoneNumber && <div className="text-danger small">{formErrors.phoneNumber}</div>}
-                        </div>
-                      </div>
+                <div className="text-center mb-3">
+                  <h5 className="mb-1">Book Your Appointment</h5>
+                  <p className="small mb-4">
+                    Please fill the details of exact person for whom consultation is needed.
+                  </p>
+                  <hr className="bg-dark" />
+                </div>
+
+                <form onSubmit={handleSubmit}>
+
+                  {/* ---------------- Row 1 ---------------- */}
+                  <div className="row gx-3">
+                    <div className="col-lg-4 col-md-6 mb-2">
+                      <label className="form-label">First Name</label>
+                      <input
+                        type="text"
+                        className={`form-control form-control-sm ${formErrors.firstName ? "border border-danger" : ""}`}
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                      />
                     </div>
 
+                    <div className="col-lg-4 col-md-6 mb-2">
+                      <label className="form-label">Last Name</label>
+                      <input
+                        type="text"
+                        className={`form-control form-control-sm ${formErrors.lastName ? "border border-danger" : ""}`}
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                      />
+                    </div>
 
-                    {/* Date & Time Slot */}
-                    <div className="row gx-2">
-                      <div className='col-sm-6'>
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="planDropdown">Choose a Plan</label>
-                          <select
-                            id="planDropdown"
-                            className="form-select form-select-sm"
-                            value={formData.plan}
-                            onChange={(e) => {
-                              const selectedPlan = availablePlans.find(p => p.planName === e.target.value);
-                              if (selectedPlan) {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  plan: selectedPlan.planName,
-                                  amount: selectedPlan.planPrice,
-                                  duration: selectedPlan.planDuration,
-                                  appointmentTime: "", // reset previously selected slot
-                                }));
-                              }
-                            }}
+                    <div className="col-lg-4 col-md-6 mb-2">
+                      <label className="form-label">Email</label>
+                      <input
+                        type="email"
+                        className={`form-control form-control-sm ${formErrors.email ? "border border-danger" : ""}`}
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ---------------- Row 2 ---------------- */}
+                  <div className="row gx-3">
+                    <div className="col-lg-4 col-md-6 mb-2">
+                      <label className="form-label">Phone</label>
+                      <input
+                        type="text"
+                        className={`form-control form-control-sm ${formErrors.phoneNumber ? "border border-danger" : ""}`}
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                      />
+                    </div>
+
+                    <div className="col-lg-4 col-md-6 mb-2">
+                      <label className="form-label">Selected Plan</label>
+                      <input
+                        className="form-control form-control-sm"
+                        value={formData.plan}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="col-lg-4 col-md-6 mb-2">
+                      <label className="form-label">Date</label>
+                      <input
+                        type="date"
+                        className="form-control form-control-sm"
+                        name="appointmentDate"
+                        value={formData.appointmentDate}
+                        onChange={handleDateSelect}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ---------------- Row 3 ---------------- */}
+                  <div className="row gx-3">
+                    <div className="col-lg-4 col-md-6 ">
+                      <label className="form-label">Price</label>
+                      <input
+                        className="form-control form-control-sm"
+                        value={formData.amount}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="col-lg-4 col-md-6 ">
+                      <label className="form-label">Duration (min)</label>
+                      <input
+                        className="form-control form-control-sm"
+                        value={formData.duration}
+                        readOnly
+                      />
+                    </div>
+                    {showCouponField && (
+                      <div className="col-lg-4 col-md-6 ">
+                        <label className="form-label">Coupon Code</label>
+                        <div className="input-group input-group-sm">
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={couponCode}
+                            onChange={handleCouponChange}
+                          />
+                          <button
+                            className="btn btn-outline-primary"
+                            type="button"
+                            onClick={applyCoupon}
                           >
-                            <option value="">-- Select a Plan --</option>
-                            {availablePlans.map(plan => (
-                              <option key={plan.planId} value={plan.planName}>
-                                {plan.planName} - ₹{plan.planPrice}
-                              </option>
-                            ))}
-                          </select>
-                          {formErrors.plan && <div className="text-danger small">{formErrors.plan}</div>}
-                        </div>
-                      </div>
-                      <div className="col-sm-6 ">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="appointmentDate">Choose a Date</label>
-                          <input type="date" className={`form-control form-control-sm ${formErrors.appointmentDate ? 'border border-danger' : ''}`}
-                            name="appointmentDate" id="appointmentDate" value={formData.appointmentDate} onChange={handleDateSelect} />
-                          {formErrors.appointmentDate && <div className="text-danger small">{formErrors.appointmentDate}</div>}
-                        </div>
-                        {formData.appointmentDate && (
-                          <div className="mb-2">
-                            <p className="small">
-                              Selected Date: {formatDateDisplay(formData.appointmentDate)}
-                            </p>
-                          </div>
-                        )}
-
-
-                      </div>
-
-                    </div>
-                    {/* Price & Duration */}
-                    <div className="row gx-2">
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="amount">Plan Price</label>
-                          <input type="text" className={`form-control form-control-sm ${formErrors.amount ? 'border border-danger' : ''}`}
-                            name="amount" id="amount" value={formData.amount} readOnly placeholder="Auto-filled" />
-                          {formErrors.amount && <div className="text-danger small">{formErrors.amount}</div>}
+                            Apply
+                          </button>
                         </div>
 
 
                       </div>
-                      <div className="col-sm-6">
-                        <div className="mb-2">
-                          <label className="form-label" htmlFor="duration">Plan Duration (Minutes)</label>
-                          <input type="text" className={`form-control form-control-sm ${formErrors.duration ? 'border border-danger' : ''}`}
-                            name="duration" id="duration" value={formData.duration} readOnly placeholder="Auto-filled" />
-                          {formErrors.duration && <div className="text-danger small">{formErrors.duration}</div>}
-                        </div>
+                    )}
+                  </div>
 
-                      </div>
-                    </div>
+              
 
+                  {/* ---------------- Coupon + Details ---------------- */}
 
+                  <div className="col-lg-8 col-md-6 mb-1 mx-auto">
+                    <label className="form-label">Details</label>
+                    <textarea
+                      className="form-control form-control-sm"
+                      rows="2"
+                      value={formData.details}
+                      onChange={handleChange}
+                    />
+                  </div>
 
-                    {/* Vastu & Birth Details */}
-
-                    <div className="row gx-2">
-
-                      {(hostname === "booking.vedratnavastu.com") && (
-                        <>
-
-                          {selectedPlanFields.includes("birthDate") && (
-                            <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="birthDate">Birth Date (Optional)</label>
-                              <input type="date" className={`form-control form-control-sm ${formErrors.birthDate ? 'border border-danger' : ''}`}
-                                name="birthDate" id="birthDate" value={formData.birthDate} onChange={handleChange} />
-                              {formErrors.birthDate && <div className="text-danger small">{formErrors.birthDate}</div>}
-                            </div>
-                          )}
-
-                          {selectedPlanFields.includes("birthTime") && (
-                            <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="birthTime">Birth Time (Optional)</label>
-                              <input type="time" className={`form-control form-control-sm ${formErrors.birthTime ? 'border border-danger' : ''}`}
-                                name="birthTime" id="birthTime" value={formData.birthTime} onChange={handleChange} />
-                              {formErrors.birthTime && <div className="text-danger small">{formErrors.birthTime}</div>}
-                            </div>
-                          )}
-
-                          {selectedPlanFields.includes("birthPlace") && (
-                            <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="birthPlace">Birth Place (Optional)</label>
-                              <input type="text" className={`form-control form-control-sm ${formErrors.birthPlace ? 'border border-danger' : ''}`}
-                                name="birthPlace" id="birthPlace" value={formData.birthPlace} onChange={handleChange} />
-                              {formErrors.birthPlace && <div className="text-danger small">{formErrors.birthPlace}</div>}
-                            </div>
-                          )}
-
-                          {selectedPlanFields.includes("vastuType") && (
-                            <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="vastuType">Vastu Type</label>
-                              <select className={`form-select form-select-sm ${formErrors.vastuType ? 'border border-danger' : ''}`}
-                                name="vastuType" id="vastuType" value={formData.vastuType} onChange={handleChange}>
-                                <option value="">-- Select Vastu Type --</option>
-                                <option value="Residential">Residential</option>
-                                <option value="Commercial">Commercial</option>
-                                <option value="Industrial">Industrial</option>
-                                <option value="Office">Office</option>
-                                <option value="Plot">Plot</option>
-                              </select>
-                              {formErrors.vastuType && <div className="text-danger small">{formErrors.vastuType}</div>}
-                            </div>
-                          )}
-
-                        
-
-                          {selectedPlanFields.includes("floorPlanFile") && (
-                            <div className="col-sm-6 mb-2">
-                              <label className="form-label" htmlFor="floorPlanFile">Upload Floor Plan (Optional)</label>
-                              <input type="file" className="form-control form-control-sm"
-                                name="floorPlanFile" id="floorPlanFile" accept=".jpg,.jpeg,.png,.pdf"
-                                onChange={(e) => setFormData({ ...formData, floorPlanFile: e.target.files[0] })} />
-                            </div>
-                          )}
-                            {selectedPlanFields.includes("googleLocation") && (
-                            <div className="col-sm-12 mb-2">
-                              <label className="form-label" htmlFor="googleLocation">Google Location (Optional)</label>
-                              <input type="text" className={`form-control form-control-sm ${formErrors.googleLocation ? 'border border-danger' : ''}`}
-                                name="googleLocation" id="googleLocation" value={formData.googleLocation} onChange={handleChange} placeholder="Paste Google Maps link" />
-                              {formErrors.googleLocation && <div className="text-danger small">{formErrors.googleLocation}</div>}
-                            </div>
-                          )}
-
-                        </>
-                      )}
-                      {showCouponField && (
-                        <div className="col-sm-6">
-                          <div className="mb-2">
-                            <label className="form-label" htmlFor="couponCode">Coupon Code (Optional)</label>
-                            <div className="input-group input-group-sm">
-                              <input
-                                type="text"
-                                id="couponCode"
-                                placeholder="Enter coupon code"
-                                className="form-control"
-                                value={couponCode}
-                                onChange={handleCouponChange}
-                              />
-                              <button className="btn btn-primary" type="button" onClick={applyCoupon}>
-                                Apply
-                              </button>
-                            </div>
-                            {formErrors.couponCode && (
-                              <div className="text-danger small">{formErrors.couponCode}</div>
-                            )}
-                            {couponMessage && (
-                              <div className="text-success small">{couponMessage}</div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-
-                      {/* Fields visible for all tenants */}
-
-
-                    </div>
-
-
-                    {/* Additional Details */}
-                    <div className="mb-2">
-                      <label className="form-label" htmlFor="details">Details</label>
-                      <textarea className="form-control form-control-sm" name="details" id="details" rows="3"
-                        value={formData.details} onChange={handleChange} placeholder="Additional notes or questions..."></textarea>
-                    </div>
-                    <div className="d-grid mb-2">
-                      <button type="submit" className="btn btn-primary btn-sm" >
+                  {/* ---------------- Submit ---------------- */}
+                  <div className="row mt-2">
+                    <div className="col-lg-3 col-md-4 col-6 mx-auto text-center">
+                      <button type="submit" className="btn btn-primary btn-sm px-4">
                         Book Appointment
                       </button>
                     </div>
-                    <div className="text-center">
-                      {/* <p className="form-text text-muted small">We&apos;ll respond in 1–2 business days.</p> */}
-                    </div>
-                  </form>
-                </div>
+                  </div>
+
+                </form>
               </div>
             </div>
           </div>
-
-
         </div>
+
+
+
       </div>
       {/* Modals for Success, Failure, and Cancel */}
       <div className="modal fade" id="successModal" tabIndex="-1" aria-labelledby="successModalLabel" aria-hidden="true">

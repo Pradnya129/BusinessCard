@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 
 const API_URL = "https://appo.coinagesoft.com/api/public-landing/policy"; // slug-based public API
 
-const CancellationPolicy = () => {
+  const CancellationPolicy = () => {
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug"); // get slug from URL query
 

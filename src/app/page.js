@@ -1,8 +1,9 @@
 'use client';
+
 import { useEffect, useState } from "react";
 import LandingPage from "./LandingPage/LandingPage";
 import { notFound } from "next/navigation";
-import ClipLoader from "react-spinners/ClipLoader";
+import ThreeDotsLoader from "./Components/LandingPageComponents/ThreeDotsLoader.js";
 
 async function getAdmin(slug) {
   const res = await fetch(
@@ -20,31 +21,23 @@ async function getAdmin(slug) {
 export default function Home() {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [hydrated, setHydrated] = useState(false);
-
-  // Fix hydration mismatch by forcing client render after hydration
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
+  const [plansReady, setPlansReady] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     async function fetchAdmin() {
       try {
-const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+        const hostname = window.location.hostname;
+        const pathname = window.location.pathname;
+        let slug = "";
 
-// Determine slug
-let slug = "";
+        if (hostname.includes("appointify.me") || hostname.includes("localhost")) {
+          slug = pathname.split("/")[1];
+        } else {
+          slug = hostname; // custom domain
+        }
 
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}// e.g., "localhost" or real domain
-                const adminData = await getAdmin(slug);
+        const adminData = await getAdmin(slug);
         setAdmin(adminData);
       } catch (err) {
         console.error("Error fetching admin:", err);
@@ -54,70 +47,50 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
   }, []);
 
   useEffect(() => {
-    if (!admin) return;
-
-    const handleFullReady = async () => {
-      await new Promise((resolve) => {
-        if (document.readyState === "complete") resolve();
-        else window.addEventListener("load", resolve, { once: true });
-      });
-
-      const images = Array.from(document.images);
-      await Promise.all(
-        images.map(
-          (img) =>
-            new Promise((resolve) => {
-              if (img.complete) resolve();
-              else {
-                img.addEventListener("load", resolve);
-                img.addEventListener("error", resolve);
-              }
-            })
-        )
-      );
-
-      await new Promise((r) => setTimeout(r, 400));
+    if (admin) {
       setLoading(false);
-    };
-
-    handleFullReady();
+    }
   }, [admin]);
 
-  if (!hydrated) return null; // prevents early flash before hydration
+  // Trigger smooth fade-in when plans are ready
+  useEffect(() => {
+    if (plansReady) {
+      const timer = setTimeout(() => setShowContent(true), 50); // slight delay ensures transition
+      return () => clearTimeout(timer);
+    }
+  }, [plansReady]);
 
   return (
     <>
-      {/* Loader Overlay */}
-      <div
-        style={{
-          opacity: loading ? 1 : 0,
-          visibility: loading ? "visible" : "hidden",
-          transition: "opacity 0.6s ease, visibility 0.6s ease",
-          height: "100vh",
-          width: "100vw",
-          background: "#fff",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          zIndex: 9999,
-        }}
-      >
-        <ClipLoader size={60} color="#2563EB" />
-      </div>
+      {/* FULL SCREEN LOADER — stays until BOTH admin + plans are ready */}
+      {(loading || !plansReady) && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "white",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <ThreeDotsLoader />
+        </div>
+      )}
 
-      {/* Render only when hydrated + admin loaded */}
+      {/* PAGE CONTENT WITH SMOOTH FADE-IN */}
       {admin && (
         <div
           style={{
-            opacity: loading ? 0 : 1,
-            visibility: loading ? "hidden" : "visible",
-            transition: "opacity 0.8s ease",
+            opacity: showContent ? 1 : 0,
+            transition: "opacity 0.5s ease-in-out",
           }}
         >
-          <LandingPage admin={admin} />
+          <LandingPage
+            admin={admin}
+            onPlansReady={() => setPlansReady(true)}
+          />
         </div>
       )}
     </>

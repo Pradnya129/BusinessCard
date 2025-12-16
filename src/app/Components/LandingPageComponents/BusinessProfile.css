@@ -1,0 +1,123 @@
+/* COVER IMAGE SLIDER */
+.cover-wrapper {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.cover-slider {
+  position: absolute;
+  inset: 0;
+}
+
+.cover-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;  
+  animation: slideFade 15s infinite;
+  transition: opacity 0.3s ease-in-out; /* smooth fade */
+}
+
+/* staggered animation for multiple slides */
+.cover-slide:nth-child(1) { animation-delay: 0s; }
+.cover-slide:nth-child(2) { animation-delay: 5s; }
+.cover-slide:nth-child(3) { animation-delay: 10s; }
+
+@keyframes slideFade {
+  0%, 33% { opacity: 1; }
+  34%, 100% { opacity: 0; }
+}
+
+/* PROFILE CARD OVERLAY */
+.profile-container {
+  position: relative;
+  margin-top: -70px; /* overlap cover */
+}
+
+.profile-card {
+  padding-top: 70px;
+}
+
+/* PROFILE IMAGE */
+.profile-img-wrapper {
+  position: absolute;
+  top: -55px;
+  right: 40%;
+  transform: translateX(-50%);
+}
+
+.profile-image {
+  width: 115px;
+  height: 115px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  object-fit: cover;
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .cover-wrapper { height: 250px; }
+  .profile-img-wrapper { top: -65px; }
+  
+}
+
+@media (min-width: 1200px) {
+  .cover-wrapper { height: 300px; }
+  .profile-img-wrapper { top: -70px; }
+}
+.secondary-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Action buttons */
+.action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 14px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+/* Icons */
+.action-btn .icon {
+  font-size: 16px;
+}
+
+/* Dropdown */
+.dropdown-menu {
+  width: 220px;
+  padding: 8px 0;
+}
+
+.dropdown-item {
+  font-size: 14px;
+  padding: 8px 14px;
+}
+
+/* Mobile optimization */
+@media (max-width: 576px) {
+  .secondary-actions {
+    gap: 10px;
+  }
+
+  .action-btn {
+    font-size: 13px;
+    padding: 10px;
+  }
+}

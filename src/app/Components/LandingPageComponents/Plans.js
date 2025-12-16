@@ -1,11 +1,19 @@
 'use client';
+
 import axios from 'axios';
 import React, { forwardRef, useEffect, useState } from 'react';
-import './Plans.css'
-
-const API_URL = process.env.REACT_APP_API_URL;
+import './Plans.css';
+import { useRouter } from "next/navigation";
+import { FaArrowLeft } from "react-icons/fa";
+import ThreeDotsLoader from './ThreeDotsLoader.js';
 
 const Plans = React.forwardRef((props, ref) => {
+
+  const router = useRouter();
+  const [hover, setHover] = useState(false);
+  const [slug, setSlug] = useState('');
+  const [isNavigating, setIsNavigating] = useState(false);
+
   const [formData, setFormData] = useState({
     tagline: '',
     mainDescription: '',
@@ -15,28 +23,37 @@ const Plans = React.forwardRef((props, ref) => {
   const [plans, setPlans] = useState([]);
   const [shifts, setShifts] = useState([]);
 
+  /* -------------------- BOOK NOW HANDLER -------------------- */
+  const handleBookNow = (plan) => {
+    setIsNavigating(true); // show loader immediately
+
+    setTimeout(() => {
+      router.push(
+        `/${slug}/CalendarOnly?planId=${plan.planId}&planName=${plan.planName}&planDuration=${plan.planDuration}&planPrice=${plan.planPrice}`
+      );
+    }, 150); // short delay = better UX
+  };
+
+  /* -------------------- FETCH DATA -------------------- */
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // ✅ Get slug from hostname first (production)
-        const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-        const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+        const hostname = window.location.hostname;
+        const pathname = window.location.pathname;
+        let resolvedSlug = '';
 
-        // Determine slug
-        let slug = "";
-
-        // If main domain
-        if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
-          slug = pathname.split("/")[1]; // get slug from URL path
-          console.log("slug/", slug)
+        if (hostname.includes('www.appointify.me') || hostname.includes('localhost')) {
+          resolvedSlug = pathname.split('/')[1];
         } else {
-          // Custom domain → send hostname as slug
-          slug = hostname;
+          resolvedSlug = hostname;
         }
 
+        setSlug(resolvedSlug);
 
-        // Fetch landing page data for this slug
-        const res = await axios.get(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`);
+        const res = await axios.get(
+          `http://localhost:5000/api/public-landing/?slug=${resolvedSlug}`
+        );
+
         const data = res.data.data;
 
         setFormData({
@@ -45,40 +62,35 @@ const Plans = React.forwardRef((props, ref) => {
           mainHeading: data.section5_MainHeading || '',
         });
       } catch (error) {
-        console.error("Error fetching landing data:", error);
+        console.error('Error fetching landing data:', error);
       }
     };
 
     const fetchPlans = async () => {
       try {
-        // ✅ Get slug from hostname/pathname
-        // ✅ Get hostname from browser, e.g., booking.vedratnavastu.com
-        const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-        const pathname = window.location.pathname; // "/aura-enterprises" or "/"
+        const hostname = window.location.hostname;
+        const pathname = window.location.pathname;
+        let resolvedSlug = '';
 
-        // Determine slug
-        let slug = "";
-
-        // If main domain
-        if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
-          slug = pathname.split("/")[1]; // get slug from URL path
-          // console.log("slug/",slug)
+        if (hostname.includes('www.appointify.me') || hostname.includes('localhost')) {
+          resolvedSlug = pathname.split('/')[1];
         } else {
-          // Custom domain → send hostname as slug
-          slug = hostname;
+          resolvedSlug = hostname;
         }
 
-
-        // Fetch plans and shifts with slug
         const [plansRes, shiftsRes] = await Promise.all([
-          axios.get(`https://appo.coinagesoft.com/api/public-landing/all?slug=${slug}`),
-          axios.get(`https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`),
+          axios.get(
+            `https://appo.coinagesoft.com/api/public-landing/all?slug=${resolvedSlug}`
+          ),
+          axios.get(
+            `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${resolvedSlug}`
+          ),
         ]);
 
         setPlans(plansRes.data.data || []);
         setShifts(shiftsRes.data.data || []);
       } catch (error) {
-        console.error('Error fetching plans or shifts:', error);
+        console.error('Error fetching plans:', error);
         setPlans([]);
         setShifts([]);
       }
@@ -88,131 +100,140 @@ const Plans = React.forwardRef((props, ref) => {
     fetchPlans();
   }, []);
 
-  if (plans.length === 0) {
-    return null
-  }
+  if (plans.length === 0) return null;
+
   return (
-    <div className="overflow-hidden">
-      {/* Hero */}
-      <div
-        className="position-relative bg-img-start"
-        style={{ backgroundImage: 'url(dist/assets/svg/components/card-11.svg)' }}
-      >
-        {/* after checking this in swagger getting 404. need to check backend */}
-        {/* <div className="container ">
-          <div className="w-md-75 w-lg-70 text-center mx-auto mb-9" id="target-plans" ref={ref} >
-            <h2>{formData.tagline}</h2>
-            <p>{formData.mainDescription}</p>
-           
-          </div>
-        </div> */}
-      </div>
-
-      {/* Plan Cards */}
-      <div className="container py-5"> {/* Section spacing */}
-        {/* <div className="text-center mb-5">
-          <h2 className="fw-bold">Our Consultation Plans</h2>
-          <p className="text-muted">Choose the plan that fits your needs</p>
-        </div> */}
-
-        <div className="container ">
-          <div className="w-md-75 w-lg-70 text-center mx-auto mb-9" id="target-plans" ref={ref} >
-            <h2>{formData.tagline}</h2>
-            <p>{formData.mainDescription}</p>
-            {/* <h3 className="mt-9 mb-0">{formData.mainHeading}</h3> */}
-          </div>
+    <>
+      {/* -------------------- FULL SCREEN LOADER -------------------- */}
+      {isNavigating && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'white',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <ThreeDotsLoader />
         </div>
+      )}
 
-        <div className="row justify-content-center">
-          {plans.map((plan) => (
-            <div className="col-md-6 col-lg-4 mb-4" key={plan.planId}>
-              <div className="card h-100 bg-primary text-white shadow-sm border-0 d-flex flex-column position-relative">
+      {/* -------------------- PAGE CONTENT -------------------- */}
+      <div className="page-wrapper">
+        {/* Hero */}
+        <div
+          className="position-relative bg-img-start"
+          style={{ backgroundImage: 'url(dist/assets/svg/components/card-11.svg)' }}
+        />
 
-                {/* Minutes Badge at Top Center */}
-                <div className="text-center pt-4">
-                  <span
-                    className="bg-white text-primary fw-bold px-3 py-1 rounded-pill shadow-sm"
-                    style={{ fontSize: '0.95rem' }}
-                  >
-                    ⏱ {plan.planDuration} minutes
-                  </span>
-                </div>
+        {/* Plans Section */}
+        <div className="container py-5">
+          <div className="container">
+             <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 40, // similar circular size
+            height: 40, // height same as width
+            fontSize: 20,
+            fontWeight: 800,
+            borderRadius: "50%",
+            border: "1px solid #d0d0d0",
+            backgroundColor: hover ? "#e6f0ff" : "#f8f9fa",
+            color: hover ? "#0c6cd3" : "#0f65c7",
+            cursor: "pointer",
+            transition: "all 0.2s ease-in-out",
+          }}
+        >
+          <FaArrowLeft />
 
-                {/* Card Body */}
-                <div className="card-body d-flex flex-column pt-3 px-4">
-                  {/* Plan Name */}
-                  <h5 className="fw-bold mb-2 text-white text-center">{plan.planName}</h5>
+        </button>
+      </div>
+            <div
+              className="w-md-75 w-lg-70 text-center mx-auto mb-9"
+              id="target-plans"
+              ref={ref}
+            >
+              <h2>{formData.tagline}</h2>
+              <p>{formData.mainDescription}</p>
+            </div>
+          </div>
 
-                  {/* Plan Description */}
-                  <p className="text-white-75 small mb-3 text-center">{plan.planDescription}</p>
+          <div className="row justify-content-center">
+            {plans.map((plan) => (
+              <div className="col-md-6 col-lg-4 mb-4" key={plan.planId}>
+                <div className="card h-100 bg-primary text-white shadow-sm border-0 d-flex flex-column">
 
-                  {/* Plan Features */}
-                  <div >
+                  {/* Duration */}
+                  <div className="text-center pt-4">
+                    <span className="bg-white text-primary fw-bold px-3 py-1 rounded-pill">
+                      ⏱ {plan.planDuration} minutes
+                    </span>
+                  </div>
+
+                  {/* Body */}
+                  <div className="card-body d-flex flex-column pt-3 px-4">
+                    <h5 className="fw-bold text-center text-white">{plan.planName}</h5>
+                    <p className="text-white-75 small text-center">
+                      {plan.planDescription}
+                    </p>
+
                     <ul>
                       {(() => {
                         let features = [];
-
                         try {
                           if (Array.isArray(plan.planFeatures)) {
                             features = plan.planFeatures;
-                          } else if (typeof plan.planFeatures === 'string' && plan.planFeatures.trim()) {
-                            const parsed = JSON.parse(plan.planFeatures);
-                            if (Array.isArray(parsed)) features = parsed;
+                          } else if (typeof plan.planFeatures === 'string') {
+                            features = JSON.parse(plan.planFeatures);
                           }
-                        } catch (err) {
-                          console.warn('⚠️ Invalid planFeatures format:', plan.planFeatures, err);
-                        }
-
+                        } catch {}
                         return features.map((f, i) => <li key={i}>{f}</li>);
                       })()}
                     </ul>
 
+                    <div className="flex-grow-1" />
                   </div>
 
-                  <div className="flex-grow-1"></div>
-                </div>
+                  {/* Footer */}
+                  <div className="card-footer bg-transparent border-0 text-center pb-4">
+                    <div className="d-flex justify-content-center gap-2 flex-wrap">
+                      <div className="bg-white text-primary fw-bold rounded px-4 py-2 fs-5">
+                        ₹{plan.planPrice}
+                      </div>
 
-                {/* Card Footer */}
-                <div className="card-footer bg-transparent border-0 text-center pb-4">
-                  <div className="d-flex justify-content-center gap-2 flex-wrap">
-                    {/* Price */}
-                    <div className="bg-white text-primary fw-bold rounded px-4 py-2 fs-5 shadow-sm">
-                      ₹{plan.planPrice}
+                      <button
+                        className="btn fw-semibold text-white px-4 py-2 rounded shadow"
+                        style={{
+                          backgroundColor: '#7d85f9',
+                          border: 'none',
+                          boxShadow: '0 0 12px rgba(125,133,249,0.5)',
+                        }}
+                        onClick={() => handleBookNow(plan)}
+                      >
+                        Book Now
+                      </button>
                     </div>
-
-                    {/* Book Now Button */}
-                    <button
-                      type="button"
-                      className="btn fw-semibold text-white px-4 py-2 rounded shadow"
-                      style={{
-                        backgroundColor: '#7d85f9',
-                        border: 'none',
-                        boxShadow: '0 0 12px rgba(125,133,249,0.5)',
-                        transition: 'all 0.3s ease-in-out',
-                      }}
-                      onClick={() =>
-                        props.scrollToSection({
-                          planName: plan.planName,
-                          planPrice: plan.planPrice,
-                          planDuration: plan.planDuration,
-                        })
-                      }
-                    >
-                      Book Now
-                    </button>
                   </div>
+
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-
-
       </div>
-
-    </div>
+    </>
   );
 });
 
-Plans.displayName = "Plans";
+Plans.displayName = 'Plans';
 export default Plans;

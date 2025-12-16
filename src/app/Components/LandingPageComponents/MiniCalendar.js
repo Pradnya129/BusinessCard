@@ -1,24 +1,29 @@
-"use client";
-import React, { useState, useEffect } from "react";
+'use client';
+import React, { useState, useEffect, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "./MiniCalendar.css";
 import axios from "axios";
+import "./MiniCalendar.css"; // <- Ensure this file exists at: ./MiniCalendar.css
+import { useRouter } from "next/navigation";
+import { FaArrowLeft } from "react-icons/fa";
 
 const MiniCalendar = ({
-  selected,
-  onDateChange,
-  onSlotSelect,
-  duration,
+  selected,        // string: "YYYY-MM-DD" or Date-compatible
+  onDateChange,    // fn(dateString)
+  onSlotSelect,    // fn(slotLabel)
+  duration,        // number (minutes)
   bookedTimeSlots = [],
   selectedSlot,
   planId,
+  planName,     // ADD THIS
+  planPrice,
 }) => {
   const [timeSlots, setTimeSlots] = useState([]);
-  const [bookedSlots, setBookedSlots] = useState([]);
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [hover, setHover] = useState(false);
 
-  // 🔹 Parse "10:00 AM" → Date (with baseDate = selected date)
+  // helper: parse "10:00 AM" -> Date on baseDate
   const parse12ToDate = (timeStr, baseDate) => {
     if (!timeStr) return null;
     const [time, modifier] = timeStr.split(" ");
@@ -39,10 +44,7 @@ const [loading, setLoading] = useState(false);
     return `${h}:${m} ${period}`;
   };
 
-  const isOverlapping = (s1, e1, s2, e2) => s1 < e2 && s2 < e1;
-
-  // 🔹 Generate slots for a shift
-  const generateTimeSlots = (shiftStart, shiftEnd, durationMin, bufferMin, baseDate) => {
+  const generateTimeSlots = (shiftStart, shiftEnd, durationMin, bufferMin) => {
     if (!shiftStart || !shiftEnd || !durationMin || durationMin <= 0) return [];
     const slots = [];
     let cur = new Date(shiftStart);
@@ -62,205 +64,321 @@ const [loading, setLoading] = useState(false);
     }
     return slots;
   };
-
-
+  // memoize slug derivation
+  const slug = useMemo(() => {
+    try {
+      const hostname = typeof window !== "undefined" ? window.location.hostname : "";
+      const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+      let s = "";
+      if (hostname.includes("www.appointify.me") || hostname.includes("localhost")) {
+        s = pathname.split("/")[1] || "";
+      } else {
+        s = hostname || "";
+      }
+      return s;
+    } catch (e) {
+      return "";
+    }
+  }, []);
 
   useEffect(() => {
     const fetchShiftAndGenerateSlots = async () => {
-      console.log("selected",selected,"planid ",planId)  
+      // required pieces
       if (!selected || !duration || !planId) {
-        console.log("time slot empty")
-        setTimeSlots([]); // ❌ No plan selected → clear slots
+        setTimeSlots([]);
         return;
       }
 
+      setLoading(true);
       try {
-              setLoading(true); // ✅ start loading
-
-    
-
         const baseDate = new Date(selected);
-const hostname = window.location.hostname; // "www.appointify.me" or "www.aura-enterprises.in"
-const pathname = window.location.pathname; // "/aura-enterprises" or "/"
-
-// Determine slug
-let slug = "";
-
-// If main domain
-if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
-  slug = pathname.split("/")[1]; // get slug from URL path
-  console.log("slug/",slug)
-} else {
-  // Custom domain → send hostname as slug
-  slug = hostname;
-}// e.g., "localhost" or real domain
-        
-          console.log("slug by mini",slug)
-        // 1️⃣ Get plan-shift-buffer
+        // 1) get rules
         const bufferRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/all-rules?slug=${slug}`
         );
-        const rule = bufferRes.data.rules.find(r => r.planId === planId);
+        const rules = bufferRes?.data?.rules || [];
+        const rule = rules.find(r => String(r.planId) === String(planId));
         if (!rule) {
           setTimeSlots([]);
           return;
         }
-console.log("mini rule",rule)
-        // 2️⃣ Get shifts
+
+        // 2) get shifts
         const shiftRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${slug}`
         );
-        const shift = shiftRes.data.data.find(s => s.id === rule.shiftId);
+        const shifts = shiftRes?.data?.data || [];
+        const shift = shifts.find(s => String(s.id) === String(rule.shiftId));
         if (!shift) {
           setTimeSlots([]);
           return;
         }
-        console.log("shift mini",shift)
-        
+
+        // construct shift start & end on the selected date
+        // shift.startTime expected format "09:00:00" or "09:00"
         const shiftStart = new Date(`${selected}T${shift.startTime}`);
         const shiftEnd = new Date(`${selected}T${shift.endTime}`);
 
-        console.log("mini shiftstart",shiftStart)
-        console.log("mini shiftend",shiftEnd)
-
-        console.log("Shift start raw:", shift.startTime);
-console.log("Shift start constructed:", shiftStart.toString());
-
-        // 3️⃣ Generate all slots
+        // 3) generate base slots
         const slots = generateTimeSlots(
           shiftStart,
           shiftEnd,
           Number(duration),
-          rule.bufferInMinutes,
-          baseDate
+          Number(rule.bufferInMinutes || 0)
         );
-console.log("mini slots",slots)
-        // 4️⃣ Get only users assigned to this plan
+
+        // 4) get users assigned to plan
         const usersRes = await axios.get(
           `https://appo.coinagesoft.com/api/public-landing/allUsersByPlan`,
           { params: { slug, planId } }
         );
-        const users = usersRes.data?.data || [];
-        console.log("Users assigned to this plan:", users);
+        const users = usersRes?.data?.data || [];
 
+        // if no users, all slots free
         if (!users.length) {
-          setTimeSlots(slots); // no users, all slots are free
+          setTimeSlots(slots.map(s => ({ ...s, isBooked: false })));
           return;
         }
 
-        // 5️⃣ Fetch booked slots (filtered by both user + planId + slug)
+        // 5) fetch booked slots for each user for that date
+        const dateStr = new Date(selected).toISOString().split("T")[0];
         const bookedResults = await Promise.all(
           users.map(async (user) => {
             try {
-              const dateStr = new Date(selected).toISOString().split("T")[0];
               const res = await axios.get(
                 `https://appo.coinagesoft.com/api/public-landing/booked-slots/${dateStr}`,
                 { params: { userId: user.id, planId, slug } }
-                // 👈 added slug here
               );
-              return res.data?.data || [];
+              return res?.data?.data || [];
             } catch (err) {
-              console.error(`Error fetching booked slots for user ${user.id}`, err);
+              console.error("Error fetching booked slots for user", user.id, err);
               return [];
             }
           })
         );
-
         const allBooked = bookedResults.flat();
 
-        // convert to Date ranges
+        // map booked ranges to Dates
         const bookedRanges = allBooked.map(b => ({
           start: parse12ToDate(b.startTime, baseDate),
           end: parse12ToDate(b.endTime, baseDate),
         }));
+        const now = new Date();
 
-        // mark slots as booked only for this plan
-        const finalSlots = slots.map(slot => {
-          const isBooked = bookedRanges.some(
-            b => b.start.getTime() === slot.start.getTime() && b.end.getTime() === slot.end.getTime()
-          );
-          return { ...slot, isBooked };
+        const filteredSlots = slots.map(slot => {
+          let isPast = false;
+
+          // If slot is today AND slot start time is before now
+          if (
+            slot.start.toDateString() === now.toDateString() &&
+            slot.start.getTime() <= now.getTime()
+          ) {
+            isPast = true;
+          }
+
+          return {
+            ...slot,
+            isPast,
+          };
         });
 
+        // mark slots if overlapping any booked range
+        const finalSlots = filteredSlots.map(slot => {
+          const isBooked = bookedRanges.some(b => {
+            if (!b.start || !b.end) return false;
+            return (
+              b.start.getTime() === slot.start.getTime() &&
+              b.end.getTime() === slot.end.getTime()
+            );
+          });
+
+          return {
+            ...slot,
+            isBooked: isBooked || slot.isPast,
+          };
+        });
+
+        setTimeSlots(finalSlots);
 
 
         setTimeSlots(finalSlots);
-        console.log("mini finalsots".finalSlots)
-
       } catch (err) {
-        console.error("❌ Error fetching shift/slots:", err);
+        console.error("❌ Error fetching/generating slots:", err);
         setTimeSlots([]);
-      }finally {
-      setLoading(false); // ✅ end loading
-    }
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchShiftAndGenerateSlots();
-  }, [selected, duration, planId]);
+  }, [selected, duration, planId, slug]);
 
+  // UI: Calendly-like three-column layout
   return (
-    <div className="mx-auto mt-5 mt-sm-0" style={{ maxWidth: "35rem" }}>
-      <div className="bg-white p-4 mt-5 mt-lg-0" style={{ maxHeight: "40rem", minHeight: "30rem" }}>
-        <div className="calendar-container custom-calendar">
-          <DatePicker
-            inline
-            selected={selected ? new Date(selected) : new Date()}
-            onChange={(dateObj) => {
-              if (!duration || !planId) {
-                alert("Please select a plan first.");
-                return;
-              }
-              onDateChange && onDateChange(dateObj.toISOString().split("T")[0]);
-            }}
-            minDate={new Date()}
-          />
-          {!planId && (
-            <div className="text-center mt-3 text-warning">
-              Please select a plan first from form to see available slots.
-            </div>
-          )}
 
-{planId && (
-  <>
-    {loading ? (
-      <div className="text-center text-info mt-3">
-        Loading available slots...
+    <div className=" m-lg-5 card mx-auto" style={{
+      width: "100%",
+      maxWidth: "1200px",   // 👈 control card width here
+      borderRadius: 12,
+    }} >
+      <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
+        <button
+          type="button"
+          onClick={() => router.back()}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 40, // similar circular size
+            height: 40, // height same as width
+            fontSize: 20,
+            fontWeight: 800,
+            borderRadius: "50%",
+            border: "1px solid #d0d0d0",
+            backgroundColor: hover ? "#e6f0ff" : "#f8f9fa",
+            color: hover ? "#0c6cd3" : "#0f65c7",
+            cursor: "pointer",
+            transition: "all 0.2s ease-in-out",
+          }}
+        >
+          <FaArrowLeft />
+
+        </button>
       </div>
-    ) : timeSlots.length > 0 ? (
-      <>
-        <h6 className="fw-semibold mb-3 text-secondary">Available Slots</h6>
-        <div className="slot-grid px-2 px-sm-0">
-          {timeSlots.map(({ label, isBooked }, index) => {
-            const isSelected = selectedSlot === label;
-            return (
-              <button
-                key={index}
-                type="button"
-                className={`btn btn-sm rounded-pill px-3 py-2 fw-semibold ${
-                  isBooked
-                    ? "btn-secondary"
-                    : isSelected
-                    ? "btn-primary"
-                    : "btn-outline-primary"
-                }`}
-                disabled={isBooked}
-                onClick={() => onSlotSelect(label)}
-                title={isBooked ? "Slot already booked" : "Available"}
-              >
-                {label}
-              </button>
-            );
-          })}
+      <div className="mb-5 d-flex justify-content-center calendly-layout">
+
+        {/* LEFT: Meeting Info */}
+        <div className="pb-3 calendly-info" style={{ flex: "0 0 30%", minWidth: 220 }}>
+          <div style={{ padding: 10 }}>
+            <h4 style={{ margin: 0, fontWeight: 700 }}>{planName}</h4>
+            <div style={{ marginTop: 10, color: "#444" }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ fontSize: 14, color: "#666" }}>⏱</div>
+                <div style={{ fontWeight: 600 }}>{duration ? `${duration} minutes` : "—"}</div>
+              </div>
+              <div style={{ marginTop: 12, color: "#666", fontSize: 14 }}>
+                You’ll receive all appointment details after confirmation.              </div>
+            </div>
+          </div>
         </div>
-      </>
-    ) : (
-      <div className="text-center text-warning mt-3">
-        No slots available for selected date
-      </div>
-    )}
-  </>
-)}
-      </div>
+
+        {/* CENTER: Calendar */}
+        <div
+          className="p-3 border-start calendly-calendar"
+          style={{ flex: "0 0 35%", minWidth: 320, borderRight: "1px solid #eee" }}
+        >
+          <div style={{ padding: 6 }}>
+            <DatePicker
+              inline
+              selected={selected ? new Date(selected) : new Date()}
+              onChange={(dateObj) => {
+                if (!duration || !planId) {
+                  alert("Please select a plan first.");
+                  return;
+                }
+                // convert to YYYY-MM-DD
+                const iso = dateObj.toISOString().split("T")[0];
+                onDateChange && onDateChange(iso);
+              }}
+              minDate={new Date()}
+              calendarClassName="custom-calendar"
+              dayClassName={(date) => {
+                // optionally mark dates with dots (use bookedTimeSlots param if you calculate)
+                // For now return '' or 'date-has-dot' if any bookedTimeSlots include that date
+                const dateIso = date.toISOString().split("T")[0];
+                if (bookedTimeSlots && bookedTimeSlots.includes(dateIso)) return "date-has-dot";
+                return "";
+              }}
+            />
+          </div>
+        </div>
+
+        {/* RIGHT: Slots */}
+        <div
+          className="calendly-slots"
+          style={{ flex: "0 0 25%", minWidth: 300, maxWidth: 400 }}
+        >
+
+          <div style={{ padding: 7 }}>
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                position: "sticky",
+                top: 0,
+                background: "#fff",
+                zIndex: 2,
+                paddingBottom: 6,
+              }}
+            >
+              <h6 style={{ margin: 0, fontWeight: 400 }} >Select a Time</h6>
+              <div style={{ color: "#666", fontSize: 13 }}>
+                {selected || "Choose date"}
+              </div>
+            </div>
+
+            {/* Slot container */}
+            <div style={{ marginTop: 10 }}>
+              {!planId ? (
+                <div className="text-center text-warning">
+                  Please select a plan first from form to see available slots.
+                </div>
+              ) : loading ? (
+                <div className="text-info">Loading available slots...</div>
+              ) : timeSlots.length === 0 ? (
+                <div className="text-warning">No slots available for selected date</div>
+              ) : (
+                <div
+                  className="slot-dropdown"
+                  style={{
+                    maxHeight: 300,       // 🔥 controls dropdown height
+                    overflowY: "auto",
+                    overflowX: "hidden",  // 🔥 scroll instead of page grow
+                    paddingRight: 2,
+                  }}
+                >
+                  <div className="slot-grid calendly-slot-grid pb-3 mb-5">
+                    {timeSlots.map(({ label, isBooked }, index) => {
+                      const isSelected = selectedSlot === label;
+
+                      return (
+                        <div key={index} className="slot-row">
+                          <button
+                            type="button"
+                            className={`slot-btn 
+                      ${isBooked ? "booked" : isSelected ? "selected" : "available"}`}
+                            disabled={isBooked}
+                            onClick={() => onSlotSelect(label)}
+                          >
+                            {label}
+                          </button>
+
+                          {isSelected && (
+                            <button
+                              className="next-btn"
+                              onClick={() =>
+                                router.push(
+                                  `/${slug}/ContactForm?planId=${planId}&planName=${planName}&planDuration=${duration}&selectedDate=${selected}&planPrice=${planPrice}&selectedSlot=${label}`
+                                )
+                              }
+                            >
+                              Next
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

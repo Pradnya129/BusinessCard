@@ -88,7 +88,7 @@ if (hostname.includes("www.appointify.me") || hostname.includes("localhost") ) {
           <p className="mb-0">
             &copy; 2025{' '}
             <a
-              href="https://www.coinagesoft.com/"
+              href="https://appo.coinagesoft.com/"
               className="underline text-blue-300 hover:text-blue-500"
               target="_blank"
               rel="noopener noreferrer"

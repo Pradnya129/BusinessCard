@@ -1,7 +1,7 @@
-
 .react-datepicker__header{
   background-color: transparent !important;
 } 
+
 .react-datepicker__current-month{
   line-height: 1.2rem;
 }
@@ -21,18 +21,19 @@ h2#fc-dom-86 {
   padding-left: 10px !important;
 }
 
-
 .bg-light{
   background:white !important;
 }
+
 .custom-calendar .react-datepicker {
   width: 100%;
-   max-width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
-  /* height: 500px; */
 }
 
-.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name {
+.react-datepicker__day-name, 
+.react-datepicker__day, 
+.react-datepicker__time-name {
     color: #000;
     display: inline-block;
     width: 1.7rem;
@@ -45,7 +46,6 @@ h2#fc-dom-86 {
   float: none !important;
 }
 
-
 .date-has-dot {
   position: relative;
 }
@@ -54,28 +54,15 @@ h2#fc-dom-86 {
   content: '';
   width: 6px;
   height: 6px;
-  background-color: #0d6efd; /* Bootstrap primary or any color */
+  background-color: #0d6efd;
   border-radius: 50%;
   position: absolute;
   bottom: -7px;
   left: 50%;
   transform: translateX(-50%);
 }
-.slot-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 12px;
-}
-.slot-grid button {
-  min-width: 150px;
-  text-align: center;
-}
-.react-datepicker__day--selected,
-.react-datepicker__day--keyboard-selected {
-  background-color: #0d6efd !important; /* or your primary color */
-  color: #fff !important; /* white text */
-  border-radius: 0.3rem;
-}
+
+/* Slot grid (Calendly style) */
 .slot-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -91,19 +78,26 @@ h2#fc-dom-86 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem; /* Smaller font for long text */
-  border-radius: 50px; /* pill shape */
+  font-size: 0.875rem;
+  border-radius: 50px;
 }
+
+/* Selected Date highlight */
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #0d6efd !important;
+  color: #fff !important;
+  border-radius: 0.3rem;
+}
+
+/* Disabled days */
 .react-datepicker__day--disabled {
   color: #ccc !important;
-  /* background-color: #f8f9fa !important; */
-  /* text-decoration: line-through; */
   cursor: not-allowed;
   border-radius: 0.3rem;
 }
 
-
-
+/* Responsive Calendar */
 @media screen and (max-width: 600px) {
   .custom-calendar .react-datepicker {
     width: 100%;
@@ -128,3 +122,197 @@ h2#fc-dom-86 {
     padding: 0 5px;
   }
 }
+
+/* Additional Calendly-like styling */
+
+.calendly-full-wrapper {
+  width: 100%;
+}
+
+.slot-btn.booked {
+  background: #f1f1f1 !important;
+  color: #999 !important;
+  border: 1px solid #ddd !important;
+  cursor: not-allowed !important;
+}
+
+.slot-btn.selected {
+  background: #0d6efd !important;
+  color: #fff !important;
+  border: 1px solid #0d6efd !important;
+}
+
+.slot-btn.available {
+  background: #fff !important;
+  color: #0d6efd !important;
+  border: 1px solid #0d6efd !important;
+}
+
+.calendly-left {
+  border-right: 1px solid #eee;
+}
+
+.calendly-right {
+  overflow-y: auto;
+}
+
+.calendly-center {
+  border-right: 1px solid #eee;
+}
+/* ===================================================
+   Calendly Style Slot Layout
+   =================================================== */
+
+.calendly-slot-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.slot-row {
+  margin: 0px 5px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Slot Button (Default) */
+.slot-btn {
+  width: 80%;
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1.5px solid #cbdafc;
+  background: white;
+  color: #0d6efd;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Hover */
+.slot-btn.available:hover {
+  border-color: #0d6efd;
+  background: #f1f7ff;
+}
+
+/* Booked Slot */
+.slot-btn.booked {
+  background: #e8e8e8 !important;
+  color: #777 !important;
+  border-color: #d0d0d0 !important;
+  cursor: not-allowed !important;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Selected Slot */
+.slot-btn.selected {
+  background: #555 !important; 
+  color: #fff !important;
+  border-color: #444 !important;
+    transition: all 0.4s ease-in-out;
+  
+}
+
+/* NEXT Button Like Calendly */
+.next-btn {
+  background: #0d6efd;
+  color: white;
+  padding: 0 20px;
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  transition: 0.2s;
+}
+
+.next-btn:hover {
+  background: #0954c4;
+}
+/* ============================
+   Slot Selection Animation
+   ============================ */
+
+.slot-btn {
+  transition: all 0.25s ease;
+  transform: scale(1);
+}
+
+/* On hover */
+.slot-btn.available:hover {
+  transform: scale(1.03);
+}
+
+/* Selected slot animation */
+.slot-btn.selected {
+  animation: slotSelectAnim 0.3s ease forwards;
+}
+
+@keyframes slotSelectAnim {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.06); opacity: 0.9; }
+  100% { transform: scale(1.03); opacity: 1; }
+}
+
+/* ============================
+   Next Button Slide Animation
+   ============================ */
+
+.next-btn {
+  opacity: 0;
+  transform: translateX(10px);
+  animation: slideInNext 0.25s ease forwards;
+}
+
+@keyframes slideInNext {
+  from {
+    opacity: 0;
+    transform: translateX(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===============================
+   DESKTOP (default – OLD UI)
+   =============================== */
+.calendly-layout {
+  display: flex;
+  gap: 16px;
+}
+
+/* ===============================
+   MOBILE & TABLET
+   Same behavior as:
+   col-12 col-lg-4
+   =============================== */
+@media (max-width: 991px) {
+  .calendly-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendly-info,
+  .calendly-calendar,
+  .calendly-slots {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+  }
+
+  .calendly-calendar {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+  }
+
+  /* slot list scroll only on desktop */
+  .slot-dropdown {
+    max-height: none !important;
+  }
+}
+
+
