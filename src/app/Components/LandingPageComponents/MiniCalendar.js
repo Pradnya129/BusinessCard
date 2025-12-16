@@ -216,11 +216,7 @@ const MiniCalendar = ({
   // UI: Calendly-like three-column layout
   return (
 
-    <div className=" m-lg-5 card mx-auto" style={{
-      width: "100%",
-      maxWidth: "1200px",   // 👈 control card width here
-      borderRadius: 12,
-    }} >
+    <div className="card mx-auto calendar-card" >
       <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
         <button
           type="button"
@@ -298,7 +294,7 @@ const MiniCalendar = ({
         {/* RIGHT: Slots */}
         <div
           className="calendly-slots"
-          style={{ flex: "0 0 25%", minWidth: 300, maxWidth: 400 }}
+          style={{ flex: "0 0 25%", minWidth: 300 }}
         >
 
           <div style={{ padding: 7 }}>
