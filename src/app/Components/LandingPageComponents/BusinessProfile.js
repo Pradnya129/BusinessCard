@@ -21,8 +21,8 @@ const BusinessProfile = () => {
         if (!slug) throw new Error('Slug not found');
 
         const [landingRes, adminRes] = await Promise.all([
-          fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`),
-          fetch(`http://localhost:5000/api/public-landing/getAdminBySlug?slug=${slug}`)
+          fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`)
+          // fetch(`http://localhost:5000/api/public-landing/getAdminBySlug?slug=${slug}`)
         ]);
 
         const landingJson = await landingRes.json();
