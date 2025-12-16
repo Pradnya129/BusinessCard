@@ -22,15 +22,15 @@ const BusinessProfile = () => {
 
         const [landingRes, adminRes] = await Promise.all([
           fetch(`https://appo.coinagesoft.com/api/public-landing/?slug=${slug}`),
-          fetch(`https://appo.coinagesoft.com/api/public-landing/getAdminBySlug?slug=${slug}`)
+          fetch(`http://localhost:5000/api/public-landing/getAdminBySlug?slug=${slug}`)
         ]);
 
         const landingJson = await landingRes.json();
-        const adminJson = await adminRes.json();
+        // const adminJson = await adminRes.json();
 
         const mergedProfile = {
           ...landingJson.data,
-          phoneNumber: adminJson?.admin?.phoneNumber ?? landingJson?.data?.phoneNumber ?? null
+          phoneNumber: landingJson?.data?.phoneNumber ?? null
         };
 
         setProfile(mergedProfile);
@@ -119,7 +119,7 @@ const BusinessProfile = () => {
                     <a href={`tel:${profile.phoneNumber}`} className="text-decoration-none">
                       <div className="p-3 border rounded-3 h-100 text-center">
                         <small className="text-muted">Phone</small>
-                        <p className="fw-semibold mb-0">{profile.phoneNumber || '+91 XXXXX XXXXX'}</p>
+                        <p className="fw-semibold mb-0">{ '+91 XXXXX XXXXX'}</p>
                       </div>
                     </a>
                   </div>
