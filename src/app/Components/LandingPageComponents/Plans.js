@@ -159,7 +159,7 @@ const Plans = React.forwardRef(({ onReady }, ref) => {
               id="target-plans"
               ref={ref}
             >
-              <h2>{formData.tagline}</h2>
+              <h2 className='plan-title'>{formData.tagline}</h2>
               <p>{formData.mainDescription}</p>
             </div>
           </div>
