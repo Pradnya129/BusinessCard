@@ -203,7 +203,7 @@ END:VCARD
                 {/* Contact Info */}
                 <div className="row g-3 mt-4">
                   <div className="col-12 col-md-6">
-                    <a href={`tel:${profile.phoneNumber}`} className="text-decoration-none">
+                    <a href={`tel:91 9875708668`} className="text-decoration-none">
                       <div className="p-3 border rounded-3 h-100 text-center">
                         <small className="text-muted">Phone</small>
                         <p className="fw-semibold mb-0">{'+91 9875708668'}</p>
