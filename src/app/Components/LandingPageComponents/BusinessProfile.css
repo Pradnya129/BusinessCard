@@ -45,7 +45,7 @@
 .profile-img-wrapper {
   position: absolute;
   top: -55px;
-  right: 40%;
+  right: 63%;
   transform: translateX(-50%);
 }
 
@@ -120,6 +120,10 @@
     font-size: 13px;
     padding: 10px;
   }
+  .profile-img-wrapper {
+  top: -60px;
+  right: 30%;
+}
 }
 /* Buttons hover effect */
 .btn-outline-primary {
