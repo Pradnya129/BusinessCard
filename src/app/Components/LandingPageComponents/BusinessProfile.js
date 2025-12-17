@@ -7,6 +7,8 @@ import './BusinessProfile.css';
 const BusinessProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [navigating, setNavigating] = useState(false);
+
   const router = useRouter();
   useEffect(() => {
     const fetchProfile = async () => {
@@ -44,14 +46,20 @@ const BusinessProfile = () => {
     fetchProfile();
   }, []);
 
-  const goToPlans = () => {
-    const hostname = window.location.hostname;
-    const pathname = window.location.pathname;
-    const slug = hostname.includes('appointify') || hostname.includes('localhost')
+const goToPlans = () => {
+  const hostname = window.location.hostname;
+  const pathname = window.location.pathname;
+
+  const slug =
+    hostname.includes('appointify') || hostname.includes('localhost')
       ? pathname.split('/')[1]
       : hostname;
-    router.push(`/${slug}/Plans`);
-  };
+
+  router.push(`/${slug}/Plans`);
+};
+
+
+
 
   if (loading) {
     return (
@@ -64,8 +72,24 @@ const BusinessProfile = () => {
   if (!profile?.fullName) return null;
 
   return (
+    
     <section className="profile-section">
-      {/* COVER IMAGE */}
+      {/* COVER IMAGE */}{navigating && (
+  <div
+    style={{
+      position: 'fixed',
+      inset: 0,
+      background: 'white',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 9999,
+    }}
+  >
+    <ThreeDotsLoader />
+  </div>
+)}
+
       <div className="cover-wrapper">
         <div className="cover-slider">
           {[profile.banner1_Image, profile.banner2_Image, profile.banner3_Image]

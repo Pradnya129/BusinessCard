@@ -96,6 +96,12 @@ h2#fc-dom-86 {
   cursor: not-allowed;
   border-radius: 0.3rem;
 }
+/* DESKTOP ONLY */
+@media (min-width: 769px) {
+  .calendly-info { flex: 0 0 30%; }
+  .calendly-calendar { flex: 0 0 35%; }
+  .calendly-slots { flex: 0 0 25%; }
+}
 
 /* Responsive Calendar */
 @media screen and (max-width: 600px) {
@@ -276,6 +282,11 @@ h2#fc-dom-86 {
   }
 }
 
+.calendar-card {
+  width: 100%;
+  max-width: 1200px;
+  border-radius: 12px;
+}
 /* ===============================
    DESKTOP (default – OLD UI)
    =============================== */
@@ -284,52 +295,69 @@ h2#fc-dom-86 {
   gap: 16px;
 }
 
-/* ===============================
-   MOBILE & TABLET
-   Same behavior as:
-   col-12 col-lg-4
-   =============================== */
-@media (max-width: 991px) {
-  .calendly-layout {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
-  .calendly-info,
+/* ===== MOBILE FIX ===== */
+@media (max-width: 768px) {
+  .calendly-layout {
+    display: flex;
+    flex-direction: column;   /* 👈 stack */
+    gap: 0px;                /* equal space between sections */
+    /* padding: 16px; */
+  }
+   .calendly-info,
   .calendly-calendar,
   .calendly-slots {
-    width: 100% !important;
-    min-width: 100% !important;
-    flex: 1 1 100% !important;
-    padding-left: 12px;
-    padding-right: 12px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+      padding: 12px 12px;
+    min-height: 0;
+  } 
+  .calendar-card {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .calendly-left,
+  .calendly-center,
+  .calendly-right {
+    border: none !important;
+  }
+   .calendly-calendar {
+    display: flex;
     justify-content: center;
   }
-
-
-  .calendly-calendar {
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
+    .slot-row {
+    grid-template-columns: 1fr;
   }
 
-  /* slot list scroll only on desktop */
-  .slot-dropdown {
-    max-height: none !important;
+  .slot-btn {
+    width: 100%;
   }
-}
-.calendar-card {
-  width: 100%;
-  max-width: 1200px;
-  border-radius: 12px;
+    .calendar-card,
+  .card {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    
+  }
+    .calendly-info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;   /* vertical center */
+    align-items: center;  
+    padding: 0px;     /* horizontal center */
+  }
+    .calendly-info > div > div > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
-/* MOBILE */
-@media (max-width: 768px) {
-  .calendar-card {
-    max-width: 100%;
-    border-radius: 0; /* edge-to-edge like Calendly */
-  }
-}
 
 
 

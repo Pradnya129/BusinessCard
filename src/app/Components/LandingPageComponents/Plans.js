@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa";
 import ThreeDotsLoader from './ThreeDotsLoader.js';
 
-const Plans = React.forwardRef((props, ref) => {
+const Plans = React.forwardRef(({ onReady }, ref) => {
 
   const router = useRouter();
   const [hover, setHover] = useState(false);
@@ -21,7 +21,6 @@ const Plans = React.forwardRef((props, ref) => {
   });
 
   const [plans, setPlans] = useState([]);
-  const [shifts, setShifts] = useState([]);
 
   /* -------------------- BOOK NOW HANDLER -------------------- */
   const handleBookNow = (plan) => {
@@ -51,7 +50,7 @@ const Plans = React.forwardRef((props, ref) => {
         setSlug(resolvedSlug);
 
         const res = await axios.get(
-          `http://localhost:5000/api/public-landing/?slug=${resolvedSlug}`
+          `https://appo.coinagesoft.com/api/public-landing/?slug=${resolvedSlug}`
         );
 
         const data = res.data.data;
@@ -78,22 +77,19 @@ const Plans = React.forwardRef((props, ref) => {
           resolvedSlug = hostname;
         }
 
-        const [plansRes, shiftsRes] = await Promise.all([
+        const [plansRes] = await Promise.all([
           axios.get(
             `https://appo.coinagesoft.com/api/public-landing/all?slug=${resolvedSlug}`
-          ),
-          axios.get(
-            `https://appo.coinagesoft.com/api/public-landing/all-shifts?slug=${resolvedSlug}`
-          ),
+          )
         ]);
 
         setPlans(plansRes.data.data || []);
-        setShifts(shiftsRes.data.data || []);
       } catch (error) {
         console.error('Error fetching plans:', error);
         setPlans([]);
-        setShifts([]);
-      }
+      }finally {
+    onReady && onReady(); // ✅ VERY IMPORTANT
+  }
     };
 
     fetchData();

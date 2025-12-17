@@ -30,9 +30,9 @@ const Page = () => {
 
   return (
     <div
-      className="section-light"
+      className=""
       ref={targetRef}
-      style={{ marginBottom: '14rem' }}
+      
     >
       {isLoaded ? (
         <CalendarOnly prefillData={selectedPlan} />

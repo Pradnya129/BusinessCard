@@ -216,7 +216,7 @@ const MiniCalendar = ({
   // UI: Calendly-like three-column layout
   return (
 
-    <div className="card mx-auto calendar-card" >
+    <div className="card mx-auto calendar-card mt-lg-5" >
       <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
         <button
           type="button"
@@ -246,8 +246,8 @@ const MiniCalendar = ({
       <div className="mb-5 d-flex justify-content-center calendly-layout">
 
         {/* LEFT: Meeting Info */}
-        <div className="pb-3 calendly-info" style={{ flex: "0 0 30%", minWidth: 220 }}>
-          <div style={{ padding: 10 }}>
+        <div className="pb-3 calendly-info ">
+          <div style={{ padding: 10 }} >
             <h4 style={{ margin: 0, fontWeight: 700 }}>{planName}</h4>
             <div style={{ marginTop: 10, color: "#444" }}>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -263,7 +263,7 @@ const MiniCalendar = ({
         {/* CENTER: Calendar */}
         <div
           className="p-3 border-start calendly-calendar"
-          style={{ flex: "0 0 35%", minWidth: 320, borderRight: "1px solid #eee" }}
+          
         >
           <div style={{ padding: 6 }}>
             <DatePicker
@@ -294,7 +294,7 @@ const MiniCalendar = ({
         {/* RIGHT: Slots */}
         <div
           className="calendly-slots"
-          style={{ flex: "0 0 25%", minWidth: 300 }}
+      
         >
 
           <div style={{ padding: 7 }}>
