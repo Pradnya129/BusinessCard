@@ -121,3 +121,20 @@
     padding: 10px;
   }
 }
+/* Buttons hover effect */
+.btn-outline-primary {
+  transition: all 0.2s;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0d6efd; /* Bootstrap primary */
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Dropdown items hover */
+.dropdown-menu li:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}

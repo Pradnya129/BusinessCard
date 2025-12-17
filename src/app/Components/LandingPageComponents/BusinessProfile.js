@@ -46,17 +46,17 @@ const BusinessProfile = () => {
     fetchProfile();
   }, []);
 
-const goToPlans = () => {
-  const hostname = window.location.hostname;
-  const pathname = window.location.pathname;
+  const goToPlans = () => {
+    const hostname = window.location.hostname;
+    const pathname = window.location.pathname;
 
-  const slug =
-    hostname.includes('appointify') || hostname.includes('localhost')
-      ? pathname.split('/')[1]
-      : hostname;
+    const slug =
+      hostname.includes('appointify') || hostname.includes('localhost')
+        ? pathname.split('/')[1]
+        : hostname;
 
-  router.push(`/${slug}/Plans`);
-};
+    router.push(`/${slug}/Plans`);
+  };
 
 
 
@@ -72,23 +72,23 @@ const goToPlans = () => {
   if (!profile?.fullName) return null;
 
   return (
-    
+
     <section className="profile-section">
       {/* COVER IMAGE */}{navigating && (
-  <div
-    style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'white',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      zIndex: 9999,
-    }}
-  >
-    <ThreeDotsLoader />
-  </div>
-)}
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'white',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 9999,
+          }}
+        >
+          <ThreeDotsLoader />
+        </div>
+      )}
 
       <div className="cover-wrapper">
         <div className="cover-slider">
@@ -110,17 +110,17 @@ const goToPlans = () => {
           <div className="col-12 col-md-10 col-lg-7">
             <div className="card border-0 shadow rounded-4 profile-card">
               <div className="card-body p-4 p-md-5 text-center">
-               <div>
+                <div>
 
-                {/* Profile Image */}
-                <div className="profile-img-wrapper">
-                  <img
-                    src={`https://appo.coinagesoft.com${profile.section2_Image}`}
-                    alt={profile.fullName}
-                    className="profile-image"
-                  />
+                  {/* Profile Image */}
+                  <div className="profile-img-wrapper">
+                    <img
+                      src={`https://appo.coinagesoft.com${profile.section2_Image}`}
+                      alt={profile.fullName}
+                      className="profile-image"
+                    />
+                  </div>
                 </div>
-               </div>
 
 
                 <h5 className="fw-bold mt-3 mb-0">{profile.fullName}</h5>
@@ -143,7 +143,7 @@ const goToPlans = () => {
                     <a href={`tel:${profile.phoneNumber}`} className="text-decoration-none">
                       <div className="p-3 border rounded-3 h-100 text-center">
                         <small className="text-muted">Phone</small>
-                        <p className="fw-semibold mb-0">{ '+91 XXXXX XXXXX'}</p>
+                        <p className="fw-semibold mb-0">{'+91 XXXXX XXXXX'}</p>
                       </div>
                     </a>
                   </div>
@@ -166,8 +166,36 @@ const goToPlans = () => {
                     No app required · Save contact instantly
                   </p>
                 </div>
+  {/* Secondary actions - Theme-consistent */}
+<div className="d-flex flex-column flex-sm-row gap-2 mt-3">
+  {/* Save Contact */}
+  <button className="btn btn-outline-primary flex-fill rounded-3 p-3 fw-semibold shadow-sm">
+    Save my contact
+  </button>
 
-              
+  {/* Share Dropdown */}
+  <div className="dropdown flex-fill">
+    <button
+      className="btn btn-outline-primary w-100 rounded-3 p-3 fw-semibold shadow-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+    >
+      Share
+    </button>
+    <ul className="dropdown-menu w-100 shadow-sm">
+      <li className="dropdown-item">Copy my card link</li>
+      <li className="dropdown-item">Show QR code</li>
+      <li className="dropdown-item text-muted">
+        Add to Apple / Google Wallet (soon)
+      </li>
+      {profile.whatsapp && <li className="dropdown-item">WhatsApp</li>}
+      <li className="dropdown-item">Email</li>
+      {profile.linkedinId && <li className="dropdown-item">LinkedIn</li>}
+    </ul>
+  </div>
+</div>
+
+
+
                 {/* Trust footer */}
                 <div className="mt-4 p-3 bg-light rounded-3 text-center">
                   <small className="text-muted">
