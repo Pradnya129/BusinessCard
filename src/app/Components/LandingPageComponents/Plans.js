@@ -126,34 +126,34 @@ const Plans = React.forwardRef(({ onReady }, ref) => {
         />
 
         {/* Plans Section */}
+           <div className="d-flex align-items-center ms-2 mt-1 mb-3" style={{ padding: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  onMouseEnter={() => setHover(true)}
+                  onMouseLeave={() => setHover(false)}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 40, // similar circular size
+                    height: 40, // height same as width
+                    fontSize: 20,
+                    fontWeight: 800,
+                    borderRadius: "50%",
+                    border: "1px solid #d0d0d0",
+                    backgroundColor: hover ? "#e6f0ff" : "#f8f9fa",
+                    color: hover ? "#0c6cd3" : "#0f65c7",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease-in-out",
+                  }}
+                >
+                  <FaArrowLeft />
+        
+                </button>
+              </div>
         <div className="container py-5">
           <div className="container">
-             <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 40, // similar circular size
-            height: 40, // height same as width
-            fontSize: 20,
-            fontWeight: 800,
-            borderRadius: "50%",
-            border: "1px solid #d0d0d0",
-            backgroundColor: hover ? "#e6f0ff" : "#f8f9fa",
-            color: hover ? "#0c6cd3" : "#0f65c7",
-            cursor: "pointer",
-            transition: "all 0.2s ease-in-out",
-          }}
-        >
-          <FaArrowLeft />
-
-        </button>
-      </div>
             <div
               className="w-md-75 w-lg-70 text-center mx-auto mb-9"
               id="target-plans"
