@@ -1,5 +1,5 @@
 'use client';
-
+import QrCodeModal from './QrCodeModal';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import './BusinessProfile.css';
@@ -8,6 +8,9 @@ const BusinessProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [navigating, setNavigating] = useState(false);
+  const [showQr, setShowQr] = useState(false);
+  const cardUrl =
+    typeof window !== 'undefined' ? window.location.href : '';
 
   const router = useRouter();
   useEffect(() => {
@@ -166,33 +169,35 @@ const BusinessProfile = () => {
                     No app required · Save contact instantly
                   </p>
                 </div>
-  {/* Secondary actions - Theme-consistent */}
-<div className="d-flex flex-column flex-sm-row gap-2 mt-3">
-  {/* Save Contact */}
-  <button className="btn btn-outline-primary flex-fill rounded-3 p-3 fw-semibold shadow-sm">
-    Save my contact
-  </button>
+                {/* Secondary actions - Theme-consistent */}
+                <div className="d-flex flex-column flex-sm-row gap-2 mt-3">
+                  {/* Save Contact */}
+                  <button className="btn btn-outline-primary flex-fill rounded-3 p-3 fw-semibold shadow-sm">
+                    Save my contact
+                  </button>
 
-  {/* Share Dropdown */}
-  <div className="dropdown flex-fill">
-    <button
-      className="btn btn-outline-primary w-100 rounded-3 p-3 fw-semibold shadow-sm dropdown-toggle"
-      data-bs-toggle="dropdown"
-    >
-      Share
-    </button>
-    <ul className="dropdown-menu w-100 shadow-sm">
-      <li className="dropdown-item">Copy my card link</li>
-      <li className="dropdown-item">Show QR code</li>
-      <li className="dropdown-item text-muted">
-        Add to Apple / Google Wallet (soon)
-      </li>
-      {profile.whatsapp && <li className="dropdown-item">WhatsApp</li>}
-      <li className="dropdown-item">Email</li>
-      {profile.linkedinId && <li className="dropdown-item">LinkedIn</li>}
-    </ul>
-  </div>
-</div>
+                  {/* Share Dropdown */}
+                  <div className="dropdown flex-fill">
+                    <button
+                      className="btn btn-outline-primary w-100 rounded-3 p-3 fw-semibold shadow-sm dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                    >
+                      Share
+                    </button>
+                    <ul className="dropdown-menu w-100 shadow-sm">
+                      <li className="dropdown-item">Copy my card link</li>
+                      <li className="dropdown-item" onClick={() => setShowQr(true)}>
+                        Show QR code
+                      </li>
+                      <li className="dropdown-item text-muted">
+                        Add to Apple / Google Wallet (soon)
+                      </li>
+                      {profile.whatsapp && <li className="dropdown-item">WhatsApp</li>}
+                      <li className="dropdown-item">Email</li>
+                      {profile.linkedinId && <li className="dropdown-item">LinkedIn</li>}
+                    </ul>
+                  </div>
+                </div>
 
 
 
@@ -207,7 +212,14 @@ const BusinessProfile = () => {
           </div>
         </div>
       </div>
+      <QrCodeModal
+  open={showQr}
+  onClose={() => setShowQr(false)}
+  url={cardUrl}
+/>
+
     </section>
+    
   );
 };
 
