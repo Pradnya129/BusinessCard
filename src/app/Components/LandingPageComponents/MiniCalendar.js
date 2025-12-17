@@ -262,7 +262,7 @@ const MiniCalendar = ({
 
         {/* CENTER: Calendar */}
         <div
-          className="p-3 border-start calendly-calendar"
+          className="p-lg-3 border-start calendly-calendar"
           
         >
           <div style={{ padding: 6 }}>

@@ -114,9 +114,9 @@ h2#fc-dom-86 {
   .react-datepicker__day-name,
   .react-datepicker__day,
   .react-datepicker__time-name {
-    width: 1.4rem;
-    line-height: 1.4rem;
-    margin: 0.3rem;
+    width: 2rem;
+    line-height: 1.6rem;
+    margin: 0.2rem;
   }
 
   .react-datepicker__month-container {
@@ -334,6 +334,7 @@ h2#fc-dom-86 {
 
   .slot-btn {
     width: 100%;
+    margin: 0 2px;
   }
     .calendar-card,
   .card {
