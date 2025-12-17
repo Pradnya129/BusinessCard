@@ -40,7 +40,7 @@ FN:${profile.fullName}
 N:${profile.fullName};;;;
 ORG:${profile.businessName || ''}
 TITLE:${profile.role || ''}
-TEL;TYPE=CELL:${profile.phoneNumber || ''}
+TEL;TYPE=CELL:9158287488
 EMAIL:${profile.email || ''}
 URL:${window.location.href}
 END:VCARD
