@@ -152,8 +152,13 @@ END:VCARD
           <ThreeDotsLoader />
         </div>
       )}
+<div className="bg-blobs">
+  <span className="blob blob-1"></span>
+  <span className="blob blob-2"></span>
+  <span className="blob blob-3"></span>
+</div>
 
-      <div className="cover-wrapper">
+      <div className="cover-wrapper ">
         <div className="cover-slider">
           {[profile.banner1_Image, profile.banner2_Image, profile.banner3_Image]
             .filter(Boolean)
