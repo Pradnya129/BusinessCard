@@ -6,20 +6,9 @@
   position: relative;
 }
 
-.cover-slider {
-  position: absolute;
-  inset: 0;
-}
 
-/* .cover-slide {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;  
-  animation: slideFade 15s infinite;
-  transition: opacity 0.3s ease-in-out; /* smooth fade */
- 
+
+
 
 /* staggered animation for multiple slides */
 .cover-slide:nth-child(1) { animation-delay: 0s; }
@@ -209,6 +198,7 @@
 }
 .cover-slider {
   display: flex;
+  width: 110%; 
   height: 100%;
   animation: slideCover 18s infinite ease-in-out;
 }
