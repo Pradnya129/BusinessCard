@@ -206,7 +206,7 @@ END:VCARD
                     <a href={`tel:91 9875708668`} className="text-decoration-none">
                       <div className="p-3 border rounded-3 h-100 text-center">
                         <small className="text-muted">Phone</small>
-                        <p className="fw-semibold mb-0">{'+91 9875708668'}</p>
+                        <p className="fw-semibold mb-0">{'+91 9158287488'}</p>
                       </div>
                     </a>
                   </div>
