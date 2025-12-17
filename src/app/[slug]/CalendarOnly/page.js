@@ -30,7 +30,7 @@ const Page = () => {
 
   return (
     <div
-      className=""
+      className="bg-white"
       ref={targetRef}
       
     >
