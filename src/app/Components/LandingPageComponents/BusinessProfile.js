@@ -13,6 +13,39 @@ const BusinessProfile = () => {
     typeof window !== 'undefined' ? window.location.href : '';
 
   const router = useRouter();
+
+  const copyCardLink = async () => {
+  try {
+    await navigator.clipboard.writeText(cardUrl);
+    alert('Business card link copied!');
+  } catch {
+    alert('Unable to copy link');
+  }
+};
+
+const shareWhatsApp = () => {
+  window.open(
+    `https://wa.me/?text=${encodeURIComponent(cardUrl)}`,
+    '_blank'
+  );
+};
+
+const shareEmail = () => {
+  window.location.href =
+    `mailto:?subject=My Digital Business Card&body=${encodeURIComponent(cardUrl)}`;
+};
+
+const shareLinkedIn = () => {
+  window.open(
+    `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(cardUrl)}`,
+    '_blank'
+  );
+};
+
+const shareSMS = () => {
+  window.location.href = `sms:?body=${encodeURIComponent(cardUrl)}`;
+};
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -170,34 +203,54 @@ const BusinessProfile = () => {
                   </p>
                 </div>
                 {/* Secondary actions - Theme-consistent */}
-                <div className="d-flex flex-column flex-sm-row gap-2 mt-3">
-                  {/* Save Contact */}
-                  <button className="btn btn-outline-primary flex-fill rounded-3 p-3 fw-semibold shadow-sm">
-                    Save my contact
-                  </button>
+              <div className="d-flex flex-column flex-sm-row gap-2 mt-3">
+  {/* Save Contact */}
+  <button className="btn btn-outline-primary flex-fill rounded-3 p-3 fw-semibold shadow-sm">
+    Save my contact
+  </button>
 
-                  {/* Share Dropdown */}
-                  <div className="dropdown flex-fill">
-                    <button
-                      className="btn btn-outline-primary w-100 rounded-3 p-3 fw-semibold shadow-sm dropdown-toggle"
-                      data-bs-toggle="dropdown"
-                    >
-                      Share
-                    </button>
-                    <ul className="dropdown-menu w-100 shadow-sm">
-                      <li className="dropdown-item">Copy my card link</li>
-                      <li className="dropdown-item" onClick={() => setShowQr(true)}>
-                        Show QR code
-                      </li>
-                      <li className="dropdown-item text-muted">
-                        Add to Apple / Google Wallet (soon)
-                      </li>
-                      {profile.whatsapp && <li className="dropdown-item">WhatsApp</li>}
-                      <li className="dropdown-item">Email</li>
-                      {profile.linkedinId && <li className="dropdown-item">LinkedIn</li>}
-                    </ul>
-                  </div>
-                </div>
+  {/* Share Dropdown */}
+  <div className="dropdown flex-fill">
+    <button
+      className="btn btn-outline-primary w-100 rounded-3 p-3 fw-semibold shadow-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+    >
+      Share
+    </button>
+
+    <ul className="dropdown-menu w-100 shadow-sm">
+      <li className="dropdown-item" onClick={copyCardLink}>
+        Copy my card link
+      </li>
+
+      <li
+        className="dropdown-item"
+        onClick={() => setShowQr(true)}
+      >
+        Show QR code
+      </li>
+
+      <li className="dropdown-item" onClick={shareWhatsApp}>
+        WhatsApp
+      </li>
+
+      <li className="dropdown-item" onClick={shareEmail}>
+        Email
+      </li>
+
+      {profile.linkedinId && (
+        <li className="dropdown-item" onClick={shareLinkedIn}>
+          LinkedIn
+        </li>
+      )}
+
+      <li className="dropdown-item text-muted">
+        Add to Apple / Google Wallet (soon)
+      </li>
+    </ul>
+  </div>
+</div>
+
 
 
 
