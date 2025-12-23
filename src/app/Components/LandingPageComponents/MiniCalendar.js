@@ -43,6 +43,13 @@ const MiniCalendar = ({
     h = h % 12 || 12;
     return `${h}:${m} ${period}`;
   };
+useEffect(() => {
+  if (!selected) {
+    const todayIso = new Date().toISOString().split("T")[0];
+    onDateChange && onDateChange(todayIso);
+  }
+}, [selected, onDateChange]);
+
 
   const generateTimeSlots = (shiftStart, shiftEnd, durationMin, bufferMin) => {
     if (!shiftStart || !shiftEnd || !durationMin || durationMin <= 0) return [];

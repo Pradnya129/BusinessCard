@@ -9,6 +9,8 @@ const BusinessProfile = () => {
   const [loading, setLoading] = useState(true);
   const [navigating, setNavigating] = useState(false);
   const [showQr, setShowQr] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
   const cardUrl =
     typeof window !== 'undefined' ? window.location.href : '';
 
@@ -121,6 +123,17 @@ END:VCARD
     router.push(`/${slug}/Plans`);
   };
 
+const getFirstParagraphText = (html) => {
+  if (!html) return '';
+
+  const div = document.createElement('div');
+  div.innerHTML = html;
+
+  const firstP = div.querySelector('p');
+  return firstP ? firstP.textContent.trim() : '';
+};
+
+
 
 
 
@@ -197,13 +210,27 @@ END:VCARD
                 {/* Name & Role */}
 
                 {/* Description */}
-                {profile.description && (
-                  <p className="text-muted mt-3">
-                    {profile.tagline1}
+{profile.description && (
+  <div className="mt-3">
+    <p
+      className={`text-muted ${expanded ? '' : 'line-clamp-2'}`}
+    >
+      {getFirstParagraphText(profile.description)}
+      
+    </p>
+{!expanded && (
+      <span
+        className=" p-0 text-primary fw-medium"
+        onClick={() => setExpanded(true)}
+      >
+        Read more
+      </span>
+    )}
+    
+  </div>
+)}
 
-                  </p>
 
-                )}
 
                 {/* Contact Info */}
                 <div className="row g-3 mt-4">
@@ -238,9 +265,11 @@ END:VCARD
                 <div className="d-flex flex-column flex-sm-row gap-2 mt-3">
                   {/* Save Contact */}
                   <button
-                    className="btn btn-outline-primary flex-fill rounded-3 p-3 fw-semibold shadow-sm"
+                    className="btn btn-outline-primary bg-black text-white flex-fill rounded-3 p-3 fw-semibold shadow-sm"
                     onClick={saveContact}
+
                   >
+                     <span className="icon">⬇️</span>
                     Save my contact
                   </button>
 
