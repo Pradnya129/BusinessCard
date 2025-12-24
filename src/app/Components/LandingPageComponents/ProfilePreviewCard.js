@@ -24,7 +24,7 @@ export default function ProfilePreviewCard() {
         />
 
         <div className="preview-info">
-          <h3>Brian James</h3>
+          <h3 className='text-white mb-0'>Brian James</h3>
           <p>Product Designer</p>
         </div>
 
