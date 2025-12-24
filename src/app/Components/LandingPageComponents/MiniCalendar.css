@@ -98,8 +98,10 @@ h2#fc-dom-86 {
 }
 /* DESKTOP ONLY */
 @media (min-width: 769px) {
-  .calendly-info { flex: 0 0 30%; }
-  .calendly-calendar { flex: 0 0 35%; }
+  .calendly-info { flex: 0 0 25%; }
+  .calendly-calendar { flex: 0 0 35%;
+  text-align: center;
+  }
   .calendly-slots { flex: 0 0 25%; }
 }
 
@@ -292,12 +294,16 @@ h2#fc-dom-86 {
    =============================== */
 .calendly-layout {
   display: flex;
-  gap: 16px;
+  /* gap: 16px; */
 }
 
 
 /* ===== MOBILE FIX ===== */
 @media (max-width: 768px) {
+
+  .body{
+    background-color: #d0d0d0;
+  }
   .calendly-layout {
     display: flex;
     flex-direction: column;   /* 👈 stack */

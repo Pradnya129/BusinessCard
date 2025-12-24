@@ -223,7 +223,7 @@ useEffect(() => {
   // UI: Calendly-like three-column layout
   return (
 
-    <div className="card mx-auto calendar-card mt-lg-5" >
+    <div className=" mx-auto  mt-lg-5 " >
       <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
         <button
           type="button"
@@ -269,10 +269,10 @@ useEffect(() => {
 
         {/* CENTER: Calendar */}
         <div
-          className="p-lg-3 border-start calendly-calendar"
+          className="p-lg-3 border-start border-end calendly-calendar"
           
         >
-          <div style={{ padding: 6 }}>
+          <div className="mx-0 px-0">
             <DatePicker
               inline
               selected={selected ? new Date(selected) : new Date()}
@@ -313,7 +313,7 @@ useEffect(() => {
                 alignItems: "baseline",
                 position: "sticky",
                 top: 0,
-                background: "#fff",
+             
                 zIndex: 2,
                 paddingBottom: 6,
               }}
