@@ -92,7 +92,7 @@ const Plans = forwardRef(({ onReady }, ref) => {
           </span>
 
           <p className="plans-sub">
-            {formData.mainDescription}
+           Select a Consultation That Suits Your Needs
           </p>
         </div>
 
