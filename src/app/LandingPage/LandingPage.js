@@ -5,7 +5,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import './LandingPage.css';
 import Head from 'next/head';
 import Plans from '../Components/LandingPageComponents/Plans';
-import BusinessProfile from '../Components/LandingPageComponents/BusinessProfile.js'
+import ProfilePreviewCard from '../Components/LandingPageComponents/ProfilePreviewCard.js'
 
 const LandingPage = ({ admin, onPlansReady }) => {
   const plansWrapperRef = useRef(null);
@@ -60,7 +60,7 @@ const LandingPage = ({ admin, onPlansReady }) => {
               selectedPlan={{}}
               admin={admin}
             /> */}
-          <BusinessProfile  admin={admin}/>
+          <ProfilePreviewCard  admin={admin}/>
           </div>
 
         </div>

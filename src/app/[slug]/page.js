@@ -20,7 +20,6 @@ async function getAdmin(slug) {
 export default function Home() {
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [plansReady, setPlansReady] = useState(false);
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
@@ -33,7 +32,7 @@ export default function Home() {
         if (hostname.includes("appointify.me") || hostname.includes("localhost")) {
           slug = pathname.split("/")[1];
         } else {
-          slug = hostname; // custom domain
+          slug = hostname;
         }
 
         const adminData = await getAdmin(slug);
@@ -42,27 +41,24 @@ export default function Home() {
         console.error("Error fetching admin:", err);
       }
     }
+
     fetchAdmin();
   }, []);
 
+  // Close loader + fade in content
   useEffect(() => {
     if (admin) {
       setLoading(false);
+      requestAnimationFrame(() => {
+        setShowContent(true);
+      });
     }
   }, [admin]);
 
-  // Trigger smooth fade-in when plans are ready
-  useEffect(() => {
-    if (plansReady) {
-      const timer = setTimeout(() => setShowContent(true), 50); // slight delay ensures transition
-      return () => clearTimeout(timer);
-    }
-  }, [plansReady]);
-
   return (
     <>
-      {/* FULL SCREEN LOADER — stays until BOTH admin + plans are ready */}
-      {(loading || !plansReady) && (
+      {/* LOADER */}
+      {loading && (
         <div
           style={{
             position: "fixed",
@@ -78,7 +74,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* PAGE CONTENT WITH SMOOTH FADE-IN */}
+      {/* CONTENT */}
       {admin && (
         <div
           style={{
@@ -86,10 +82,7 @@ export default function Home() {
             transition: "opacity 0.5s ease-in-out",
           }}
         >
-          <LandingPage
-            admin={admin}
-            onPlansReady={() => setPlansReady(true)}
-          />
+          <LandingPage admin={admin} />
         </div>
       )}
     </>

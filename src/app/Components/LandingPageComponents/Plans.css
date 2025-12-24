@@ -1,54 +1,151 @@
-.plan-features {
-  padding-left: 0;             /* remove extra left space */
-  margin: 1rem 0;              /* moderate vertical spacing */
-}
-
-.plan-features ul {
-  list-style: disc;            /* classic solid bullets */
-  padding-left: 1rem;          /* small indentation */
-  margin-bottom: 0;
-}
-
-.plan-features li {
-  color: #f0f0f0;              /* soft white text */
-  font-size: 0.95rem;
-  margin-bottom: 0.4rem;
-  line-height: 1.5;
-}
-
-.card-body {
+/* Full loader */
+.plans-full-loader {
+  position: fixed;
+  inset: 0;
+  background: white;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Sheet wrapper */
+.plans-sheet {
+  padding: 0 16px 24px;
+}
+
+/* Sticky header */
+.plans-header {
+  position: sticky;
+  top: -20;
+  background: white;
+  padding: 4px 0;
+  z-index: 5;
+}
+
+.plans-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.plans-header p {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Plans list */
+.plans-list {
+  margin-top: 12px;
+}
+
+/* Individual plan */
+.plan-card {
+  background: #f9faff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  position: relative;
+}
+
+/* Accent bar */
+.plan-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 4px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #6c85ff, #9faeff);
+}
+
+.plan-top {
+  display: flex;
   justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6c85ff;
 }
 
-.card-body p {
-  margin-bottom: 1.5rem; /* Ensures space before bullet points */
+.plan-card h4 {
+  margin: 8px 0 4px;
 }
 
-.card-body ul {
-  list-style: disc;
-  padding-left: 20px;
-  margin-bottom: 1.5rem; /* Space before buttons */
-  margin-top: 0;
+.plan-card .desc {
+  font-size: 13px;
+  color: #555;
 }
 
-.card-body ul li {
-  margin-bottom: 0.5rem;
-}
-.page-wrapper {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+.features {
+  padding-left: 16px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #444;
 }
 
-.page-wrapper.fade-out {
-  opacity: 0;
-  transform: translateY(-10px);
+/* CTA */
+.book-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 12px;
+  border: none;
+  background: #6c85ff;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+}
+/* FANCY STICKY HEADER */
+.plans-header.fancy {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  padding: 14px 0 12px;
+  margin-bottom: 12px;
+
+  text-align: center;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.95),
+    rgba(255,255,255,0.85)
+  );
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-@media (max-width: 768px) { /* Mobile */
-  .plan-title {
-    line-height: 1.3 !important;
-  }
+/* TAGLINE CHIP */
+.plans-chip {
+  display: inline-block;
+
+  padding: 6px 14px;
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+
+  color: #4f6cf7;
+  background: rgba(79,108,247,0.12);
+
+  box-shadow: inset 0 0 0 1px rgba(79,108,247,0.15);
+}
+
+/* DESCRIPTION */
+.plans-sub {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.45;
+
+  color: #666;
+  max-width: 260px;
+  margin-left: auto;
+  margin-right: auto;
 }
