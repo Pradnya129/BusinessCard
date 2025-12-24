@@ -56,12 +56,12 @@ export default function ProfileDetails({ onClose }) {
       <button className="back-arrow clean" onClick={handleClose}>←</button>
 
       {/* Top Right Icon */}
-      <div className="top-icon">♂</div>
+      {/* <div className="top-icon">♂</div> */}
 
       <div className="details-content">
         <img
           className="avatar clean"
-          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e"
+          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=388&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Brian James"
         />
         <h2 className="name">Brian James</h2>

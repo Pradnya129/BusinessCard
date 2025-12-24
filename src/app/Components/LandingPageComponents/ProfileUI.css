@@ -1,62 +1,94 @@
 /* Background */
 
-html,
-body {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-.app-bg {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #6c85ff;
-}
-
-/* Phone frame */
-.phone-frame {
-  width: 280px;
-  height: 560px;
-  border-radius: 24px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 30px 60px rgba(0,0,0,.3);
-}
-
-/* FIRST SCREEN */
-.preview-card {
-  position: relative;
-  height: 100%;
-}
-
-.preview-card img {
+/* Reset */
+html, body {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
+/* FULLSCREEN CARD */
+.preview-card.full {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-card.full img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Fill entire screen, crop if needed */
+}
+
+/* INFO OVERLAY */
 .preview-info {
   position: absolute;
-  bottom: 80px;
-  left: 20px;
+  bottom: 5%;
+  left: 5%;
   color: white;
 }
 
+.preview-info h3 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.preview-info p {
+  margin: 4px 0 0 0;
+  font-size: 1rem;
+}
+
+/* ARROW BUTTON */
 .arrow-btn {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(0,0,0,.6);
+  bottom: 3%;
+  right: 3%;
+  background: rgba(0,0,0,0.6);
   color: white;
   border: none;
   border-radius: 50%;
-  padding: 15px;
-  font-size: 18px;
+  padding: 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
+
+/* OVERLAY DETAILS */
+.details-page.clean {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 999;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Example bottom sheet (optional) */
+.bottom-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50%;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+/* DRAG HANDLE */
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
+  margin: 10px auto;
+}
+
 
 /* SECOND SCREEN */
 /* PAGE CONTAINER */
