@@ -88,14 +88,22 @@ body {
   z-index: 10;
 }
 
-/* DRAG HANDLE */
+.sheet-handle-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: white;
+  padding-top: 10px;
+}
+
 .sheet-handle {
   width: 36px;
   height: 4px;
   background: #ccc;
   border-radius: 2px;
-  margin: 10px auto;
+  margin: 0 auto 10px;
 }
+
 
 /* SCROLLABLE CONTENT */
 .sheet-scroll {

@@ -103,8 +103,9 @@ export default function ProfileDetails({ onClose }) {
           </div>
         )}
 
-        <div className="sheet-handle" />
-
+        <div className="sheet-handle-wrapper">
+    <div className="sheet-handle" />
+  </div>
         <div className="sheet-scroll bg-grey">
           {!plansReady && (
             <div style={{ padding: 24, textAlign: 'center' }}>
