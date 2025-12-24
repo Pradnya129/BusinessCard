@@ -32,7 +32,6 @@ export default function ProfileDetails({ onClose }) {
 
   const onTouchEnd = () => {
     if (translateY < 25) setTranslateY(0);      // full
-    else if (translateY < 55) setTranslateY(35); // half
     else setTranslateY(90);                     // collapsed
   };
 
