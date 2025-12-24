@@ -39,7 +39,7 @@ h2#fc-dom-86 {
     width: 1.7rem;
     line-height: 1.7rem;
     text-align: center;
-    margin: 0.8rem;
+    margin: 0.35rem;
 }
 
 .react-datepicker__month-container {
@@ -303,6 +303,7 @@ h2#fc-dom-86 {
 
   .body{
     background-color: #d0d0d0;
+    margin-bottom: 18px;
   }
   .calendly-layout {
     display: flex;
@@ -319,6 +320,7 @@ h2#fc-dom-86 {
       padding: 12px 12px;
     min-height: 0;
   } 
+ 
   .calendar-card {
     box-shadow: none !important;
     border-radius: 0 !important;
@@ -365,6 +367,11 @@ h2#fc-dom-86 {
     align-items: center;
   }
 }
+
+/* ===============================
+   MOBILE VISUAL POLISH (SAFE)
+   =============================== */
+
 
 
 

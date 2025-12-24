@@ -338,7 +338,7 @@ useEffect(() => {
                 <div
                   className="slot-dropdown"
                   style={{
-                    maxHeight: 300,       // 🔥 controls dropdown height
+                    maxHeight: 200,       // 🔥 controls dropdown height
                     overflowY: "auto",
                     overflowX: "hidden",  // 🔥 scroll instead of page grow
                     paddingRight: 2,
