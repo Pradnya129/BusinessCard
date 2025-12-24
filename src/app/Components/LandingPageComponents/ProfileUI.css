@@ -39,14 +39,14 @@ body {
 
 .preview-info {
   position: absolute;
-  bottom: 15%;   /* responsive instead of 80px */
+  bottom: 20%;   /* responsive instead of 80px */
   left: 5%;
   color: white;
 }
 
 .arrow-btn {
   position: absolute;
-  bottom: 8%;
+  bottom: 10%;
   right: 3%;
   background: rgba(0,0,0,0.6);
   color: white;

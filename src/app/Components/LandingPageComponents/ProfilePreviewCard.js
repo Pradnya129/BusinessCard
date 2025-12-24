@@ -24,8 +24,8 @@ export default function ProfilePreviewCard() {
         />
 
         <div className="preview-info">
-          <h3 className='text-white mb-0'>Brian James</h3>
-          <p>Product Designer</p>
+          <h1 className='text-white mb-0 pb-0'>Brian James</h1>
+          <p className='fs-6 pt-0 '>Product Designer</p>
         </div>
 
         <button className="arrow-btn" type="button" onClick={openPreview}>
