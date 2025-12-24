@@ -367,7 +367,15 @@ h2#fc-dom-86 {
     align-items: center;
   }
 }
-
+.back-arrow.clean {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
 /* ===============================
    MOBILE VISUAL POLISH (SAFE)
    =============================== */

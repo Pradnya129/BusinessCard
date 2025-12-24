@@ -22,6 +22,7 @@ const MiniCalendar = ({
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [hover, setHover] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   // helper: parse "10:00 AM" -> Date on baseDate
   const parse12ToDate = (timeStr, baseDate) => {
@@ -220,37 +221,20 @@ useEffect(() => {
     fetchShiftAndGenerateSlots();
   }, [selected, duration, planId, slug]);
 
+  
+const handleClose = () => {
+  router.back();
+};
+
   // UI: Calendly-like three-column layout
   return (
 
     <div className=" mx-auto  mt-lg-5 " >
       <div className="d-flex align-items-center mb-3" style={{ padding: 10 }}>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: 40, // similar circular size
-            height: 40, // height same as width
-            fontSize: 20,
-            fontWeight: 800,
-            borderRadius: "50%",
-            border: "1px solid #d0d0d0",
-            backgroundColor: hover ? "#e6f0ff" : "#f8f9fa",
-            color: hover ? "#0c6cd3" : "#0f65c7",
-            cursor: "pointer",
-            transition: "all 0.2s ease-in-out",
-          }}
-        >
-          <FaArrowLeft />
+       <button className="back-arrow clean" onClick={handleClose}>←</button>
 
-        </button>
       </div>
-      <div className="mb-5 d-flex justify-content-center calendly-layout">
+      <div className="mb-5 mt-5 d-flex justify-content-center calendly-layout">
 
         {/* LEFT: Meeting Info */}
         <div className="pb-3 calendly-info ">
