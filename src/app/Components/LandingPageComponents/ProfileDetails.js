@@ -8,7 +8,7 @@ export default function ProfileDetails({ onClose }) {
   const startY = useRef(0);
   const startTranslate = useRef(0);
 
-  const [translateY, setTranslateY] = useState(95); // collapsed %
+  const [translateY, setTranslateY] = useState(90); // collapsed %
   const [closing, setClosing] = useState(false);
   const [plansReady, setPlansReady] = useState(false);
 
@@ -33,7 +33,7 @@ export default function ProfileDetails({ onClose }) {
   const onTouchEnd = () => {
     if (translateY < 25) setTranslateY(0);      // full
     else if (translateY < 55) setTranslateY(35); // half
-    else setTranslateY(95);                     // collapsed
+    else setTranslateY(90);                     // collapsed
   };
 
   useEffect(() => {
