@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import ProfileDetails from './ProfileDetails';
 import './ProfileUI.css';
+import QrCodeModal from './QrCodeModal';
 
 export default function ProfilePreviewCard() {
   const [open, setOpen] = useState(false);
@@ -35,6 +36,7 @@ export default function ProfilePreviewCard() {
 
       {/* OVERLAY DETAILS */}
       {open && <ProfileDetails onClose={closePreview} />}
+      
     </>
   );
 }

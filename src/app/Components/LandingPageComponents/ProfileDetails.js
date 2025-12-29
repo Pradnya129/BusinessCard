@@ -1,23 +1,72 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import './ProfileUI.css';
-import Plans from '../LandingPageComponents/Plans.js'
+import Plans from '../LandingPageComponents/Plans.js';
+import QrCodeModal from './QrCodeModal';
 
 export default function ProfileDetails({ onClose }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const startTranslate = useRef(0);
 
-  const [translateY, setTranslateY] = useState(90); // collapsed %
+  const [translateY, setTranslateY] = useState(90);
   const [closing, setClosing] = useState(false);
   const [plansReady, setPlansReady] = useState(false);
+const [showQr, setShowQr] = useState(false);
+
+  const cardUrl =
+    typeof window !== 'undefined' ? window.location.href : '';
 
   const handleClose = () => {
     setClosing(true);
-    setTimeout(() => {
-      onClose();
-    }, 400);
+    setTimeout(onClose, 400);
   };
+
+  /* ---------- ACTIONS ---------- */
+
+  const copyCardLink = async () => {
+    try {
+      await navigator.clipboard.writeText(cardUrl);
+      alert('Link copied!');
+    } catch {
+      alert('Unable to copy');
+    }
+  };
+
+  const saveContact = () => {
+    const vCard = `
+BEGIN:VCARD
+VERSION:3.0
+FN:Brian James
+TITLE:Product Designer
+EMAIL:brian@email.com
+URL:${cardUrl}
+END:VCARD
+`.trim();
+
+    const blob = new Blob([vCard], { type: 'text/vcard;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Brian-James.vcf';
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const shareWhatsApp = () => {
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(cardUrl)}`,
+      '_blank'
+    );
+  };
+
+  const shareEmail = () => {
+    window.location.href = `mailto:?body=${encodeURIComponent(cardUrl)}`;
+  };
+
+  /* ---------- BOTTOM SHEET (UNCHANGED) ---------- */
 
   const onTouchStart = (e) => {
     startY.current = e.touches[0].clientY;
@@ -31,58 +80,80 @@ export default function ProfileDetails({ onClose }) {
   };
 
   const onTouchEnd = () => {
-    if (translateY < 25) setTranslateY(0);      // full
-    else setTranslateY(90);                     // collapsed
+    if (translateY < 25) setTranslateY(0);
+    else setTranslateY(90);
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTranslateY(85); // initial collapsed state
-    }, 600);
-    return () => clearTimeout(timer);
+    setTimeout(() => setTranslateY(85), 600);
   }, []);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
+    return () => (document.body.style.overflow = '');
   }, []);
 
   return (
     <div className={`details-page clean ${closing ? 'slide-out' : 'slide-in'}`}>
-      {/* Back Arrow */}
-      <button className="back-arrow clean" onClick={handleClose}>←</button>
+      <button className="back-arrow clean" onClick={handleClose}>
+        ←
+      </button>
 
-      {/* Top Right Icon */}
-      {/* <div className="top-icon">♂</div> */}
-
+      {/* PROFILE */}
       <div className="details-content">
         <img
           className="avatar clean"
-          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=388&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=388"
           alt="Brian James"
         />
+
         <h2 className="name">Brian James</h2>
         <p className="role">Product Designer</p>
+
         <p className="desc clean">
           Sr. UI/UX Design Manager @sakspro <br />
           formerly Interactive Director at @enlab.
         </p>
-        <div className="stats clean">
-          <div>
-            <strong>2390</strong>
-            <span>Followers</span>
-          </div>
-          <div>
-            <strong>450</strong>
-            <span>Following</span>
-          </div>
-        </div>
-        <button className="follow-btn clean">Follow</button>
+
+{/* ===== ACTION BUTTONS ===== */}
+<div className="action-section">
+
+  {/* PRIMARY ACTION */}
+  <button className="action-btn primary" onClick={saveContact}>
+    <div className="icon-box">↓</div>
+    <span>Save contact</span>
+  </button>
+
+  {/* SECONDARY ACTIONS */}
+  <div className="action-grid two-col">
+    <button className="action-btn" onClick={() => setShowQr(true)}>
+      <div className="icon-box">▢</div>
+      <span>QR Code</span>
+    </button>
+
+    <button className="action-btn" onClick={copyCardLink}>
+      <div className="icon-box">🔗</div>
+      <span>Copy link</span>
+    </button>
+
+    <button className="action-btn" onClick={shareWhatsApp}>
+      <div className="icon-box">💬</div>
+      <span>WhatsApp</span>
+    </button>
+
+    <button className="action-btn" onClick={shareEmail}>
+      <div className="icon-box">✉️</div>
+      <span>Email</span>
+    </button>
+  </div>
+</div>
+
+
+
+
       </div>
 
-      {/* Bottom Sheet */}
+      {/* BOTTOM SHEET */}
       <div
         ref={sheetRef}
         className="bottom-sheet"
@@ -91,12 +162,8 @@ export default function ProfileDetails({ onClose }) {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        {/* TEASER CTA: show only when sheet is collapsed */}
         {translateY > 50 && (
-          <div
-            className="sheet-teaser"
-            onClick={() => setTranslateY(35)} // expand on tap
-          >
+          <div className="sheet-teaser" onClick={() => setTranslateY(35)}>
             <span>View Plans & Book</span>
             <span className="arrow">↑</span>
           </div>
@@ -105,10 +172,11 @@ export default function ProfileDetails({ onClose }) {
         <div className="sheet-handle-wrapper">
           <div className="sheet-handle" />
         </div>
+
         <div className="sheet-scroll bg-grey">
           {!plansReady && (
             <div style={{ padding: 24, textAlign: 'center' }}>
-              <span>Loading plans…</span>
+              Loading plans…
             </div>
           )}
           <Plans ref={sheetRef} onReady={() => setPlansReady(true)} />
